@@ -1,0 +1,19 @@
+services:
+  sadnd.server:
+    image: ${DOCKER_REGISTRY-}sadndserver
+    container_name: SADnD.api
+    build:
+      context: .
+      dockerfile: SADnD/Server/Dockerfile
+
+  sadnd.database:
+    image: postgres:latest
+    container_name: SADnD.database
+    environment:
+      - POSTGRES_DB=sadnd
+      - POSTGRES_USER=sadnd
+      - POSTGRES_PASSWORD=sadnd
+    volumes:
+      - ./.containers/db:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
