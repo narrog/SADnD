@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using System;
 
 namespace SADnD.Server.Data.Migrations
@@ -11,10 +12,10 @@ namespace SADnD.Server.Data.Migrations
                 name: "AspNetRoles",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<string>(type: "varchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true),
+                    NormalizedName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "text", nullable: true) // Ändert von nvarchar(max) zu text
                 },
                 constraints: table =>
                 {
@@ -25,21 +26,21 @@ namespace SADnD.Server.Data.Migrations
                 name: "AspNetUsers",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumberConfirmed = table.Column<bool>(type: "bit", nullable: false),
-                    TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    AccessFailedCount = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<string>(type: "varchar(450)", nullable: false),
+                    UserName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true),
+                    NormalizedUserName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true),
+                    Email = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true),
+                    NormalizedEmail = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true),
+                    EmailConfirmed = table.Column<bool>(type: "boolean", nullable: false), // Ändert von bit zu boolean
+                    PasswordHash = table.Column<string>(type: "text", nullable: true), // Ändert von nvarchar(max) zu text
+                    SecurityStamp = table.Column<string>(type: "text", nullable: true), // Ändert von nvarchar(max) zu text
+                    ConcurrencyStamp = table.Column<string>(type: "text", nullable: true), // Ändert von nvarchar(max) zu text
+                    PhoneNumber = table.Column<string>(type: "text", nullable: true), // Ändert von nvarchar(max) zu text
+                    PhoneNumberConfirmed = table.Column<bool>(type: "boolean", nullable: false), // Ändert von bit zu boolean
+                    TwoFactorEnabled = table.Column<bool>(type: "boolean", nullable: false), // Ändert von bit zu boolean
+                    LockoutEnd = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true), // Ändert von datetimeoffset zu timestamp with time zone
+                    LockoutEnabled = table.Column<bool>(type: "boolean", nullable: false), // Ändert von bit zu boolean
+                    AccessFailedCount = table.Column<int>(type: "integer", nullable: false) // Ändert von int zu integer
                 },
                 constraints: table =>
                 {
@@ -50,15 +51,15 @@ namespace SADnD.Server.Data.Migrations
                 name: "DeviceCodes",
                 columns: table => new
                 {
-                    UserCode = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    DeviceCode = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    SubjectId = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    SessionId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    ClientId = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    CreationTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Expiration = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Data = table.Column<string>(type: "nvarchar(max)", maxLength: 50860, nullable: false)
+                    UserCode = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false),
+                    DeviceCode = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false),
+                    SubjectId = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: true),
+                    SessionId = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
+                    ClientId = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false),
+                    Description = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: true),
+                    CreationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false), // Ändert von datetime2 zu timestamp without time zone
+                    Expiration = table.Column<DateTime>(type: "timestamp without time zone", nullable: false), // Ändert von datetime2 zu timestamp without time zone
+                    Data = table.Column<string>(type: "text", nullable: false) // Ändert von nvarchar(max) zu text
                 },
                 constraints: table =>
                 {
@@ -69,14 +70,14 @@ namespace SADnD.Server.Data.Migrations
                 name: "Keys",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Version = table.Column<int>(type: "int", nullable: false),
-                    Created = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Use = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: true),
-                    Algorithm = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    IsX509Certificate = table.Column<bool>(type: "bit", nullable: false),
-                    DataProtected = table.Column<bool>(type: "bit", nullable: false),
-                    Data = table.Column<string>(type: "nvarchar(max)", maxLength: 50860, nullable: false)
+                    Id = table.Column<string>(type: "varchar(450)", nullable: false),
+                    Version = table.Column<int>(type: "integer", nullable: false), // Ändert von int zu integer
+                    Created = table.Column<DateTime>(type: "timestamp without time zone", nullable: false), // Ändert von datetime2 zu timestamp without time zone
+                    Use = table.Column<string>(type: "varchar(450)", maxLength: 450, nullable: true),
+                    Algorithm = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
+                    IsX509Certificate = table.Column<bool>(type: "boolean", nullable: false), // Ändert von bit zu boolean
+                    DataProtected = table.Column<bool>(type: "boolean", nullable: false), // Ändert von bit zu boolean
+                    Data = table.Column<string>(type: "text", nullable: false) // Ändert von nvarchar(max) zu text
                 },
                 constraints: table =>
                 {
@@ -87,16 +88,16 @@ namespace SADnD.Server.Data.Migrations
                 name: "PersistedGrants",
                 columns: table => new
                 {
-                    Key = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Type = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    SubjectId = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    SessionId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    ClientId = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    CreationTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Expiration = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    ConsumedTime = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Data = table.Column<string>(type: "nvarchar(max)", maxLength: 50860, nullable: false)
+                    Key = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false),
+                    Type = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
+                    SubjectId = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: true),
+                    SessionId = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
+                    ClientId = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false),
+                    Description = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: true),
+                    CreationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false), // Ändert von datetime2 zu timestamp without time zone
+                    Expiration = table.Column<DateTime>(type: "timestamp without time zone", nullable: true), // Ändert von datetime2 zu timestamp ohne time zone
+                    ConsumedTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: true), // Ändert von datetime2 zu timestamp ohne time zone
+                    Data = table.Column<string>(type: "text", nullable: false) // Ändert von nvarchar(max) zu text
                 },
                 constraints: table =>
                 {
@@ -107,11 +108,11 @@ namespace SADnD.Server.Data.Migrations
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    RoleId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<int>(type: "integer", nullable: false) // Ändert von int zu integer
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn), // Verwende SerialColumn für PostgreSQL
+                    RoleId = table.Column<string>(type: "varchar(450)", nullable: false),
+                    ClaimType = table.Column<string>(type: "text", nullable: true), // Ändert von nvarchar(max) zu text
+                    ClaimValue = table.Column<string>(type: "text", nullable: true) // Ändert von nvarchar(max) zu text
                 },
                 constraints: table =>
                 {
@@ -128,11 +129,11 @@ namespace SADnD.Server.Data.Migrations
                 name: "AspNetUserClaims",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<int>(type: "integer", nullable: false) // Ändert von int zu integer
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn), // Verwende SerialColumn für PostgreSQL
+                    UserId = table.Column<string>(type: "varchar(450)", nullable: false),
+                    ClaimType = table.Column<string>(type: "text", nullable: true), // Ändert von nvarchar(max) zu text
+                    ClaimValue = table.Column<string>(type: "text", nullable: true) // Ändert von nvarchar(max) zu text
                 },
                 constraints: table =>
                 {
@@ -149,10 +150,10 @@ namespace SADnD.Server.Data.Migrations
                 name: "AspNetUserLogins",
                 columns: table => new
                 {
-                    LoginProvider = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    ProviderKey = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    ProviderDisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    LoginProvider = table.Column<string>(type: "varchar(128)", maxLength: 128, nullable: false),
+                    ProviderKey = table.Column<string>(type: "varchar(128)", maxLength: 128, nullable: false),
+                    ProviderDisplayName = table.Column<string>(type: "text", nullable: true), // Ändert von nvarchar(max) zu text
+                    UserId = table.Column<string>(type: "varchar(450)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -166,37 +167,13 @@ namespace SADnD.Server.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AspNetUserRoles",
-                columns: table => new
-                {
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    RoleId = table.Column<string>(type: "nvarchar(450)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AspNetUserRoles", x => new { x.UserId, x.RoleId });
-                    table.ForeignKey(
-                        name: "FK_AspNetUserRoles_AspNetRoles_RoleId",
-                        column: x => x.RoleId,
-                        principalTable: "AspNetRoles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_AspNetUserRoles_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AspNetUserTokens",
                 columns: table => new
                 {
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    LoginProvider = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
-                    Value = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    UserId = table.Column<string>(type: "varchar(450)", nullable: false),
+                    LoginProvider = table.Column<string>(type: "varchar(128)", maxLength: 128, nullable: false),
+                    Name = table.Column<string>(type: "varchar(128)", maxLength: 128, nullable: false),
+                    Value = table.Column<string>(type: "text", nullable: true) // Ändert von nvarchar(max) zu text
                 },
                 constraints: table =>
                 {
@@ -209,17 +186,17 @@ namespace SADnD.Server.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            // Füge alle notwendigen Indizes hinzu
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
-                name: "RoleNameIndex",
+                name: "IX_AspNetRoles_NormalizedName",
                 table: "AspNetRoles",
                 column: "NormalizedName",
-                unique: true,
-                filter: "[NormalizedName] IS NOT NULL");
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserClaims_UserId",
@@ -232,32 +209,20 @@ namespace SADnD.Server.Data.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AspNetUserRoles_RoleId",
-                table: "AspNetUserRoles",
-                column: "RoleId");
-
-            migrationBuilder.CreateIndex(
-                name: "EmailIndex",
+                name: "IX_AspNetUsers_NormalizedEmail",
                 table: "AspNetUsers",
                 column: "NormalizedEmail");
 
             migrationBuilder.CreateIndex(
-                name: "UserNameIndex",
+                name: "IX_AspNetUsers_NormalizedUserName",
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
-                unique: true,
-                filter: "[NormalizedUserName] IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_DeviceCodes_DeviceCode",
-                table: "DeviceCodes",
-                column: "DeviceCode",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_DeviceCodes_Expiration",
-                table: "DeviceCodes",
-                column: "Expiration");
+                name: "IX_PersistedGrants_SubjectId",
+                table: "PersistedGrants",
+                column: "SubjectId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Keys_Use",
@@ -265,24 +230,14 @@ namespace SADnD.Server.Data.Migrations
                 column: "Use");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PersistedGrants_ConsumedTime",
-                table: "PersistedGrants",
-                column: "ConsumedTime");
+                name: "IX_Keys_Algorithm",
+                table: "Keys",
+                column: "Algorithm");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PersistedGrants_Expiration",
-                table: "PersistedGrants",
-                column: "Expiration");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PersistedGrants_SubjectId_ClientId_Type",
-                table: "PersistedGrants",
-                columns: new[] { "SubjectId", "ClientId", "Type" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PersistedGrants_SubjectId_SessionId_Type",
-                table: "PersistedGrants",
-                columns: new[] { "SubjectId", "SessionId", "Type" });
+                name: "IX_Keys_Created",
+                table: "Keys",
+                column: "Created");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -295,9 +250,6 @@ namespace SADnD.Server.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserLogins");
-
-            migrationBuilder.DropTable(
-                name: "AspNetUserRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
