@@ -90,7 +90,7 @@ namespace SADnD.Server.Areas.Identity.Pages.Account
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
             [Required]
-            [StringLength(100, ErrorMessage = "Das {0} muss mindestens {2} und maximal {1} Zeichen lang sein.", MinimumLength = 6)]
+            [StringLength(100, ErrorMessage = "Das {0} muss zwischen {2} und {1} Zeichen lang sein.", MinimumLength = 6)]
             [DataType(DataType.Password)]
             [Display(Name = "Passwort")]
             public string Password { get; set; }
