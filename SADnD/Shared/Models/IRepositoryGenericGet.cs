@@ -5,9 +5,9 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SADnD.Shared
+namespace SADnD.Shared.Models
 {
-    public interface IRepositoryGenericGet<TEntity> :IRepository<TEntity> where TEntity : class
+    public interface IRepositoryGenericGet<TEntity> : IRepository<TEntity> where TEntity : class
     {
         Task<IEnumerable<TEntity>> Get(
             Expression<Func<TEntity, bool>> filter = null,

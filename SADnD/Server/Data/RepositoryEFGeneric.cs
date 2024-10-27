@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SADnD.Shared;
+using SADnD.Shared.Models;
 using System.Linq.Expressions;
 
 namespace SADnD.Server.Data

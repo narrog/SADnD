@@ -19,6 +19,8 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.R
 builder.Services.AddIdentityServer()
     .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
 
+builder.Services.AddTransient<RepositoryEFGeneric<Campaign, ApplicationDbContext>>();
+
 builder.Services.AddAuthentication()
     .AddIdentityServerJwt();
 

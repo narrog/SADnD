@@ -6,6 +6,7 @@ using SADnD.Shared.Models;
 
 namespace SADnD.Server.Data
 {
+    // Change the Path in the Package Manager Console to ./SADnD/Server to Add Migrations
     public class ApplicationDbContext : ApiAuthorizationDbContext<ApplicationUser>
     {
         public ApplicationDbContext(
