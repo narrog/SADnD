@@ -4,13 +4,13 @@ using System.Linq.Expressions;
 
 namespace SADnD.Server.Data
 {
-    public class RepositoryEFGeneric<TEntity, TDataContext> : IRepositoryGenericGet<TEntity>
+    public class EFRepositoryGeneric<TEntity, TDataContext> : IRepositoryGenericGet<TEntity>
         where TEntity : class
         where TDataContext : DbContext
     {
         protected readonly TDataContext context;
         internal DbSet<TEntity> dbSet;
-        public RepositoryEFGeneric(TDataContext dataContext)
+        public EFRepositoryGeneric(TDataContext dataContext)
         {
             context = dataContext;
             dbSet = context.Set<TEntity>();

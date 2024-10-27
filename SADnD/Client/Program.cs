@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using SADnD.Client;
+using SADnD.Client.Services;
+using SADnD.Shared.Models;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -14,5 +16,7 @@ builder.Services.AddHttpClient("SADnD.ServerAPI", client => client.BaseAddress =
 builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("SADnD.ServerAPI"));
 
 builder.Services.AddApiAuthorization();
+
+builder.Services.AddScoped<APIRepositoryGeneric<Campaign>>();
 
 await builder.Build().RunAsync();

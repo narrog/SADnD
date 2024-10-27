@@ -19,20 +19,35 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.R
 builder.Services.AddIdentityServer()
     .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
 
-builder.Services.AddTransient<RepositoryEFGeneric<Campaign, ApplicationDbContext>>();
-
 builder.Services.AddAuthentication()
     .AddIdentityServerJwt();
+
+builder.Services.AddTransient<EFRepositoryGeneric<Campaign, ApplicationDbContext>>();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
+// Executes Database Migrations, tries 5 times if Database Container isn't running yet
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    context.Database.Migrate();
+    int retries = 5;
+    while (retries > 0)
+    {
+        try
+        {
+            context.Database.Migrate();
+            break;
+        }
+        catch (Exception ex) 
+        {
+            retries--;
+            // TODO: Logging
+            await Task.Delay(5000);
+        }
+    }
 }
 
 // Configure the HTTP request pipeline.
