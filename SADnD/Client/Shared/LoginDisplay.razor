@@ -4,12 +4,22 @@
 
 <AuthorizeView>
     <Authorized>
-        <a href="authentication/profile">Dein Konto</a>
-        <button class="nav-link btn btn-link" @onclick="BeginLogOut">Log out</button>
+        <ul class="navbar-nav mb-2 mb-md-0">
+            <li class="nav-item">
+                <a class="btn btn-link" href="authentication/profile">Dein Konto</a>
+            </li>
+            <li class="nav-item">
+                <button class="btn btn-link" @onclick="BeginLogOut">Log out</button>
+            </li>
+        </ul>       
     </Authorized>
     <NotAuthorized>
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="btn btn-link" href="authentication/login">Anmelden</a>
+            </li>
+        </ul>
         
-        <a href="authentication/login">Anmelden</a>
     </NotAuthorized>
 </AuthorizeView>
 
