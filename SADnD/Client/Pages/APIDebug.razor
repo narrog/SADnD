@@ -20,6 +20,9 @@
     <button onclick="@GetWithId">
         GetWithId
     </button>
+    <button onclick="@Delete">
+        Delete
+    </button>
 </div>
 <div>
     <InputText @bind-Value="@name"></InputText>
@@ -33,30 +36,37 @@
 </div>
 
 @code {
-        string controllerName = "test";
-        string id;
-        string name;
-        string message = "hello world!";
+    string controllerName = "test";
+    string id;
+    string name;
+    string message = "hello world!";
 
-        private async void GetAll()
+    private async void GetAll()
+    {
+        if (controllerName == "campaign")
         {
-            if (controllerName == "campaign")
-            {
-                message = JsonSerializer.Serialize(await campaignManager.GetAll());
-            }
+            message = JsonSerializer.Serialize(await campaignManager.GetAll());
         }
-        private async void GetWithId()
+    }
+    private async void GetWithId()
+    {
+        if (controllerName == "campaign")
         {
-            if (controllerName == "campaign")
-            {
-                message = JsonSerializer.Serialize(await campaignManager.GetByID(id));
-            }
+            message = JsonSerializer.Serialize(await campaignManager.GetByID(id));
         }
-        private async void Post()
+    }
+    private async void Post()
+    {
+        if (controllerName == "campaign")
         {
-            if (controllerName == "campaign")
-            {
-                message = JsonSerializer.Serialize(await campaignManager.Insert(new Campaign { Name = name }));
-            }
+            message = JsonSerializer.Serialize(await campaignManager.Insert(new Campaign { Name = name }));
+        }
+    }
+    private async void Delete()
+    {
+        if (controllerName == "campaign")
+        {
+            message = (await campaignManager.Delete(id)).ToString();
+        }
     }
 }

@@ -2,8 +2,10 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using SADnD.Server.Areas.Identity;
 using SADnD.Server.Data;
 using SADnD.Shared.Models;
+using System.Security.Claims;
 
 namespace SADnD.Server.Controllers
 {
@@ -13,32 +15,35 @@ namespace SADnD.Server.Controllers
     public class CampaignController : ControllerBase
     {
         UserManager<ApplicationUser> _userManager;
+        CustomClaimsService<ApplicationDbContext,UserManager<ApplicationUser>> _customClaimsService;
         EFRepositoryGeneric<Campaign,ApplicationDbContext> _campaignManager;
-        public CampaignController(UserManager<ApplicationUser> userManager, EFRepositoryGeneric<Campaign,ApplicationDbContext> campaignManager)
+        public CampaignController(
+            UserManager<ApplicationUser> userManager, 
+            CustomClaimsService<ApplicationDbContext, UserManager<ApplicationUser>> customClaimsService, 
+            EFRepositoryGeneric<Campaign,ApplicationDbContext> campaignManager)
         {
             _userManager = userManager;
+            _customClaimsService = customClaimsService;
             _campaignManager = campaignManager;
         }
 
         [HttpGet]
         public async Task<ActionResult<APIListOfEntityResponse<Campaign>>> GetAllCampaigns()
         {
-            return StatusCode(403);
-
-            //try
-            //{
-            //    var result = await _campaignManager.GetAll();
-            //    return Ok(new APIListOfEntityResponse<Campaign>()
-            //    {
-            //        Success = true,
-            //        Data = result
-            //    });
-            //}
-            //catch (Exception ex)
-            //{
-            //    // TODO: log Exception
-            //    return StatusCode(500);
-            //}
+            try
+            {
+                var result = await _campaignManager.GetAll();
+                return Ok(new APIListOfEntityResponse<Campaign>()
+                {
+                    Success = true,
+                    Data = result
+                });
+            }
+            catch (Exception ex)
+            {
+                // TODO: log Exception
+                return StatusCode(500);
+            }
         }
 
         [HttpGet("{id}")]
@@ -81,10 +86,18 @@ namespace SADnD.Server.Controllers
                 {
                     campaign.RegenerateId();
                 }
+                var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
+                var user = await _userManager.FindByIdAsync(id);
+                if (user != null)
+                {
+                    campaign.DungeonMasters = new List<ApplicationUser>() { user};
+                }
                 await _campaignManager.Insert(campaign);
                 var result = (await _campaignManager.Get(x => x.Id == campaign.Id)).FirstOrDefault();
                 if (result != null)
                 {
+
+                    await _customClaimsService.AddCampaignClaims(user);
                     return Ok(new APIEntityResponse<Campaign>()
                     {
                         Success = true,
@@ -140,12 +153,13 @@ namespace SADnD.Server.Controllers
             }
         }
 
+        [Authorize(Policy="IsDungeonMaster")]
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(string id)
         {
             try
             {
-                if (await _campaignManager.Get(x => x.Id == id) != null)
+                if (await _campaignManager.Get(x => x.Id == id) != null) //&& User.HasClaim("CampaignRole", $"{id}:DungeonMaster"))
                 {
                     var success = await _campaignManager.Delete(id);
                     if (success)
