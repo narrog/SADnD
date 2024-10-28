@@ -1,17 +1,22 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SADnD.Server.Data;
 using SADnD.Shared.Models;
 
 namespace SADnD.Server.Controllers
 {
+    [Authorize]
     [Route("[controller]")]
     [ApiController]
     public class CampaignController : ControllerBase
     {
+        UserManager<ApplicationUser> _userManager;
         EFRepositoryGeneric<Campaign,ApplicationDbContext> _campaignManager;
-        public CampaignController(EFRepositoryGeneric<Campaign,ApplicationDbContext> campaignManager)
+        public CampaignController(UserManager<ApplicationUser> userManager, EFRepositoryGeneric<Campaign,ApplicationDbContext> campaignManager)
         {
+            _userManager = userManager;
             _campaignManager = campaignManager;
         }
 
@@ -72,7 +77,7 @@ namespace SADnD.Server.Controllers
         {
             try
             {
-                while (_campaignManager.GetByID(campaign.Id) != null)
+                while ((await _campaignManager.GetByID(campaign.Id)) != null)
                 {
                     campaign.RegenerateId();
                 }

@@ -17,6 +17,6 @@ builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().Cre
 
 builder.Services.AddApiAuthorization();
 
-builder.Services.AddScoped<APIRepositoryGeneric<Campaign>>();
+builder.Services.AddScoped<CampaignManager>();
 
 await builder.Build().RunAsync();

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,9 +11,9 @@ namespace SADnD.Shared.Models
     {
         public string Id { get; set; } = GenerateId();
         public string Name { get; set; }
-        public ICollection<ApplicationUser> DungeonMasters { get; set; }
-        public ICollection<ApplicationUser> Players { get; set; }
-        public ICollection<JoinRequest> JoinRequests { get; set; }
+        public ICollection<ApplicationUser>? DungeonMasters { get; set; }
+        public ICollection<ApplicationUser>? Players { get; set; }
+        public ICollection<JoinRequest>? JoinRequests { get; set; }
         private static string GenerateId(int length = 8)
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";

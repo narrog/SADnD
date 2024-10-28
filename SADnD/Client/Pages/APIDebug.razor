@@ -1,0 +1,62 @@
+﻿@page "/apidebug"
+
+@using System.Text.Json
+@inject CampaignManager campaignManager
+
+<h3>APIDebug</h3>
+
+<InputSelect @bind-Value="@controllerName">
+    <option value="campaign">
+        Kampagne
+    </option>
+</InputSelect>
+<div>
+    <button onclick="@GetAll">
+        Get
+    </button>
+</div>
+<div>
+    <InputText @bind-Value="@id"></InputText>
+    <button onclick="@GetWithId">
+        GetWithId
+    </button>
+</div>
+<div>
+    <InputText @bind-Value="@name"></InputText>
+    <button onclick="@Post">
+        Post
+    </button>
+</div>
+<div>
+    <p>@controllerName</p>
+    <p>@message</p>
+</div>
+
+@code {
+        string controllerName = "test";
+        string id;
+        string name;
+        string message = "hello world!";
+
+        private async void GetAll()
+        {
+            if (controllerName == "campaign")
+            {
+                message = JsonSerializer.Serialize(await campaignManager.GetAll());
+            }
+        }
+        private async void GetWithId()
+        {
+            if (controllerName == "campaign")
+            {
+                message = JsonSerializer.Serialize(await campaignManager.GetByID(id));
+            }
+        }
+        private async void Post()
+        {
+            if (controllerName == "campaign")
+            {
+                message = JsonSerializer.Serialize(await campaignManager.Insert(new Campaign { Name = name }));
+            }
+    }
+}
