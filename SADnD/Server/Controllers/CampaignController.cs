@@ -23,22 +23,21 @@ namespace SADnD.Server.Controllers
         [HttpGet]
         public async Task<ActionResult<APIListOfEntityResponse<Campaign>>> GetAllCampaigns()
         {
-            return StatusCode(403);
+            //return StatusCode(403);
 
-            //try
-            //{
-            //    var result = await _campaignManager.GetAll();
-            //    return Ok(new APIListOfEntityResponse<Campaign>()
-            //    {
-            //        Success = true,
-            //        Data = result
-            //    });
-            //}
-            //catch (Exception ex)
-            //{
-            //    // TODO: log Exception
-            //    return StatusCode(500);
-            //}
+            try {
+                var result = await _campaignManager.GetAll();
+                return Ok(new APIListOfEntityResponse<Campaign>() {
+                    Success = true,
+                    Data = result
+                });
+            }
+            catch (Exception ex) {
+                Console.WriteLine("Fehler beim Abrufen der Kampagnen (CampaignController)");
+                Console.WriteLine(ex.Message);
+                // TODO: log Exception
+                return StatusCode(500);
+            }
         }
 
         [HttpGet("{id}")]
@@ -71,6 +70,29 @@ namespace SADnD.Server.Controllers
                 return StatusCode(500);
             }
         }
+        //[HttpGet("{DungeonMaster}/searchbydungeonmaster")]
+        //public async Task<ActionResult<APIEntityResponse<Campaign>>> SearchByDungeonMaster(string id) {
+        //    try {
+        //        var result = (await _campaignManager.Get(x => x.Id == id.ToUpper())).FirstOrDefault();
+        //        if (result != null) {
+        //            return Ok(new APIEntityResponse<Campaign>() {
+        //                Success = true,
+        //                Data = result
+        //            });
+        //        }
+        //        else {
+        //            return Ok(new APIEntityResponse<Campaign>() {
+        //                Success = false,
+        //                ErrorMessages = new List<string>() { "Campaign Not Found" },
+        //                Data = null
+        //            });
+        //        }
+        //    }
+        //    catch (Exception ex) {
+        //        // TODO: log Exception
+        //        return StatusCode(500);
+        //    }
+        //}
 
         [HttpPost]
         public async Task<ActionResult<APIEntityResponse<Campaign>>> Post([FromBody] Campaign campaign)

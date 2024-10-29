@@ -10,6 +10,8 @@ namespace SADnD.Shared.Models
     public class Campaign
     {
         public string Id { get; set; } = GenerateId();
+        [Required]
+        [StringLength(maximumLength:50, MinimumLength = 5, ErrorMessage ="Name muss zwischen 5 und 50 Zeichen lang sein")]
         public string Name { get; set; }
         public ICollection<ApplicationUser>? DungeonMasters { get; set; }
         public ICollection<ApplicationUser>? Players { get; set; }
