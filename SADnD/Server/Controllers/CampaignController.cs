@@ -10,7 +10,7 @@ using System.Security.Claims;
 namespace SADnD.Server.Controllers
 {
     [Authorize]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class CampaignController : ControllerBase
     {
