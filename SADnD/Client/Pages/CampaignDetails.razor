@@ -1,5 +1,5 @@
-﻿@page "/kampagnen-details/{id}"
-
+﻿@page "/campaign-details/{id}"
+@attribute [Authorize]
 @inject CampaignManager campaignManager
 
 <h3>Kampagne "@campaign.Name" - Details</h3>
@@ -8,6 +8,9 @@
     <p><strong>Dungeonmaster: </strong>@campaign.DungeonMasters</p>
     <p><strong>Zugangscode: </strong>@campaign.Id</p>
 </div>
+<div>
+    <button class="btn btn-outline-danger" @onclick="DeleteCampaign">Löschen</button>
+</div>
 
 @code {
     [Parameter] public required string Id { get; set; }
@@ -15,5 +18,13 @@
 
     protected override async Task OnInitializedAsync() {
         campaign = await campaignManager.GetByID(Id);
+    }
+
+    private async Task DeleteCampaign() {
+        // string toDeleteName = campaign.Name;
+        // bool confirm = await js.InvokeAsync<bool>("confirm", $"Soll der Eintrag '{toDeleteName}' wirklich gelöscht werden?");
+        // if (!confirm) return;
+
+        await campaignManager.Delete(campaign.Id);
     }
 }

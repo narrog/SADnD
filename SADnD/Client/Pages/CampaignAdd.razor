@@ -1,4 +1,4 @@
-﻿@page "/neue-kampagne"
+﻿@page "/new-campaign"
 
 @attribute [Authorize]
 @using Newtonsoft.Json
@@ -37,7 +37,7 @@
                 message = JsonConvert.SerializeObject(await campaignManager.Insert(campaign));
             }
             UIMessage = "Kampagne erfolgreich erstellt";
-            navManager.NavigateTo("alle-kampagnen");
+            navManager.NavigateTo("all-campaigns");
         }
         catch (Exception ex) {
             UIMessage = ex.Message;
@@ -45,6 +45,6 @@
         }
     }
     private void CancelButtonPressed() {
-        navManager.NavigateTo("alle-kampagnen");
+        navManager.NavigateTo("all-campaigns");
     }
 }

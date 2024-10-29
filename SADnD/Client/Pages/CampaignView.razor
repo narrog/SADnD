@@ -14,9 +14,9 @@
                 </div>
             }
             <div class="mt-2 p-1">
-                <a class="btn btn-primary me-2" href="neue-kampagne">hinzufügen</a>
+                <a class="btn btn-primary me-2" href="new-campaign">hinzufügen</a>
                 @if (!ShowAll) {
-                    <a href="/alle-kampagnen" class="btn btn-primary">Alle anzeigen</a>
+                    <a href="/all-campaigns" class="btn btn-primary">Alle anzeigen</a>
                 }
             </div>
         }
@@ -46,6 +46,6 @@
     }
 
     private void OpenCampaignDetails(string id) {
-        navManager.NavigateTo($"kampagnen-details/{id}");
+        navManager.NavigateTo($"campaign-details/{id}");
     }
 }

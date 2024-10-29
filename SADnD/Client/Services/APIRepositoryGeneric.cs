@@ -130,15 +130,19 @@ namespace SADnD.Client.Services
         }
         public async Task<bool> Delete(object id)
         {
+            Console.WriteLine("Funktion Delete in APIRepositoryGeneric aufgerufen");
             try
             {
                 var url = _controllerName + "/" + WebUtility.HtmlEncode(id.ToString());
+                Console.WriteLine($"url: {url}");
                 var result = await _httpClient.DeleteAsync(url);
+                Console.WriteLine($"result: {result}");
                 result.EnsureSuccessStatusCode();
                 return true;
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 return false;
             }
         }
