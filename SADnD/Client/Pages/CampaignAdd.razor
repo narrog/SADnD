@@ -1,10 +1,9 @@
 ﻿@page "/neue-kampagne"
 
 @attribute [Authorize]
-@using System.Text.Json
+@using Newtonsoft.Json
 
 @inject CampaignManager campaignManager
-@inject NavigationManager navManager
 
 <h3>Kampagne hinzufügen</h3>
 
@@ -35,7 +34,7 @@
 
         try {
             if (controllerName == "campaign") {
-                message = JsonSerializer.Serialize(await campaignManager.Insert(campaign));
+                message = JsonConvert.SerializeObject(await campaignManager.Insert(campaign));
             }
             UIMessage = "Kampagne erfolgreich erstellt";
             navManager.NavigateTo("alle-kampagnen");

@@ -1,0 +1,19 @@
+﻿@page "/kampagnen-details/{id}"
+
+@inject CampaignManager campaignManager
+
+<h3>Kampagne "@campaign.Name" - Details</h3>
+
+<div class="container-fluid mt-3">
+    <p><strong>Dungeonmaster: </strong>@campaign.DungeonMasters</p>
+    <p><strong>Zugangscode: </strong>@campaign.Id</p>
+</div>
+
+@code {
+    [Parameter] public required string Id { get; set; }
+    private Campaign campaign = new Campaign();
+
+    protected override async Task OnInitializedAsync() {
+        campaign = await campaignManager.GetByID(Id);
+    }
+}

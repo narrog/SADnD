@@ -1,7 +1,7 @@
-﻿using SADnD.Shared.Models;
+﻿using Newtonsoft.Json;
+using SADnD.Shared.Models;
 using System.Net;
 using System.Net.Http.Json;
-using System.Text.Json;
 
 namespace SADnD.Client.Services
 {
@@ -25,7 +25,7 @@ namespace SADnD.Client.Services
                 var result = await _httpClient.GetAsync(_controllerName);
                 result.EnsureSuccessStatusCode();
                 string responseBody = await result.Content.ReadAsStringAsync();
-                var response = JsonSerializer.Deserialize<APIListOfEntityResponse<TEntity>>(responseBody);
+                var response = JsonConvert.DeserializeObject<APIListOfEntityResponse<TEntity>>(responseBody);
                 if (response.Success)
                 {
                     return response.Data;
@@ -49,7 +49,7 @@ namespace SADnD.Client.Services
                 var result = await _httpClient.GetAsync(url);
                 result.EnsureSuccessStatusCode();
                 string responseBody = await result.Content.ReadAsStringAsync();
-                var response = JsonSerializer.Deserialize<APIEntityResponse<TEntity>>(responseBody);
+                var response = JsonConvert.DeserializeObject<APIEntityResponse<TEntity>>(responseBody);
                 if (response.Success)
                 {
                     return response.Data;
@@ -71,7 +71,7 @@ namespace SADnD.Client.Services
                 var result = await _httpClient.PostAsJsonAsync(_controllerName, entity);
                 result.EnsureSuccessStatusCode();
                 string responseBody = await result.Content.ReadAsStringAsync();
-                var response = JsonSerializer.Deserialize<APIEntityResponse<TEntity>>(responseBody);
+                var response = JsonConvert.DeserializeObject<APIEntityResponse<TEntity>>(responseBody);
                 if (response.Success)
                 {
                     return response.Data;
@@ -93,7 +93,7 @@ namespace SADnD.Client.Services
                 var result = await _httpClient.PutAsJsonAsync(_controllerName, entity);
                 result.EnsureSuccessStatusCode();
                 string responseBody = await result.Content.ReadAsStringAsync();
-                var response = JsonSerializer.Deserialize<APIEntityResponse<TEntity>>(responseBody);
+                var response = JsonConvert.DeserializeObject<APIEntityResponse<TEntity>>(responseBody);
                 if (response.Success)
                 {
                     return response.Data;
