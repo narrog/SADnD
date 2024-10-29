@@ -32,7 +32,9 @@ namespace SADnD.Server.Controllers
         {
             try
             {
-                var result = await _campaignManager.GetAll();
+                var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
+                var user = await _userManager.FindByIdAsync(id);
+                var result = await _campaignManager.Get(x => x.DungeonMasters.Any(dm  => dm.Id == user.Id) || x.Players.Any(p => p.Id == user.Id));
                 return Ok(new APIListOfEntityResponse<Campaign>()
                 {
                     Success = true,
