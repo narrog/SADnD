@@ -1,0 +1,46 @@
+﻿@inject CampaignManager campaignManager
+
+<div class="container-fluid mt-3">
+    <div class="row">
+        @if (campaigns != null) {
+            @foreach (Campaign campaign in campaigns) {
+                <div class="col-12 col-md-4 p-1">
+                    <div class="p-2 bg-dark text-light">
+                        <p>@campaign.Id</p>
+                        <p>@campaign.Name</p>
+                        @* <p>@campaign.DungeonMasters</p> *@
+                    </div>
+                </div>
+            }
+            <div class="mt-2 p-1">
+                <a class="btn btn-primary me-2" href="neue-kampagne">hinzufügen</a>
+                @if (!ShowAll) {
+                    <a href="/alle-kampagnen" class="btn btn-primary">Alle anzeigen</a>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+
+
+@code {
+    [Parameter] public bool ShowAll { get; set; }
+    string controllerName = "campaign";
+    private IEnumerable<Campaign>? campaigns;
+
+
+    protected override async Task OnInitializedAsync() {
+        await GetAllCampaigns();
+        if (campaigns != null) {
+            if (!ShowAll) {
+                campaigns = campaigns.Count() < 3 ? campaigns.Take(campaigns.Count()) : campaigns.Take(3);
+            }
+        }
+        
+    }
+
+    private async Task GetAllCampaigns() {
+        campaigns = await campaignManager.GetAllCampaignsAsync();
+    }
+}
