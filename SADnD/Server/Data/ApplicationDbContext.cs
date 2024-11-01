@@ -39,30 +39,30 @@ namespace SADnD.Server.Data
                 .UsingEntity(j => j.ToTable("CampaignPlayers"));
 
             builder.Entity<Race>().HasData(
-                new Race() { Name = "Zwerg" },
-                new Race() { Name = "Elf" },
-                new Race() { Name = "Halbling" },
-                new Race() { Name = "Mensch" },
-                new Race() { Name = "Aasimar" },
-                new Race() { Name = "Drachenblütiger" },
-                new Race() { Name = "Gnom" },
-                new Race() { Name = "Goliath" },
-                new Race() { Name = "Ork" },
-                new Race() { Name = "Tiefling" }
+                new Race() { Id = 1, Name = "Zwerg" },
+                new Race() { Id = 2, Name = "Elf" },
+                new Race() { Id = 3, Name = "Halbling" },
+                new Race() { Id = 4, Name = "Mensch" },
+                new Race() { Id = 5, Name = "Aasimar" },
+                new Race() { Id = 6, Name = "Drachenblütiger" },
+                new Race() { Id = 7, Name = "Gnom" },
+                new Race() { Id = 8, Name = "Goliath" },
+                new Race() { Id = 9, Name = "Ork" },
+                new Race() { Id = 10, Name = "Tiefling" }
             );
             builder.Entity<Class>().HasData(
-                new Class() { Name = "Barbar" },
-                new Class() { Name = "Barde" },
-                new Class() { Name = "Druide" },
-                new Class() { Name = "Hexenmeister" },
-                new Class() { Name = "Kämpfer" },
-                new Class() { Name = "Kleriker" },
-                new Class() { Name = "Magier" },
-                new Class() { Name = "Mönch" },
-                new Class() { Name = "Paladin" },
-                new Class() { Name = "Schurke" },
-                new Class() { Name = "Waldläufer" },
-                new Class() { Name = "Zauberer" }
+                new Class() { Id = 1, Name = "Barbar" },
+                new Class() { Id = 2, Name = "Barde" },
+                new Class() { Id = 3, Name = "Druide" },
+                new Class() { Id = 4, Name = "Hexenmeister" },
+                new Class() { Id = 5, Name = "Kämpfer" },
+                new Class() { Id = 6, Name = "Kleriker" },
+                new Class() { Id = 7, Name = "Magier" },
+                new Class() { Id = 8, Name = "Mönch" },
+                new Class() { Id = 9, Name = "Paladin" },
+                new Class() { Id = 10, Name = "Schurke" },
+                new Class() { Id = 11, Name = "Waldläufer" },
+                new Class() { Id = 12, Name = "Zauberer" }
             );
         }
     }
