@@ -18,5 +18,8 @@ builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().Cre
 builder.Services.AddApiAuthorization();
 
 builder.Services.AddScoped<CampaignManager>();
+builder.Services.AddScoped<CharacterManager>();
+builder.Services.AddScoped<RaceManager>();
+builder.Services.AddScoped<ClassManager>();
 
 await builder.Build().RunAsync();

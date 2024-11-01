@@ -37,6 +37,33 @@ namespace SADnD.Server.Data
                 .HasMany(c => c.Players)
                 .WithMany(u => u.PlayerCampaigns)
                 .UsingEntity(j => j.ToTable("CampaignPlayers"));
+
+            builder.Entity<Race>().HasData(
+                new Race() { Name = "Zwerg" },
+                new Race() { Name = "Elf" },
+                new Race() { Name = "Halbling" },
+                new Race() { Name = "Mensch" },
+                new Race() { Name = "Aasimar" },
+                new Race() { Name = "Drachenblütiger" },
+                new Race() { Name = "Gnom" },
+                new Race() { Name = "Goliath" },
+                new Race() { Name = "Ork" },
+                new Race() { Name = "Tiefling" }
+            );
+            builder.Entity<Class>().HasData(
+                new Class() { Name = "Barbar" },
+                new Class() { Name = "Barde" },
+                new Class() { Name = "Druide" },
+                new Class() { Name = "Hexenmeister" },
+                new Class() { Name = "Kämpfer" },
+                new Class() { Name = "Kleriker" },
+                new Class() { Name = "Magier" },
+                new Class() { Name = "Mönch" },
+                new Class() { Name = "Paladin" },
+                new Class() { Name = "Schurke" },
+                new Class() { Name = "Waldläufer" },
+                new Class() { Name = "Zauberer" }
+            );
         }
     }
 }
