@@ -16,6 +16,9 @@ namespace SADnD.Server.Data
         }
         public DbSet<Campaign> Campaigns { get; set; }
         public DbSet<JoinRequest> JoinRequests { get; set; }
+        public DbSet<Character> Characters { get; set; }
+        public DbSet<Race> Races { get; set; }
+        public DbSet<Class> Classes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
