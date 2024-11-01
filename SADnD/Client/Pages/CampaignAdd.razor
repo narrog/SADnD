@@ -1,0 +1,50 @@
+﻿@page "/new-campaign"
+
+@attribute [Authorize]
+@using Newtonsoft.Json
+
+@inject CampaignManager campaignManager
+
+<h3>Kampagne hinzufügen</h3>
+
+<div class="mt-3">
+    <EditForm Model="@campaign" OnValidSubmit="@Post">
+        <DataAnnotationsValidator /> 
+        Name:
+        <InputText @bind-Value="@campaign.Name"></InputText>
+        <div class="mt-3">
+            <button type="submit" class="btn btn-primary me-2">Speichern</button>
+            <button class="btn btn-secondary" type="button" @onclick="CancelButtonPressed">Abbrechen</button>
+        </div>
+        <ValidationSummary class="mt-3" />
+    </EditForm>
+</div>
+<div class="mt-3">
+    @UIMessage
+</div>
+
+@code {
+    private Campaign campaign = new Campaign();
+    string UIMessage = "";
+    string controllerName = "campaign";
+    string message = "";
+    string name = "";
+
+    private async void Post() {
+
+        try {
+            if (controllerName == "campaign") {
+                message = JsonConvert.SerializeObject(await campaignManager.Insert(campaign));
+            }
+            UIMessage = "Kampagne erfolgreich erstellt";
+            navManager.NavigateTo("all-campaigns");
+        }
+        catch (Exception ex) {
+            UIMessage = ex.Message;
+            StateHasChanged();
+        }
+    }
+    private void CancelButtonPressed() {
+        navManager.NavigateTo("all-campaigns");
+    }
+}

@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35312.102
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SADnD.Server", "SADnD\Server\SADnD.Server.csproj", "{EB65E9B1-EEA9-434F-BB49-6165B138A574}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SADnD.Server", "SADnD\Server\SADnD.Server.csproj", "{EB65E9B1-EEA9-434F-BB49-6165B138A574}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SADnD.Client", "SADnD\Client\SADnD.Client.csproj", "{1793EDF7-B3A1-4900-8418-510591708EA3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SADnD.Client", "SADnD\Client\SADnD.Client.csproj", "{1793EDF7-B3A1-4900-8418-510591708EA3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SADnD.Shared", "SADnD\Shared\SADnD.Shared.csproj", "{9469D367-791B-40FB-B9A3-8B9E73ED317E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SADnD.Shared", "SADnD\Shared\SADnD.Shared.csproj", "{9469D367-791B-40FB-B9A3-8B9E73ED317E}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{E15082F1-5DCD-4859-8908-549A731BF85D}"
 EndProject
