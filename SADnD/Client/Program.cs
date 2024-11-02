@@ -18,5 +18,6 @@ builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().Cre
 builder.Services.AddApiAuthorization();
 
 builder.Services.AddScoped<CampaignManager>();
+builder.Services.AddScoped<JoinRequestManager>();
 
 await builder.Build().RunAsync();

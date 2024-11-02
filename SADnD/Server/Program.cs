@@ -42,6 +42,7 @@ builder.Services.AddAuthentication()
     .AddIdentityServerJwt();
 
 builder.Services.AddTransient<EFRepositoryGeneric<Campaign, ApplicationDbContext>>();
+builder.Services.AddTransient<EFRepositoryGeneric<JoinRequest, ApplicationDbContext>>();
 builder.Services.AddTransient<CustomClaimsService<ApplicationDbContext,UserManager<ApplicationUser>>>();
 
 builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, CustomUserClaimsPrincipalFactory>();
