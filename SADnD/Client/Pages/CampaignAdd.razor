@@ -2,6 +2,7 @@
 
 @attribute [Authorize]
 @using Newtonsoft.Json
+@inject IJSRuntime js
 
 @inject CampaignManager campaignManager
 
@@ -44,7 +45,11 @@
             StateHasChanged();
         }
     }
-    private void CancelButtonPressed() {
-        navManager.NavigateTo("all-campaigns");
+    private async void CancelButtonPressed() {
+        bool confirm = await js.InvokeAsync<bool>("confirm", "Eingabe wirklich abbrechen");
+        if (confirm)
+            await js.InvokeVoidAsync("history.back");
+        else
+            return;
     }
 }

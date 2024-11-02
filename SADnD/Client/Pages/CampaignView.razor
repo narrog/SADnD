@@ -42,7 +42,7 @@
     }
 
     private async Task GetAllCampaigns() {
-        campaigns = await campaignManager.GetAllCampaignsAsync();
+        campaigns = await campaignManager.GetAll();
     }
 
     private void OpenCampaignDetails(string id) {
