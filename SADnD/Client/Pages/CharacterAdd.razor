@@ -11,15 +11,18 @@
 <h3>Charakter hinzufügen</h3>
 
 @if (races != null && AvailableClasses != null) {
-    <div class="container-fluid mt-3">
-        <div class="row">
-            <EditForm Model="@character" OnValidSubmit="@Post">
-                <DataAnnotationsValidator />
+    <EditForm Model="@character" OnValidSubmit="@Post">
+        <div class="container-fluid mt-3">
+            <DataAnnotationsValidator />
+            <div class="row">
+                
                 <div class="col-12 col-md-8 p-1">
-                    Name: <InputText @bind-Value="@character.Name"></InputText>
+                    Name:<br /><InputText @bind-Value="@character.Name"></InputText>
                 </div>
+            </div>
+            <div class="row">
                 <div class="col-12 col-md-4 p-1">
-                    Rasse: 
+                    Rasse:<br />
                     <InputSelect @bind-Value="@character.RaceId">
                         <option selected value="0">Bitte auswählen</option>
                         @foreach (var race in races) {
@@ -27,8 +30,10 @@
                         }
                     </InputSelect>
                 </div>
+            </div>
+            <div class="row">
                 <div class="col-12 col-md-4 p-1">
-                    Klasse:
+                    Klasse:<br />
                     @* @foreach (var classItem in AvailableClasses) {
                         <div>
                             <input type="checkbox" @onchange="(e => UpdateSelection(classItem.Id, (bool)e.Value))" />
@@ -37,27 +42,55 @@
                     } *@
                     @foreach (var charClass in character.Classes)
                     {
-                        <InputSelect @bind-Value="@charClass.ClassId">
-                            <option selected value="">Bitte auswählen</option>
-                            @foreach (var characterClass in AvailableClasses)
-                            {
-                                <option value="@characterClass.Id">@characterClass.Name</option>
-                            }
-                        </InputSelect>
-                        <InputNumber @bind-Value="@charClass.Level">
-                        </InputNumber>
-                        <button onclick="@AddClass">+</button>
+                        <p>
+                            <InputSelect @bind-Value="@charClass.ClassId">
+                                <option selected value="0">Bitte auswählen</option>
+                                @foreach (var characterClass in AvailableClasses) {
+                                    <option value="@characterClass.Id">@characterClass.Name</option>
+                                }
+                            </InputSelect>
+                            <InputNumber @bind-Value="@charClass.Level">
+                            </InputNumber>
+                            <button onclick="@AddClass">+</button>
+                        </p>                     
                     }
-                    
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6 col-md-4 col-lg-2 p-1">
+                    Alter:<br />
+                    <InputNumber @bind-Value="@character.Age"></InputNumber>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2 p-1">
+                    Grössen-Kategorie:<br />
+                    <InputText @bind-Value="@SizeCategoryString"></InputText>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2 p-1">
+                    Grösse:<br />
+                    <InputNumber @bind-Value="@character.Size"></InputNumber>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2 p-1">
+                    Gewicht:<br />
+                    <InputNumber @bind-Value="@character.Weight"></InputNumber>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2 p-1">
+                    Geschlecht:<br />
+                    <InputText @bind-Value="@character.Sex"></InputText>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2 p-1">
+                    Alignment:<br />
+                    <InputText @bind-Value="@character.Alignment"></InputText>
                 </div>
                 <div class="mt-3">
                     <button type="submit" class="btn btn-primary me-2">Speichern</button>
                     <button class="btn btn-secondary" type="button" @onclick="CancelButtonPressed">Abbrechen</button>
                 </div>
-                <ValidationSummary class="mt-3" />
-            </EditForm>
+            </div>
+
+            <ValidationSummary class="mt-3" />
         </div>
-    </div>
+    </EditForm>
+
 }
 <div class="mt-3">
     @UIMessage
@@ -71,6 +104,14 @@
     string controllerName = "character";
     string message = "";
     string name = "";
+    private string? SizeCategoryString {
+        get => character.SizeCategory.ToString();
+        set {
+            if (!string.IsNullOrEmpty(value)) {
+                character.SizeCategory = value[0]; // Nimmt das erste Zeichen
+            }
+        }
+    }
 
     protected override async Task OnInitializedAsync() {
         AvailableClasses = await classManager.GetAll();
