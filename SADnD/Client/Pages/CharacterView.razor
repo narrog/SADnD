@@ -8,7 +8,8 @@
                     <div class="p-2 bg-dark text-light" @onclick="() => OpenCharacterDetails(character.Id)">
                         <p>@character.Id</p>
                         <p>@character.Name</p>
-                        @* <p>@character.DungeonMasters</p> *@
+                        <p>@character.RaceId - @character.Race!.Name</p>
+                        <p>@character.Classes</p>
                         <button class="btn btn-secondary" @onclick="() => OpenCharacterDetails(character.Id)">Details</button>
                     </div>
                 </div>
@@ -30,7 +31,6 @@
     string controllerName = "character";
     private IEnumerable<Character>? characters;
 
-
     protected override async Task OnInitializedAsync() {
         await GetAllCharacters();
         if (characters != null) {
@@ -38,7 +38,6 @@
                 characters = characters.Count() < 3 ? characters.Take(characters.Count()) : characters.Take(3);
             }
         }
-
     }
 
     private async Task GetAllCharacters() {
@@ -46,6 +45,6 @@
     }
 
     private void OpenCharacterDetails(int id) {
-        navManager.NavigateTo($"characters-details/{id}");
+        navManager.NavigateTo($"character-details/{id}");
     }
 }
