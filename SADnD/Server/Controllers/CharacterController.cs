@@ -30,8 +30,7 @@ namespace SADnD.Server.Controllers
             try
             {
                 var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
-                var user = await _userManager.FindByIdAsync(id);
-                var result = await _characterManager.Get(x => x.UserId == user.Id);
+                var result = await _characterManager.Get(x => x.UserId == id,null,"Race,Classes.Class");
                 return Ok(new APIListOfEntityResponse<Character>()
                 {
                     Success = true,
