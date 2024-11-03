@@ -23,9 +23,12 @@ namespace SADnD.Shared.Models
         public int TemporaryHitpoints { get; set; }
         public bool[]? DeathRoles { get; set; }
         public string? Background {  get; set; }
+        [Range (1, int.MaxValue, ErrorMessage = "Alter ungültig")]
         public int? Age { get; set; }
         public char? SizeCategory { get; set; }
+        [Range(0, int.MaxValue, ErrorMessage = "Grösse ungültig")]
         public float? Size {  get; set; }
+        [Range(0, int.MaxValue, ErrorMessage = "Gewicht ungültig")]
         public float? Weight { get; set; }
         public string? Sex { get; set; }
         public string? Alignment { get; set; }
