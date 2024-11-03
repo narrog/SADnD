@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -29,8 +30,10 @@ namespace SADnD.Shared.Models
         public string? Sex { get; set; }
         public string? Alignment { get; set; }
         public string? UserId { get; set; }
+        [JsonIgnore]
         public ApplicationUser? User { get; set; }
         public string? CampaignId { get; set; }
+        [JsonIgnore]
         public Campaign? Campaign { get; set; }
     }
 }

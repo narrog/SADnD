@@ -64,7 +64,11 @@
 </div>
 
 @code {
-    private Character character = new Character(){Classes = new List<CharacterClass>() {new CharacterClass() } };
+    private Character character = new Character() { 
+        Classes = new List<CharacterClass>() { 
+            new CharacterClass() { Level = 1 } 
+        } 
+    };
     private IEnumerable<Class> AvailableClasses;
     private IEnumerable<Race> races;
     string UIMessage = "";
@@ -115,7 +119,10 @@
 
     private void AddClass()
     {
-        character.Classes.Add(new CharacterClass(){CharacterId = character.Id});
+        character.Classes.Add(new CharacterClass(){
+            CharacterId = character.Id, 
+            Level = 1
+        });
     }
 
     // Die ausgewählten Klassen-IDs
