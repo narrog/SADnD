@@ -2,6 +2,7 @@
 
 @attribute [Authorize]
 @using Newtonsoft.Json
+@using System.Security.Claims
 @inject IJSRuntime js
 
 @inject CharacterManager characterManager
@@ -64,10 +65,12 @@
 </div>
 
 @code {
+    [CascadingParameter]
+    public CascadingAppState appState { get; set; }
     private Character character = new Character() { 
         Classes = new List<CharacterClass>() { 
             new CharacterClass() { Level = 1 } 
-        } 
+        }
     };
     private IEnumerable<Class> AvailableClasses;
     private IEnumerable<Race> races;
@@ -79,6 +82,8 @@
     protected override async Task OnInitializedAsync() {
         AvailableClasses = await classManager.GetAll();
         races = await raceManager.GetAll();
+
+        character.UserId = appState.UserId;
 
         foreach (var classItem in AvailableClasses) {
             SelectedClassIds[classItem.Id] = false; // Standardwert ist false (nicht ausgewählt)
