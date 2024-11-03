@@ -87,7 +87,7 @@ namespace SADnD.Server.Controllers
                     character.User = user;
                 }
                 await _characterManager.Insert(character);
-                var result = (await _characterManager.GetByID(character.Id));
+                var result = await _characterManager.GetByID(character.Id);
                 if (result != null)
                 {
                     return Ok(new APIEntityResponse<Character>()

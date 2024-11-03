@@ -10,13 +10,25 @@
     [Parameter]
     public RenderFragment ChildContent { get; set; }
 
-    public string UserId { get; set; }
-    public IEnumerable<Claim> Claims { get; set; }
+    private string userId;
+    private IEnumerable<Claim> claims;
 
-    protected override async Task OnInitializedAsync()
+    public string UserId 
+    { 
+        get
+        {
+            userId = authenticationStateTask.Result.User.Claims.Where(x => x.Type == "sub").FirstOrDefault().Value;
+            return userId;
+        } 
+        private set {}
+    }
+    public IEnumerable<Claim> Claims 
     {
-        var result = authenticationStateTask.Result;
-        Claims = result.User.Claims;
-        UserId = Claims.Where(x => x.Type == "sub").FirstOrDefault().Value;
+        get
+        {
+            claims = authenticationStateTask.Result.User.Claims;
+            return claims;
+        }
+        private set {}
     }
 }
