@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,8 +12,9 @@ namespace SADnD.Shared.Models
         public int Id { get; set; }
         public int Level { get; set; }
         public int CharacterId { get; set; }
-        public Character Character { get; set; }
+        [JsonIgnore] 
+        public Character? Character { get; set; }
         public int ClassId { get; set; }
-        public Class Class { get; set; }
+        public Class? Class { get; set; }
     }
 }

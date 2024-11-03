@@ -16,8 +16,8 @@ namespace SADnD.Shared.Models
         [Required]
         [Range(1, int.MaxValue, ErrorMessage = "Rasse muss gewählt werden.")]
         public int RaceId { get; set; }
-        public Race Race { get; set; }
-        public ICollection<Models.Class>? Classes { get; set; }
+        public Race? Race { get; set; }
+        public ICollection<CharacterClass>? Classes { get; set; }
         public int Hitpoints { get; set; }
         public int TemporaryHitpoints { get; set; }
         public bool[]? DeathRoles { get; set; }
@@ -28,8 +28,8 @@ namespace SADnD.Shared.Models
         public float? Weight { get; set; }
         public string? Sex { get; set; }
         public string? Alignment { get; set; }
-        public string UserId { get; set; }
-        public ApplicationUser User { get; set; }
+        public string? UserId { get; set; }
+        public ApplicationUser? User { get; set; }
         public string? CampaignId { get; set; }
         public Campaign? Campaign { get; set; }
     }

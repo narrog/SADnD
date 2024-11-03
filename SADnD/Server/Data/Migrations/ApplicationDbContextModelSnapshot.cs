@@ -419,22 +419,19 @@ namespace SADnD.Server.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("Age")
+                    b.Property<int?>("Age")
                         .HasColumnType("integer");
 
                     b.Property<string>("Alignment")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Background")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("CampaignId")
                         .HasColumnType("text");
 
                     b.Property<bool[]>("DeathRoles")
-                        .IsRequired()
                         .HasColumnType("boolean[]");
 
                     b.Property<int>("Hitpoints")
@@ -442,19 +439,19 @@ namespace SADnD.Server.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<int>("RaceId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Sex")
-                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<float>("Size")
+                    b.Property<float?>("Size")
                         .HasColumnType("real");
 
-                    b.Property<char>("SizeCategory")
+                    b.Property<char?>("SizeCategory")
                         .HasColumnType("character(1)");
 
                     b.Property<int>("TemporaryHitpoints")
@@ -464,7 +461,7 @@ namespace SADnD.Server.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<float>("Weight")
+                    b.Property<float?>("Weight")
                         .HasColumnType("real");
 
                     b.HasKey("Id");
@@ -512,11 +509,16 @@ namespace SADnD.Server.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("CharacterId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CharacterId");
 
                     b.ToTable("Classes");
 
@@ -789,7 +791,7 @@ namespace SADnD.Server.Migrations
             modelBuilder.Entity("SADnD.Shared.Models.CharacterClass", b =>
                 {
                     b.HasOne("SADnD.Shared.Models.Character", "Character")
-                        .WithMany("Classes")
+                        .WithMany()
                         .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -803,6 +805,13 @@ namespace SADnD.Server.Migrations
                     b.Navigation("Character");
 
                     b.Navigation("Class");
+                });
+
+            modelBuilder.Entity("SADnD.Shared.Models.Class", b =>
+                {
+                    b.HasOne("SADnD.Shared.Models.Character", null)
+                        .WithMany("Classes")
+                        .HasForeignKey("CharacterId");
                 });
 
             modelBuilder.Entity("SADnD.Shared.Models.JoinRequest", b =>

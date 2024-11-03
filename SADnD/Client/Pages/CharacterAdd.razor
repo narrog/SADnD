@@ -29,18 +29,25 @@
                 </div>
                 <div class="col-12 col-md-4 p-1">
                     Klasse:
-                    @foreach (var classItem in AvailableClasses) {
+                    @* @foreach (var classItem in AvailableClasses) {
                         <div>
                             <input type="checkbox" @onchange="(e => UpdateSelection(classItem.Id, (bool)e.Value))" />
                             <label>@classItem.Name</label>
                         </div>
+                    } *@
+                    @foreach (var charClass in character.Classes)
+                    {
+                        <InputSelect @bind-Value="@charClass.ClassId">
+                            <option selected value="">Bitte auswählen</option>
+                            @foreach (var characterClass in AvailableClasses)
+                            {
+                                <option value="@characterClass.Id">@characterClass.Name</option>
+                            }
+                        </InputSelect>
+                        <InputNumber @bind-Value="@charClass.Level">
+                        </InputNumber>
+                        <button onclick="@AddClass">+</button>
                     }
-                    @* <InputSelect multiple @bind-Value="@character.Classes">
-                        <option selected value="">Bitte auswählen</option>
-                        @foreach(var characterClass in classes){
-                            <option value="@characterClass.Id">@characterClass.Name</option>
-                        }
-                    </InputSelect> *@
                     
                 </div>
                 <div class="mt-3">
@@ -57,7 +64,7 @@
 </div>
 
 @code {
-    private Character character = new Character();
+    private Character character = new Character(){Classes = new List<CharacterClass>() {new CharacterClass() } };
     private IEnumerable<Class> AvailableClasses;
     private IEnumerable<Race> races;
     string UIMessage = "";
@@ -82,14 +89,14 @@
             .ToList();
 
             // Hier aktualisieren Sie Ihr Modell
-            character.Classes = selectedClasses;
-            foreach (var x in character.Classes) {
-                Console.WriteLine($"gewählte Klasse: {x.Id} - {x.Name}");
-            }
+            // character.Classes = selectedClasses;
+            // foreach (var x in character.Classes) {
+            //     Console.WriteLine($"gewählte Klasse: {x.Id} - {x.Name}");
+            // }
 
             message = JsonConvert.SerializeObject(await characterManager.Insert(character));
             Console.WriteLine($"message: {message}");
-            
+
             //await js.InvokeVoidAsync("history.back");
         }
         catch (Exception ex) {
@@ -104,6 +111,11 @@
             await js.InvokeVoidAsync("history.back");
         else
             return;
+    }
+
+    private void AddClass()
+    {
+        character.Classes.Add(new CharacterClass(){CharacterId = character.Id});
     }
 
     // Die ausgewählten Klassen-IDs
