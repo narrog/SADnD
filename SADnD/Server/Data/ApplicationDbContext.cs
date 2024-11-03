@@ -19,6 +19,7 @@ namespace SADnD.Server.Data
         public DbSet<Character> Characters { get; set; }
         public DbSet<Race> Races { get; set; }
         public DbSet<Class> Classes { get; set; }
+        public DbSet<CharacterClass> CharactersClasses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
