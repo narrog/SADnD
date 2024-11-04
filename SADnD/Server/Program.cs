@@ -46,6 +46,8 @@ builder.Services.AddTransient<CharacterManager>();
 builder.Services.AddTransient<EFRepositoryGeneric<Race, ApplicationDbContext>>();
 builder.Services.AddTransient<EFRepositoryGeneric<Class, ApplicationDbContext>>();
 builder.Services.AddTransient<CustomClaimsService<ApplicationDbContext, UserManager<ApplicationUser>>>();
+builder.Services.AddTransient<EFRepositoryGeneric<JoinRequest, ApplicationDbContext>>();
+builder.Services.AddTransient<CustomClaimsService<ApplicationDbContext,UserManager<ApplicationUser>>>();
 
 builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, CustomUserClaimsPrincipalFactory>();
 
