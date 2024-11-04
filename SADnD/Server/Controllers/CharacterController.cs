@@ -49,13 +49,13 @@ namespace SADnD.Server.Controllers
         {
             try
             {
-                var result = (await _characterManager.GetByID(id));
+                var result = await _characterManager.Get(x => x.Id == id, null, "Race,Classes.Class");
                 if (result != null)
                 {
                     return Ok(new APIEntityResponse<Character>()
                     {
                         Success = true,
-                        Data = result
+                        Data = result.FirstOrDefault()
                     });
                 }
                 else
@@ -84,7 +84,12 @@ namespace SADnD.Server.Controllers
                 var user = await _userManager.FindByIdAsync(id);
                 if (user != null)
                 {
-                    character.User = user;
+                    // TODO: Look into writing these checks as policy
+                    if (user.Id != character.UserId)
+                    {
+                        return StatusCode(403);
+                    }
+                    character.UserId = user.Id;
                 }
                 await _characterManager.Insert(character);
                 var result = await _characterManager.GetByID(character.Id);
@@ -118,8 +123,18 @@ namespace SADnD.Server.Controllers
         {
             try
             {
+                var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
+                var user = await _userManager.FindByIdAsync(id);
+                if (user != null)
+                {
+                    if (user.Id != character.UserId)
+                    {
+                        return StatusCode(403);
+                    }
+                    character.UserId = user.Id;
+                }
                 await _characterManager.Update(character);
-                var result = (await _characterManager.Get(x => x.Id == character.Id)).FirstOrDefault();
+                var result = await _characterManager.GetByID(character.Id);
                 if (result != null)
                 {
                     return Ok(new APIEntityResponse<Character>()
@@ -150,7 +165,9 @@ namespace SADnD.Server.Controllers
         {
             try
             {
-                if (await _characterManager.Get(x => x.Id == id) != null) 
+                var userId = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
+                var character = await _characterManager.GetByID(id);
+                if (character != null && character.UserId == userId) 
                 {
                     var success = await _characterManager.Delete(id);
                     if (success)
