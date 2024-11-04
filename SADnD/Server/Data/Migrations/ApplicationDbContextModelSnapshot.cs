@@ -400,7 +400,8 @@ namespace SADnD.Server.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("Id");
 
@@ -408,6 +409,180 @@ namespace SADnD.Server.Migrations
                         .IsUnique();
 
                     b.ToTable("Campaigns");
+                });
+
+            modelBuilder.Entity("SADnD.Shared.Models.Character", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("Age")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Alignment")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Background")
+                        .HasColumnType("text");
+
+                    b.Property<string>("CampaignId")
+                        .HasColumnType("text");
+
+                    b.Property<bool[]>("DeathRoles")
+                        .HasColumnType("boolean[]");
+
+                    b.Property<int>("Hitpoints")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("RaceId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Sex")
+                        .HasColumnType("text");
+
+                    b.Property<float?>("Size")
+                        .HasColumnType("real");
+
+                    b.Property<char?>("SizeCategory")
+                        .HasColumnType("character(1)");
+
+                    b.Property<int>("TemporaryHitpoints")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<float?>("Weight")
+                        .HasColumnType("real");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CampaignId");
+
+                    b.HasIndex("RaceId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Characters");
+                });
+
+            modelBuilder.Entity("SADnD.Shared.Models.CharacterClass", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CharacterId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ClassId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterId");
+
+                    b.HasIndex("ClassId");
+
+                    b.ToTable("CharactersClasses");
+                });
+
+            modelBuilder.Entity("SADnD.Shared.Models.Class", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("CharacterId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterId");
+
+                    b.ToTable("Classes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Barbar"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Barde"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Druide"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Hexenmeister"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "Kämpfer"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "Kleriker"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "Magier"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Name = "Mönch"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Name = "Paladin"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Name = "Schurke"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Name = "Waldläufer"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Name = "Zauberer"
+                        });
                 });
 
             modelBuilder.Entity("SADnD.Shared.Models.JoinRequest", b =>
@@ -436,6 +611,75 @@ namespace SADnD.Server.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("JoinRequests");
+                });
+
+            modelBuilder.Entity("SADnD.Shared.Models.Race", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Races");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Zwerg"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Elf"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Halbling"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Mensch"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "Aasimar"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "Drachenblütiger"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "Gnom"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Name = "Goliath"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Name = "Ork"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Name = "Tiefling"
+                        });
                 });
 
             modelBuilder.Entity("ApplicationUserCampaign", b =>
@@ -519,6 +763,57 @@ namespace SADnD.Server.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("SADnD.Shared.Models.Character", b =>
+                {
+                    b.HasOne("SADnD.Shared.Models.Campaign", "Campaign")
+                        .WithMany()
+                        .HasForeignKey("CampaignId");
+
+                    b.HasOne("SADnD.Shared.Models.Race", "Race")
+                        .WithMany()
+                        .HasForeignKey("RaceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SADnD.Shared.Models.ApplicationUser", "User")
+                        .WithMany("Characters")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Campaign");
+
+                    b.Navigation("Race");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SADnD.Shared.Models.CharacterClass", b =>
+                {
+                    b.HasOne("SADnD.Shared.Models.Character", "Character")
+                        .WithMany()
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SADnD.Shared.Models.Class", "Class")
+                        .WithMany()
+                        .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Character");
+
+                    b.Navigation("Class");
+                });
+
+            modelBuilder.Entity("SADnD.Shared.Models.Class", b =>
+                {
+                    b.HasOne("SADnD.Shared.Models.Character", null)
+                        .WithMany("Classes")
+                        .HasForeignKey("CharacterId");
+                });
+
             modelBuilder.Entity("SADnD.Shared.Models.JoinRequest", b =>
                 {
                     b.HasOne("SADnD.Shared.Models.Campaign", "Campaign")
@@ -540,12 +835,19 @@ namespace SADnD.Server.Migrations
 
             modelBuilder.Entity("SADnD.Shared.Models.ApplicationUser", b =>
                 {
+                    b.Navigation("Characters");
+
                     b.Navigation("JoinRequests");
                 });
 
             modelBuilder.Entity("SADnD.Shared.Models.Campaign", b =>
                 {
                     b.Navigation("JoinRequests");
+                });
+
+            modelBuilder.Entity("SADnD.Shared.Models.Character", b =>
+                {
+                    b.Navigation("Classes");
                 });
 #pragma warning restore 612, 618
         }

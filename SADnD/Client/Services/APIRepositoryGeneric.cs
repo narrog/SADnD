@@ -130,7 +130,6 @@ namespace SADnD.Client.Services
         }
         public async Task<bool> Delete(object id)
         {
-            Console.WriteLine("Funktion Delete in APIRepositoryGeneric aufgerufen");
             try
             {
                 var url = _controllerName + "/" + WebUtility.HtmlEncode(id.ToString());

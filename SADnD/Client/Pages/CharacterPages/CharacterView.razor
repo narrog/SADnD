@@ -1,0 +1,64 @@
+﻿@inject CharacterManager characterManager
+
+<div class="container-fluid mt-3">
+    <div class="row">
+        @if (characters != null) {
+            @foreach (Character character in characters) {
+                <div class="col-12 col-md-4 p-1 d-flex">
+                    <div class="p-2 bg-dark text-light w-100" @onclick="() => OpenCharacterDetails(character.Id)">
+                        <p><strong>@character.Name</strong></p>
+                        <p>Rasse: @(character.Race != null ? character.Race.Name : "Unbekannt")</p>
+                        @if (character.Classes != null && character.Classes.Any()) {
+                            <p>Klassen
+                            <ul>
+                                @foreach (var characterClass in character.Classes) {
+                                    @if (characterClass.Class != null) {
+                                        <li>
+                                            @characterClass.Class.Name, Level: @characterClass.Level
+                                        </li>
+                                    }
+                                }
+                            </ul>
+                            </p>
+                        }
+                        else {
+                            <p>Keine Klasse zugeordnet</p>
+                        }
+                        <button class="btn btn-secondary" @onclick="() => OpenCharacterDetails(character.Id)">Details</button>
+                    </div>
+                </div>
+            }
+            <div class="mt-2 p-1">
+                <a class="btn btn-primary me-2" href="new-character">hinzufügen</a>
+                @if (!ShowAll) {
+                    <a href="/all-characters" class="btn btn-primary">Alle anzeigen</a>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+
+
+@code {
+    [Parameter] public bool ShowAll { get; set; }
+    string controllerName = "character";
+    private IEnumerable<Character>? characters;
+
+    protected override async Task OnInitializedAsync() {
+        await GetAllCharacters();
+        if (characters != null) {
+            if (!ShowAll) {
+                characters = characters.Count() < 3 ? characters.Take(characters.Count()) : characters.Take(3);
+            }
+        }
+    }
+
+    private async Task GetAllCharacters() {
+        characters = await characterManager.GetAll();
+    }
+
+    private void OpenCharacterDetails(int id) {
+        navManager.NavigateTo($"character-details/{id}");
+    }
+}

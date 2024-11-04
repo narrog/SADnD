@@ -1,0 +1,34 @@
+﻿@using System.Security.Claims
+
+<CascadingValue Value="this">
+    @ChildContent
+</CascadingValue>
+
+@code {
+    [CascadingParameter]
+    public Task<AuthenticationState> authenticationStateTask { get; set; }
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    private string userId;
+    private IEnumerable<Claim> claims;
+
+    public string UserId 
+    { 
+        get
+        {
+            userId = authenticationStateTask.Result.User.Claims.Where(x => x.Type == "sub").FirstOrDefault().Value;
+            return userId;
+        } 
+        private set {}
+    }
+    public IEnumerable<Claim> Claims 
+    {
+        get
+        {
+            claims = authenticationStateTask.Result.User.Claims;
+            return claims;
+        }
+        private set {}
+    }
+}

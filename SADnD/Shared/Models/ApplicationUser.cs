@@ -11,5 +11,6 @@ namespace SADnD.Shared.Models
         public ICollection<Campaign> PlayerCampaigns { get; set; }
         [JsonIgnore]
         public ICollection<JoinRequest> JoinRequests { get; set; }
+        public ICollection<Character> Characters { get; set; }
     }
 }
