@@ -1,0 +1,51 @@
+﻿@page "/campaign-details/{id}"
+@attribute [Authorize]
+@inject CampaignManager campaignManager
+@inject IJSRuntime js
+
+<h3>Kampagne "@campaign.Name" - Details</h3>
+
+<div class="container-fluid mt-3">
+    <strong>Dungeonmaster: </strong><br />
+        @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any()) {
+            <p>
+                <ul>
+                        @foreach (var master in campaign.DungeonMasters) {
+                            @if (master.UserName != null) {
+                            <li>
+                                    @master.UserName
+                            </li>
+                            }
+                        }
+                </ul>
+            </p>
+        }
+        else {
+            <p>Kein DungeonMaster gefunden</p>
+        }
+    <p><strong>Zugangscode: </strong>@campaign.Id</p>
+</div>
+<div>
+    <a class="btn btn-outline-primary me-2" onclick="history.back();">Zurück</a>
+    <button class="btn btn-outline-danger" @onclick="DeleteCampaign">Löschen</button>
+</div>
+
+@code {
+    [Parameter] public required string Id { get; set; }
+    private Campaign campaign = new Campaign();
+
+    protected override async Task OnInitializedAsync() {
+        campaign = await campaignManager.GetByID(Id);
+    }
+
+    private async Task DeleteCampaign() {
+        // string toDeleteName = campaign.Name;
+        // bool confirm = await js.InvokeAsync<bool>("confirm", $"Soll der Eintrag '{toDeleteName}' wirklich gelöscht werden?");
+        // if (!confirm) return;
+
+        //await campaignManager.Delete(campaign.Id);
+
+        await js.InvokeVoidAsync("alert", $"Funktion wird später implementiert");
+    }
+
+}

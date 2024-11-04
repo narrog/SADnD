@@ -5,6 +5,11 @@ services:
     build:
       context: .
       dockerfile: SADnD/Server/Dockerfile
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - sadnd.database
 
   sadnd.database:
     image: postgres:latest
@@ -14,6 +19,30 @@ services:
       - POSTGRES_USER=sadnd
       - POSTGRES_PASSWORD=sadnd
     volumes:
-      - ./.containers/db:/var/lib/postgresql/data
+      - ./db:/var/lib/postgresql/data
     ports:
       - 5432:5432
+  
+  sadnd.nginx:
+    image: nginx:latest
+    container_name: SADnD.nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/cerbot
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - sadnd.server
+
+  sadnd.certbot:
+    image: certbot/certbot
+    container_name: SADnD.certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+
+networks:
+  defaults:
+    name: SADnD.net  

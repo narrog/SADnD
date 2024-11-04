@@ -17,6 +17,7 @@ namespace SADnD.Server.Areas.Identity
             _context = context;
             _userManager = userManager;
         }
+        // TODO: Optimise with granular add and remove functions or move entirely to onLogin maybe
         public async Task AddCampaignClaims(ApplicationUser user)
         {
             var userWithCampaigns = await _context.Users

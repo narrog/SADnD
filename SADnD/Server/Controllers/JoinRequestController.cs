@@ -12,30 +12,27 @@ namespace SADnD.Server.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class CampaignController : ControllerBase
+    public class JoinRequestController : ControllerBase
     {
         UserManager<ApplicationUser> _userManager;
-        CustomClaimsService<ApplicationDbContext,UserManager<ApplicationUser>> _customClaimsService;
-        EFRepositoryGeneric<Campaign,ApplicationDbContext> _campaignManager;
-        public CampaignController(
+        EFRepositoryGeneric<JoinRequest,ApplicationDbContext> _requestManager;
+        public JoinRequestController(
             UserManager<ApplicationUser> userManager, 
-            CustomClaimsService<ApplicationDbContext, UserManager<ApplicationUser>> customClaimsService, 
-            EFRepositoryGeneric<Campaign,ApplicationDbContext> campaignManager)
+            EFRepositoryGeneric<JoinRequest,ApplicationDbContext> requestManager)
         {
             _userManager = userManager;
-            _customClaimsService = customClaimsService;
-            _campaignManager = campaignManager;
+            _requestManager = requestManager;
         }
 
         [HttpGet]
-        public async Task<ActionResult<APIListOfEntityResponse<Campaign>>> GetAllCampaigns()
+        public async Task<ActionResult<APIListOfEntityResponse<JoinRequest>>> GetAllRequests()
         {
             try
             {
                 var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
                 var user = await _userManager.FindByIdAsync(id);
-                var result = await _campaignManager.Get(x => x.DungeonMasters.Any(dm  => dm.Id == user.Id) || x.Players.Any(p => p.Id == user.Id),null,"DungeonMasters,Players");
-                return Ok(new APIListOfEntityResponse<Campaign>()
+                var result = await _requestManager.Get(x => x.Campaign.DungeonMasters.Any(dm => dm.Id == id) || x.UserId == id);
+                return Ok(new APIListOfEntityResponse<JoinRequest>()
                 {
                     Success = true,
                     Data = result
@@ -49,14 +46,14 @@ namespace SADnD.Server.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<APIEntityResponse<Campaign>>> GetByCampaignId(string id)
+        public async Task<ActionResult<APIEntityResponse<JoinRequest>>> GetByRequestId(int id)
         {
             try
             {
-                var result = (await _campaignManager.Get(x => x.Id == id.ToUpper(),null,"DungeonMasters,Players")).FirstOrDefault();
+                var result = (await _requestManager.Get(x => x.Id == id,null,"Campaign,User")).FirstOrDefault();
                 if (result != null)
                 {
-                    return Ok(new APIEntityResponse<Campaign>()
+                    return Ok(new APIEntityResponse<JoinRequest>()
                     {
                         Success = true,
                         Data = result
@@ -64,10 +61,10 @@ namespace SADnD.Server.Controllers
                 }
                 else
                 {
-                    return Ok(new APIEntityResponse<Campaign>()
+                    return Ok(new APIEntityResponse<JoinRequest>()
                     {
                         Success = false,
-                        ErrorMessages = new List<string>() { "Campaign Not Found" },
+                        ErrorMessages = new List<string>() { "Request Not Found" },
                         Data = null
                     });
                 }
@@ -80,26 +77,21 @@ namespace SADnD.Server.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<APIEntityResponse<Campaign>>> Post([FromBody] Campaign campaign)
+        public async Task<ActionResult<APIEntityResponse<JoinRequest>>> Post([FromBody] JoinRequest request)
         {
             try
             {
-                while ((await _campaignManager.GetByID(campaign.Id)) != null)
-                {
-                    campaign.RegenerateId();
-                }
                 var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
                 var user = await _userManager.FindByIdAsync(id);
-                if (user != null && campaign.DungeonMasters == null)
+                if (user != null)
                 {
-                    campaign.DungeonMasters = new List<ApplicationUser>() { user};
+                    request.UserId = user.Id;
                 }
-                await _campaignManager.Insert(campaign);
-                var result = await _campaignManager.GetByID(campaign.Id);
+                await _requestManager.Insert(request);
+                var result = await _requestManager.GetByID(request.Id);
                 if (result != null)
                 {
-                    await _customClaimsService.AddCampaignClaims(user);
-                    return Ok(new APIEntityResponse<Campaign>()
+                    return Ok(new APIEntityResponse<JoinRequest>()
                     {
                         Success = true,
                         Data = result
@@ -107,10 +99,10 @@ namespace SADnD.Server.Controllers
                 }
                 else
                 {
-                    return Ok(new APIEntityResponse<Campaign>()
+                    return Ok(new APIEntityResponse<JoinRequest>()
                     {
                         Success = false,
-                        ErrorMessages = new List<string>() { "Could not find campaign after adding it" },
+                        ErrorMessages = new List<string>() { "Could not find request after adding it" },
                         Data = null
                     });
                 }
@@ -123,21 +115,24 @@ namespace SADnD.Server.Controllers
         }
 
         [HttpPut]
-        public async Task<ActionResult<APIEntityResponse<Campaign>>> Put([FromBody] Campaign campaign)
+        public async Task<ActionResult<APIEntityResponse<JoinRequest>>> Put([FromBody] JoinRequest request)
         {
             try
             {
                 var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
-                var user = await _userManager.FindByIdAsync(id);
-                if (!campaign.DungeonMasters.Any(x => x.Id == id))
+                if (!request.Campaign.DungeonMasters.Any(dm => dm.Id == id) && request.Accepted != null)
                 {
                     return StatusCode(403);
                 }
-                await _campaignManager.Update(campaign);
-                var result = await _campaignManager.GetByID(campaign.Id);
+                if (!request.Campaign.Players.Any(p => p.Id == id))
+                {
+                    return StatusCode(403);
+                }
+                await _requestManager.Update(request);
+                var result = (await _requestManager.GetByID(request.Id));
                 if (result != null)
                 {
-                    return Ok(new APIEntityResponse<Campaign>()
+                    return Ok(new APIEntityResponse<JoinRequest>()
                     {
                         Success = true,
                         Data = result
@@ -145,10 +140,10 @@ namespace SADnD.Server.Controllers
                 }
                 else
                 {
-                    return Ok(new APIEntityResponse<Campaign>()
+                    return Ok(new APIEntityResponse<JoinRequest>()
                     {
                         Success = false,
-                        ErrorMessages = new List<string>() { "Could not find campaign after updating it" },
+                        ErrorMessages = new List<string>() { "Could not find request after updating it" },
                         Data = null
                     });
                 }
@@ -160,15 +155,17 @@ namespace SADnD.Server.Controllers
             }
         }
 
-        [Authorize(Policy="IsDungeonMaster")]
         [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(string id)
+        public async Task<ActionResult> Delete(int id)
         {
             try
             {
-                if (await _campaignManager.GetByID(id) != null)
+                var userId = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
+                var user = await _userManager.FindByIdAsync(userId);
+                var request = await _requestManager.GetByID(id);
+                if (request != null && (request.User.Id == user.Id || request.Campaign.DungeonMasters.Any(dm => dm.Id == user.Id))) 
                 {
-                    var success = await _campaignManager.Delete(id);
+                    var success = await _requestManager.Delete(id);
                     if (success)
                     {
                         return NoContent();
