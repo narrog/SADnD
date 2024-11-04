@@ -35,19 +35,21 @@
             <div class="row">
                 <div class="col-12 col-md-4 p-1">
                     Klasse:<br />
-                    @foreach (var charClass in character.Classes)
-                    {
-                        <p>
-                            <InputSelect @bind-Value="@charClass.ClassId">
-                                <option selected value="0">Bitte auswählen</option>
-                                @foreach (var characterClass in allClasses) {
-                                    <option value="@characterClass.Id">@characterClass.Name</option>
-                                }
-                            </InputSelect>
-                            <InputNumber @bind-Value="@charClass.Level">
-                            </InputNumber>
-                            <button onclick="@AddClass">+</button>
-                        </p>                     
+                    @if (character.Classes != null) {
+                        @foreach (var charClass in character.Classes) {
+                            <p>
+                                <InputSelect @bind-Value="@charClass.ClassId">
+                                    <option selected value="0">Bitte auswählen</option>
+                                    @foreach (var characterClass in allClasses) {
+                                        <option value="@characterClass.Id">@characterClass.Name</option>
+                                    }
+                                </InputSelect>
+                                <InputNumber @bind-Value="@charClass.Level">
+                                </InputNumber>
+                                <button @onclick="@AddClass" title="Weitere Klasse hinzufügen">+</button>
+                                <button @onclick="() => RemoveClass(charClass)" title="Diese Klasse löschen">-</button>
+                            </p>
+                        }
                     }
                 </div>
             </div>
@@ -135,11 +137,17 @@
         try {
             CheckClassValid();
 
-            message = JsonConvert.SerializeObject(await characterManager.Insert(character));
-            Console.WriteLine($"message: {message}");
-
-            if(message != "null") {
-                await js.InvokeVoidAsync("history.back");
+            if (!showClassError) { 
+                if (message != "null") {
+                    bool confirm = await js.InvokeAsync<bool>("confirm", "Speichern & zurück zur Übersicht?");
+                    if (confirm) {
+                        message = JsonConvert.SerializeObject(await characterManager.Insert(character));
+                        Console.WriteLine($"message: {message}");
+                        await js.InvokeVoidAsync("history.back");
+                    }
+                    else
+                        return;
+                }
             }
         }
         catch (Exception ex) {
@@ -156,20 +164,33 @@
             return;
     }
 
-    private void AddClass()
-    {
-        character.Classes.Add(new CharacterClass(){
-            CharacterId = character.Id, 
-            Level = 1
-        });
+    private void AddClass() {
+        if(character.Classes != null) {
+            character.Classes.Add(new CharacterClass() {
+                CharacterId = character.Id,
+                Level = 1
+            });
+        }
+    }
+    private void RemoveClass(CharacterClass charClass) {
+        if (character.Classes != null && character.Classes.Count > 1) {
+            if (character.Classes.First() != charClass) {
+                character.Classes.Remove(charClass);
+            }
+            return;
+        }
+        else {
+            js.InvokeVoidAsync("alert", "Diese Zeile kann nicht gelöscht werden");
+            return;
+        }
     }
 
     private void CheckClassValid() {
-        string jsonString = JsonConvert.SerializeObject(character.Classes);
-        List<CharacterClass> characterClasses = JsonConvert.DeserializeObject<List<CharacterClass>>(jsonString);
-
-        bool hasIdZero = characterClasses.Exists(c => c.Id == 0);
-
-        showClassError = hasIdZero ? true : false;
+        if (character.Classes != null && character.Classes.Any(c => c.ClassId == 0)) {
+            showClassError = true;
+        }
+        else {
+            showClassError = false;
+        }
     }
 }
