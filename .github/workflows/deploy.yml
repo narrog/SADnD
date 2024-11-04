@@ -16,7 +16,7 @@ jobs:
       - name: Compress project
         run: |
           touch project.tar.gz
-          tar -czf project.tar.gz . --exclude=project.tar.gz
+          tar -czf project.tar.gz --exclude=project.tar.gz . 
 
       - name: Copy files to server
         uses: appleboy/scp-action@v0.1.7
