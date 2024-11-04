@@ -20,7 +20,7 @@ services:
       - POSTGRES_USER=sadnd
       - POSTGRES_PASSWORD=sadnd
     volumes:
-      - /db:/var/lib/postgresql/data
+      - ./db:/var/lib/postgresql/data
     ports:
       - 5432:5432
   
@@ -28,9 +28,9 @@ services:
     image: nginx:latest
     container_name: SADnD.nginx
     volumes:
-      - /nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - /certbot/conf:/etc/letsencrypt
-      - /certbot/www:/var/www/cerbot
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/cerbot
     ports:
       - 80:80
       - 443:443
@@ -41,5 +41,5 @@ services:
     image: certbot/certbot
     container_name: SADnD.certbot
     volumes:
-      - /certbot/conf:/etc/letsencrypt
-      - /certbot/www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
