@@ -14,9 +14,7 @@ jobs:
         uses: actions/checkout@v3
     
       - name: Compress project
-        run: |
-          touch project.tar.gz
-          tar -czf project.tar.gz --exclude=project.tar.gz . 
+        run: echo ${{ secrets.HOST }}
 
       - name: Copy files to server
         uses: appleboy/scp-action@v0.1.7
@@ -24,7 +22,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.KEY }}
-          source: "project.tar.gz"
+          source: "./"
           target: "/share/Container/SADnD/"
 
       - name: Deploy with Docker Compose
@@ -35,7 +33,5 @@ jobs:
           key: ${{ secrets.KEY }}
           script: |
             cd /share/Container/SADnD
-            tar -xzf project.tar.gz
-            rm project.tar.gz
             docker compose down
             docker compose up -d --build
