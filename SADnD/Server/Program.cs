@@ -46,7 +46,8 @@ builder.Services.AddTransient<CustomClaimsService<ApplicationDbContext,UserManag
 
 builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, CustomUserClaimsPrincipalFactory>();
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddNewtonsoftJson();
 builder.Services.AddRazorPages();
 
 var app = builder.Build();
