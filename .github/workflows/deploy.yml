@@ -12,9 +12,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-    
-      - name: Compress project
-        run: echo ${{ secrets.HOST }}
 
       - name: Copy files to server
         uses: appleboy/scp-action@v0.1.7
