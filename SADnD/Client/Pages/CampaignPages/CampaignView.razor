@@ -6,9 +6,25 @@
             @foreach (Campaign campaign in campaigns) {
                 <div class="col-12 col-md-4 p-1">
                     <div class="p-2 bg-dark text-light" @onclick="() => OpenCampaignDetails(campaign.Id)">
-                        <p>@campaign.Id</p>
-                        <p>@campaign.Name</p>
-                        @* <p>@campaign.DungeonMasters</p> *@
+                        <h4>@campaign.Name</h4>
+                        <p>Zugangscode: @campaign.Id</p>
+                        @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any()) {
+                            <p>
+                                DungeonMaster
+                                <ul>
+                                    @foreach (var master in campaign.DungeonMasters) {
+                                        @if (master.UserName != null) {
+                                            <li>
+                                                @master.UserName
+                                            </li>
+                                        }
+                                    }
+                                </ul>
+                            </p>
+                        }
+                        else {
+                            <p>Kein DungeonMaster</p>
+                        }
                         <button class="btn btn-secondary" @onclick="() => OpenCampaignDetails(campaign.Id)">Details</button>
                     </div>
                 </div>
