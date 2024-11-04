@@ -31,7 +31,7 @@ namespace SADnD.Server.Controllers
             {
                 var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
                 var user = await _userManager.FindByIdAsync(id);
-                var result = await _requestManager.Get(x => x.Campaign.DungeonMasters.Any(dm => dm.Id == user.Id));
+                var result = await _requestManager.Get(x => x.Campaign.DungeonMasters.Any(dm => dm.Id == id) || x.UserId == id);
                 return Ok(new APIListOfEntityResponse<JoinRequest>()
                 {
                     Success = true,
@@ -50,7 +50,7 @@ namespace SADnD.Server.Controllers
         {
             try
             {
-                var result = (await _requestManager.GetByID(id));
+                var result = (await _requestManager.Get(x => x.Id == id,null,"Campaign,User")).FirstOrDefault();
                 if (result != null)
                 {
                     return Ok(new APIEntityResponse<JoinRequest>()
@@ -85,10 +85,10 @@ namespace SADnD.Server.Controllers
                 var user = await _userManager.FindByIdAsync(id);
                 if (user != null)
                 {
-                    request.User = user;
+                    request.UserId = user.Id;
                 }
                 await _requestManager.Insert(request);
-                var result = (await _requestManager.Get(x => x.Id == request.Id)).FirstOrDefault();
+                var result = await _requestManager.GetByID(request.Id);
                 if (result != null)
                 {
                     return Ok(new APIEntityResponse<JoinRequest>()
@@ -119,6 +119,15 @@ namespace SADnD.Server.Controllers
         {
             try
             {
+                var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
+                if (!request.Campaign.DungeonMasters.Any(dm => dm.Id == id) && request.Accepted != null)
+                {
+                    return StatusCode(403);
+                }
+                if (!request.Campaign.Players.Any(p => p.Id == id))
+                {
+                    return StatusCode(403);
+                }
                 await _requestManager.Update(request);
                 var result = (await _requestManager.GetByID(request.Id));
                 if (result != null)
