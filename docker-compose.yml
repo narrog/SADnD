@@ -42,3 +42,7 @@ services:
     volumes:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
+
+networks:
+  defaults:
+    name: SADnD.net  
