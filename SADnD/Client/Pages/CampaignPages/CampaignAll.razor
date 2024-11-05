@@ -1,13 +1,30 @@
 ﻿@page "/all-campaigns"
 
 @attribute [Authorize]
-
+@inject JoinRequestManager joinRequestManager
 
 <h3>Deine Kampagnen</h3>
 
 <CampaignView ShowAll="true"/>
 
+@if (joinRequests != null) {
+    <div class="mt-5">
+        <h4>Offene Anfragen</h4>
+        <ul>
+            @foreach (var request in joinRequests) {
+                <li>@request.CampaignId - @if (request.Campaign != null) {
+                        @request.Campaign.Name
+                    }</li>
+            }
+        </ul>
+    </div>   
+}
+
 
 @code {
+    public IEnumerable<JoinRequest>? joinRequests;
 
+    protected override async Task OnInitializedAsync() {
+        joinRequests = await joinRequestManager.GetAll();
+    }
 }
