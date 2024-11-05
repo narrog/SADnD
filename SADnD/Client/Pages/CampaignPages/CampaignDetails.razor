@@ -1,7 +1,9 @@
 ﻿@page "/campaign-details/{id}"
 @attribute [Authorize]
 @inject CampaignManager campaignManager
+@inject JoinRequestManager joinRequestManager
 @inject IJSRuntime js
+@using Newtonsoft.Json
 
 <h3>Kampagne "@campaign.Name" - Details</h3>
 
@@ -10,13 +12,13 @@
         @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any()) {
             <p>
                 <ul>
-                        @foreach (var master in campaign.DungeonMasters) {
-                            @if (master.UserName != null) {
-                            <li>
-                                    @master.UserName
-                            </li>
-                            }
+                    @foreach (var master in campaign.DungeonMasters) {
+                        @if (master.UserName != null) {
+                        <li>
+                                @master.UserName
+                        </li>
                         }
+                    }
                 </ul>
             </p>
         }
@@ -24,6 +26,20 @@
             <p>Kein DungeonMaster gefunden</p>
         }
     <p><strong>Zugangscode: </strong>@campaign.Id</p>
+    <p><strong>Offene Anfragen</strong>
+        @if(joinRequests != null && joinRequests.Any()) {
+            <ul>
+                @foreach(var request in joinRequests) {
+                    <li>
+                        @if (request.User != null) {
+                            @request.User.UserName;
+                        }
+                    </li>
+                    
+                }
+            </ul>
+        }
+    </p>
 </div>
 <div>
     <a class="btn btn-outline-primary me-2" onclick="history.back();">Zurück</a>
@@ -33,9 +49,12 @@
 @code {
     [Parameter] public required string Id { get; set; }
     private Campaign campaign = new Campaign();
+    private IEnumerable<JoinRequest>? joinRequests;
 
     protected override async Task OnInitializedAsync() {
         campaign = await campaignManager.GetByID(Id);
+        joinRequests = await joinRequestManager.GetAll();
+        joinRequests = joinRequests.Where(x => x.CampaignId == Id);
     }
 
     private async Task DeleteCampaign() {

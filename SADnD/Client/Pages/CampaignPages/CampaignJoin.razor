@@ -26,11 +26,16 @@
 </div>
 
 @code {
+    [CascadingParameter]
+    public CascadingAppState appState { get; set; }
     private JoinRequest joinRequest = new();
     private IEnumerable<Campaign>? allCampaigns;
     private bool campaignValidity = false;
     string UIMessage = "";
 
+    protected override async Task OnInitializedAsync() {
+        joinRequest.UserId = appState.UserId;
+    }
 
     private async void Post() {
         try {

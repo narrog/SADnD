@@ -31,7 +31,7 @@ namespace SADnD.Server.Controllers
             {
                 var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
                 var user = await _userManager.FindByIdAsync(id);
-                var result = await _requestManager.Get(x => x.Campaign.DungeonMasters.Any(dm => dm.Id == id) || x.UserId == id);
+                var result = await _requestManager.Get(x => x.Campaign.DungeonMasters.Any(dm => dm.Id == id) || x.UserId == id,null,"Campaign,User");
                 return Ok(new APIListOfEntityResponse<JoinRequest>()
                 {
                     Success = true,
