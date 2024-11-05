@@ -4,7 +4,10 @@
       "commandName": "DockerCompose",
       "commandVersion": "1.0",
       "serviceActions": {
-        "sadnd.server": "StartDebugging"
+        "sadnd.server": "StartDebugging",
+        "sadnd.certbot": "DoNotStart",
+        "sadnd.database": "StartWithoutDebugging",
+        "sadnd.nginx": "DoNotStart"
       }
     }
   }

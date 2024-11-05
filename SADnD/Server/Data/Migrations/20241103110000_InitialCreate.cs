@@ -4,10 +4,12 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace SADnD.Server.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreateWithPostgreSQL : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -56,7 +58,7 @@ namespace SADnD.Server.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false)
+                    Name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -118,6 +120,19 @@ namespace SADnD.Server.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PersistedGrants", x => x.Key);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Races",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Races", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -301,6 +316,131 @@ namespace SADnD.Server.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Characters",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    RaceId = table.Column<int>(type: "integer", nullable: false),
+                    Hitpoints = table.Column<int>(type: "integer", nullable: false),
+                    TemporaryHitpoints = table.Column<int>(type: "integer", nullable: false),
+                    DeathRoles = table.Column<bool[]>(type: "boolean[]", nullable: true),
+                    Background = table.Column<string>(type: "text", nullable: true),
+                    Age = table.Column<int>(type: "integer", nullable: true),
+                    SizeCategory = table.Column<char>(type: "character(1)", nullable: true),
+                    Size = table.Column<float>(type: "real", nullable: true),
+                    Weight = table.Column<float>(type: "real", nullable: true),
+                    Sex = table.Column<string>(type: "text", nullable: true),
+                    Alignment = table.Column<string>(type: "text", nullable: true),
+                    UserId = table.Column<string>(type: "text", nullable: false),
+                    CampaignId = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Characters", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Characters_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Characters_Campaigns_CampaignId",
+                        column: x => x.CampaignId,
+                        principalTable: "Campaigns",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Characters_Races_RaceId",
+                        column: x => x.RaceId,
+                        principalTable: "Races",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Classes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    CharacterId = table.Column<int>(type: "integer", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Classes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Classes_Characters_CharacterId",
+                        column: x => x.CharacterId,
+                        principalTable: "Characters",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CharactersClasses",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Level = table.Column<int>(type: "integer", nullable: false),
+                    CharacterId = table.Column<int>(type: "integer", nullable: false),
+                    ClassId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CharactersClasses", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CharactersClasses_Characters_CharacterId",
+                        column: x => x.CharacterId,
+                        principalTable: "Characters",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CharactersClasses_Classes_ClassId",
+                        column: x => x.ClassId,
+                        principalTable: "Classes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "Classes",
+                columns: new[] { "Id", "CharacterId", "Name" },
+                values: new object[,]
+                {
+                    { 1, null, "Barbar" },
+                    { 2, null, "Barde" },
+                    { 3, null, "Druide" },
+                    { 4, null, "Hexenmeister" },
+                    { 5, null, "Kämpfer" },
+                    { 6, null, "Kleriker" },
+                    { 7, null, "Magier" },
+                    { 8, null, "Mönch" },
+                    { 9, null, "Paladin" },
+                    { 10, null, "Schurke" },
+                    { 11, null, "Waldläufer" },
+                    { 12, null, "Zauberer" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Races",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { 1, "Zwerg" },
+                    { 2, "Elf" },
+                    { 3, "Halbling" },
+                    { 4, "Mensch" },
+                    { 5, "Aasimar" },
+                    { 6, "Drachenblütiger" },
+                    { 7, "Gnom" },
+                    { 8, "Goliath" },
+                    { 9, "Ork" },
+                    { 10, "Tiefling" }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -353,6 +493,36 @@ namespace SADnD.Server.Migrations
                 table: "Campaigns",
                 column: "Id",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Characters_CampaignId",
+                table: "Characters",
+                column: "CampaignId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Characters_RaceId",
+                table: "Characters",
+                column: "RaceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Characters_UserId",
+                table: "Characters",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CharactersClasses_CharacterId",
+                table: "CharactersClasses",
+                column: "CharacterId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CharactersClasses_ClassId",
+                table: "CharactersClasses",
+                column: "ClassId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Classes_CharacterId",
+                table: "Classes",
+                column: "CharacterId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_DeviceCodes_DeviceCode",
@@ -426,6 +596,9 @@ namespace SADnD.Server.Migrations
                 name: "CampaignPlayers");
 
             migrationBuilder.DropTable(
+                name: "CharactersClasses");
+
+            migrationBuilder.DropTable(
                 name: "DeviceCodes");
 
             migrationBuilder.DropTable(
@@ -441,10 +614,19 @@ namespace SADnD.Server.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
+                name: "Classes");
+
+            migrationBuilder.DropTable(
+                name: "Characters");
+
+            migrationBuilder.DropTable(
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "Campaigns");
+
+            migrationBuilder.DropTable(
+                name: "Races");
         }
     }
 }

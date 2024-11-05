@@ -5,6 +5,7 @@
 
 #Ignore docker container files
 .containers
+db/
 
 # User-specific files
 *.rsuser

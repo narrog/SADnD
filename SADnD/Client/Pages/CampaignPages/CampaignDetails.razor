@@ -6,7 +6,23 @@
 <h3>Kampagne "@campaign.Name" - Details</h3>
 
 <div class="container-fluid mt-3">
-    <p><strong>Dungeonmaster: </strong>@campaign.DungeonMasters</p>
+    <strong>Dungeonmaster: </strong><br />
+        @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any()) {
+            <p>
+                <ul>
+                        @foreach (var master in campaign.DungeonMasters) {
+                            @if (master.UserName != null) {
+                            <li>
+                                    @master.UserName
+                            </li>
+                            }
+                        }
+                </ul>
+            </p>
+        }
+        else {
+            <p>Kein DungeonMaster gefunden</p>
+        }
     <p><strong>Zugangscode: </strong>@campaign.Id</p>
 </div>
 <div>

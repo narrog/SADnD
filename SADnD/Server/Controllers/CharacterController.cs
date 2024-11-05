@@ -12,30 +12,26 @@ namespace SADnD.Server.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class CampaignController : ControllerBase
+    public class CharacterController : ControllerBase
     {
         UserManager<ApplicationUser> _userManager;
-        CustomClaimsService<ApplicationDbContext,UserManager<ApplicationUser>> _customClaimsService;
-        EFRepositoryGeneric<Campaign,ApplicationDbContext> _campaignManager;
-        public CampaignController(
+        CharacterManager _characterManager;
+        public CharacterController(
             UserManager<ApplicationUser> userManager, 
-            CustomClaimsService<ApplicationDbContext, UserManager<ApplicationUser>> customClaimsService, 
-            EFRepositoryGeneric<Campaign,ApplicationDbContext> campaignManager)
+            CharacterManager campaignManager)
         {
             _userManager = userManager;
-            _customClaimsService = customClaimsService;
-            _campaignManager = campaignManager;
+            _characterManager = campaignManager;
         }
 
         [HttpGet]
-        public async Task<ActionResult<APIListOfEntityResponse<Campaign>>> GetAllCampaigns()
+        public async Task<ActionResult<APIListOfEntityResponse<Character>>> GetAllCharacters()
         {
             try
             {
                 var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
-                var user = await _userManager.FindByIdAsync(id);
-                var result = await _campaignManager.Get(x => x.DungeonMasters.Any(dm  => dm.Id == user.Id) || x.Players.Any(p => p.Id == user.Id),null,"DungeonMasters,Players");
-                return Ok(new APIListOfEntityResponse<Campaign>()
+                var result = await _characterManager.Get(x => x.UserId == id,null,"Race,Classes.Class");
+                return Ok(new APIListOfEntityResponse<Character>()
                 {
                     Success = true,
                     Data = result
@@ -49,25 +45,25 @@ namespace SADnD.Server.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<APIEntityResponse<Campaign>>> GetByCampaignId(string id)
+        public async Task<ActionResult<APIEntityResponse<Character>>> GetByCharacterId(int id)
         {
             try
             {
-                var result = (await _campaignManager.Get(x => x.Id == id.ToUpper(),null,"DungeonMasters,Players")).FirstOrDefault();
+                var result = await _characterManager.Get(x => x.Id == id, null, "Race,Classes.Class");
                 if (result != null)
                 {
-                    return Ok(new APIEntityResponse<Campaign>()
+                    return Ok(new APIEntityResponse<Character>()
                     {
                         Success = true,
-                        Data = result
+                        Data = result.FirstOrDefault()
                     });
                 }
                 else
                 {
-                    return Ok(new APIEntityResponse<Campaign>()
+                    return Ok(new APIEntityResponse<Character>()
                     {
                         Success = false,
-                        ErrorMessages = new List<string>() { "Campaign Not Found" },
+                        ErrorMessages = new List<string>() { "Character Not Found" },
                         Data = null
                     });
                 }
@@ -80,26 +76,26 @@ namespace SADnD.Server.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<APIEntityResponse<Campaign>>> Post([FromBody] Campaign campaign)
+        public async Task<ActionResult<APIEntityResponse<Character>>> Post([FromBody] Character character)
         {
             try
             {
-                while ((await _campaignManager.GetByID(campaign.Id)) != null)
-                {
-                    campaign.RegenerateId();
-                }
                 var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
                 var user = await _userManager.FindByIdAsync(id);
-                if (user != null && campaign.DungeonMasters == null)
+                if (user != null)
                 {
-                    campaign.DungeonMasters = new List<ApplicationUser>() { user};
+                    // TODO: Look into writing these checks as policy
+                    if (user.Id != character.UserId)
+                    {
+                        return StatusCode(403);
+                    }
+                    character.UserId = user.Id;
                 }
-                await _campaignManager.Insert(campaign);
-                var result = await _campaignManager.GetByID(campaign.Id);
+                await _characterManager.Insert(character);
+                var result = await _characterManager.GetByID(character.Id);
                 if (result != null)
                 {
-                    await _customClaimsService.AddCampaignClaims(user);
-                    return Ok(new APIEntityResponse<Campaign>()
+                    return Ok(new APIEntityResponse<Character>()
                     {
                         Success = true,
                         Data = result
@@ -107,10 +103,10 @@ namespace SADnD.Server.Controllers
                 }
                 else
                 {
-                    return Ok(new APIEntityResponse<Campaign>()
+                    return Ok(new APIEntityResponse<Character>()
                     {
                         Success = false,
-                        ErrorMessages = new List<string>() { "Could not find campaign after adding it" },
+                        ErrorMessages = new List<string>() { "Could not find character after adding it" },
                         Data = null
                     });
                 }
@@ -123,21 +119,25 @@ namespace SADnD.Server.Controllers
         }
 
         [HttpPut]
-        public async Task<ActionResult<APIEntityResponse<Campaign>>> Put([FromBody] Campaign campaign)
+        public async Task<ActionResult<APIEntityResponse<Character>>> Put([FromBody] Character character)
         {
             try
             {
                 var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
                 var user = await _userManager.FindByIdAsync(id);
-                if (!campaign.DungeonMasters.Any(x => x.Id == id))
+                if (user != null)
                 {
-                    return StatusCode(403);
+                    if (user.Id != character.UserId)
+                    {
+                        return StatusCode(403);
+                    }
+                    character.UserId = user.Id;
                 }
-                await _campaignManager.Update(campaign);
-                var result = await _campaignManager.GetByID(campaign.Id);
+                await _characterManager.Update(character);
+                var result = await _characterManager.GetByID(character.Id);
                 if (result != null)
                 {
-                    return Ok(new APIEntityResponse<Campaign>()
+                    return Ok(new APIEntityResponse<Character>()
                     {
                         Success = true,
                         Data = result
@@ -145,10 +145,10 @@ namespace SADnD.Server.Controllers
                 }
                 else
                 {
-                    return Ok(new APIEntityResponse<Campaign>()
+                    return Ok(new APIEntityResponse<Character>()
                     {
                         Success = false,
-                        ErrorMessages = new List<string>() { "Could not find campaign after updating it" },
+                        ErrorMessages = new List<string>() { "Could not find character after updating it" },
                         Data = null
                     });
                 }
@@ -160,15 +160,16 @@ namespace SADnD.Server.Controllers
             }
         }
 
-        [Authorize(Policy="IsDungeonMaster")]
         [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(string id)
+        public async Task<ActionResult> Delete(int id)
         {
             try
             {
-                if (await _campaignManager.GetByID(id) != null)
+                var userId = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
+                var character = await _characterManager.GetByID(id);
+                if (character != null && character.UserId == userId) 
                 {
-                    var success = await _campaignManager.Delete(id);
+                    var success = await _characterManager.Delete(id);
                     if (success)
                     {
                         return NoContent();

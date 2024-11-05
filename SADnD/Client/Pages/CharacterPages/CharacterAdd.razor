@@ -1,0 +1,196 @@
+﻿@page "/new-character"
+
+@attribute [Authorize]
+@using Newtonsoft.Json
+@using System.Security.Claims
+@inject IJSRuntime js
+
+@inject CharacterManager characterManager
+@inject ClassManager classManager
+@inject RaceManager raceManager
+
+<h3>Charakter hinzufügen</h3>
+
+@if (allRaces != null && allClasses != null) {
+    <EditForm Model="@character" OnValidSubmit="@Post">
+        <div class="container-fluid mt-3">
+            <DataAnnotationsValidator />
+            <div class="row">
+                
+                <div class="col-12 col-md-8 p-1">
+                    Name:<br /><InputText @bind-Value="@character.Name"></InputText>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 col-md-4 p-1">
+                    Rasse:<br />
+                    <InputSelect @bind-Value="@character.RaceId">
+                        <option selected value="0">Bitte auswählen</option>
+                        @foreach (var race in allRaces) {
+                            <option value="@race.Id">@race.Name</option>
+                        }
+                    </InputSelect>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 col-md-4 p-1">
+                    Klasse:<br />
+                    @if (character.Classes != null) {
+                        @foreach (var charClass in character.Classes) {
+                            <p>
+                                <InputSelect @bind-Value="@charClass.ClassId">
+                                    <option selected value="0">Bitte auswählen</option>
+                                    @foreach (var characterClass in allClasses) {
+                                        <option value="@characterClass.Id">@characterClass.Name</option>
+                                    }
+                                </InputSelect>
+                                <InputNumber @bind-Value="@charClass.Level">
+                                </InputNumber>
+                                <button @onclick="@AddClass" title="Weitere Klasse hinzufügen">+</button>
+                                <button @onclick="() => RemoveClass(charClass)" title="Diese Klasse löschen">-</button>
+                            </p>
+                        }
+                    }
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6 col-md-4 col-lg-2 p-1">
+                    Alter:<br />
+                    <InputNumber @bind-Value="@character.Age"></InputNumber>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2 p-1">
+                    Grössen-Kategorie:<br />
+                    <InputText @bind-Value="@SizeCategoryString"></InputText>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2 p-1">
+                    Grösse:<br />
+                    <InputNumber @bind-Value="@character.Size"></InputNumber>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2 p-1">
+                    Gewicht:<br />
+                    <InputNumber @bind-Value="@character.Weight"></InputNumber>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2 p-1">
+                    Geschlecht:<br />
+                    <InputText @bind-Value="@character.Sex"></InputText>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2 p-1">
+                    Alignment:<br />
+                    <InputText @bind-Value="@character.Alignment"></InputText>
+                </div>
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary me-2">Speichern</button>
+                    <button class="btn btn-secondary" type="button" @onclick="CancelButtonPressed">Abbrechen</button>
+                </div>
+            </div>
+
+            <ValidationSummary class="mt-3" />
+            @if (showClassError) {
+                <ul class="mt-3">
+                    <li class="validation-message">
+                        Klasse muss gewählt werden
+                    </li>
+                </ul>
+            }
+        </div>
+    </EditForm>
+
+}
+<div class="mt-3">
+    @UIMessage
+</div>
+
+@code {
+    [CascadingParameter]
+    public CascadingAppState appState { get; set; }
+    private Character character = new Character() { 
+        Classes = new List<CharacterClass>() { 
+            new CharacterClass() { Level = 1 } 
+        }
+    };
+    private IEnumerable<Class> allClasses;
+    private IEnumerable<Race> allRaces;
+    string UIMessage = "";
+    string controllerName = "character";
+    string message = "";
+
+    bool showClassError = false;
+
+    private string? SizeCategoryString {
+        get => character.SizeCategory.ToString();
+        set {
+            if (!string.IsNullOrEmpty(value)) {
+                character.SizeCategory = value[0]; // Nimmt das erste Zeichen
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync() {
+        allClasses = await classManager.GetAll();
+        allRaces = await raceManager.GetAll();
+
+        character.UserId = appState.UserId;
+    }
+
+    private async void Post() {
+
+        try {
+            CheckClassValid();
+
+            if (!showClassError) { 
+                if (message != "null") {
+                    bool confirm = await js.InvokeAsync<bool>("confirm", "Speichern & zurück zur Übersicht?");
+                    if (confirm) {
+                        message = JsonConvert.SerializeObject(await characterManager.Insert(character));
+                        Console.WriteLine($"message: {message}");
+                        await js.InvokeVoidAsync("history.back");
+                    }
+                    else
+                        return;
+                }
+            }
+        }
+        catch (Exception ex) {
+            UIMessage = ex.Message;
+            Console.WriteLine($"{ex.Message}");
+            StateHasChanged();
+        }
+    }
+    private async void CancelButtonPressed() {
+        bool confirm = await js.InvokeAsync<bool>("confirm", "Eingabe wirklich abbrechen");
+        if (confirm)
+            await js.InvokeVoidAsync("history.back");
+        else
+            return;
+    }
+
+    private void AddClass() {
+        if(character.Classes != null) {
+            character.Classes.Add(new CharacterClass() {
+                CharacterId = character.Id,
+                Level = 1
+            });
+        }
+    }
+    private void RemoveClass(CharacterClass charClass) {
+        if (character.Classes != null && character.Classes.Count > 1) {
+            if (character.Classes.First() != charClass) {
+                character.Classes.Remove(charClass);
+            }
+            return;
+        }
+        else {
+            js.InvokeVoidAsync("alert", "Diese Zeile kann nicht gelöscht werden");
+            return;
+        }
+    }
+
+    private void CheckClassValid() {
+        if (character.Classes != null && character.Classes.Any(c => c.ClassId == 0)) {
+            showClassError = true;
+        }
+        else {
+            showClassError = false;
+        }
+    }
+}
