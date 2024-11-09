@@ -55,29 +55,45 @@
             </div>
             <div class="row">
                 <div class="col-6 col-md-4 col-lg-2 p-1">
-                    Alter:<br />
-                    <InputNumber @bind-Value="@character.Age"></InputNumber>
+                    Geschlecht:<br />
+                    <InputSelect @bind-Value="@character.Sex">
+                        <option selected value="0">Bitte auswählen</option>
+                        @foreach (var item in ListOfGenders) {
+                            <option value="@item">@item</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2 p-1">
+                    Gesinnung:<br />
+                    <InputSelect @bind-Value="@character.Alignment">
+                        <option selected value="0">Bitte auswählen</option>
+                        @foreach (var item in ListOfAlignments) {
+                            <option value="@item">@item</option>
+                        }
+                    </InputSelect>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2 p-1">
                     Grössen-Kategorie:<br />
-                    <InputText @bind-Value="@SizeCategoryString"></InputText>
+                    <InputSelect @bind-Value="@character.SizeCategory">
+                        <option selected value="0">Bitte auswählen</option>
+                        @foreach (var item in ListOfSizeCategories) {
+                            <option value="@item">@item</option>
+                        }
+                    </InputSelect>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2 p-1">
                     Grösse:<br />
                     <InputNumber @bind-Value="@character.Size"></InputNumber>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2 p-1">
+                    Alter:<br />
+                    <InputNumber @bind-Value="@character.Age"></InputNumber>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2 p-1">
                     Gewicht:<br />
                     <InputNumber @bind-Value="@character.Weight"></InputNumber>
                 </div>
-                <div class="col-6 col-md-4 col-lg-2 p-1">
-                    Geschlecht:<br />
-                    <InputText @bind-Value="@character.Sex"></InputText>
-                </div>
-                <div class="col-6 col-md-4 col-lg-2 p-1">
-                    Alignment:<br />
-                    <InputText @bind-Value="@character.Alignment"></InputText>
-                </div>
+                
                 <div class="mt-3">
                     <button type="submit" class="btn btn-primary me-2">Speichern</button>
                     <button class="btn btn-secondary" type="button" @onclick="CancelButtonPressed">Abbrechen</button>
@@ -110,10 +126,32 @@
 @code {
     [CascadingParameter]
     public CascadingAppState appState { get; set; }
-    private Character character = new Character() { 
-        Classes = new List<CharacterClass>() { 
-            new CharacterClass() { Level = 1 } 
+    private Character character = new Character() {
+            Classes = new List<CharacterClass>() {
+            new CharacterClass() { Level = 1 }
         }
+    };
+    private List<string> ListOfGenders = new List<string> {
+        "männlich",
+        "weiblich",
+        "divers",
+        "neutral"
+    };
+    private List<string> ListOfAlignments = new List<string> {
+        "Rechtschaffen Gut", 
+        "Neutral Gut", 
+        "Chaotisch Gut", 
+        "Rechtschaffen Neutral", 
+        "Neutral", 
+        "Chaotisch Neutral", 
+        "Rechtschaffen Böse", 
+        "Neutral Böse", 
+        "Chaotisch Böse"
+    };
+    private List<Char> ListOfSizeCategories = new List<Char> {
+        'S',
+        'M',
+        'L'
     };
     private IEnumerable<Class> allClasses;
     private IEnumerable<Race> allRaces;
