@@ -10,21 +10,42 @@
 @if (joinRequests != null) {
     <div class="mt-5">
         <h4>Offene Anfragen</h4>
-        <ul>
-            @foreach (var request in joinRequests) {
-                <li>@request.CampaignId - @if (request.Campaign != null) {
-                        @request.Campaign.Name
-                    }</li>
-            }
-        </ul>
+        <table class="table table-sm table-hover table-striped align-middle">
+            <tbody>
+                @foreach (var request in joinRequests) {
+                    <tr>
+                        <td>@request.CampaignId</td>
+
+                        <td>
+                            <button class="btn btn-outline-danger me-2" @onclick="() => JoinRequestCancel(request)">Abbrechen</button>
+                        </td>
+                        @if (!string.IsNullOrEmpty(requestMessage)) {
+                            <td>
+                                @requestMessage
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+
     </div>   
 }
 
 
 @code {
     public IEnumerable<JoinRequest>? joinRequests;
+    private string requestMessage = "";
 
     protected override async Task OnInitializedAsync() {
         joinRequests = await joinRequestManager.GetAll();
+    }
+
+    private async void JoinRequestCancel(JoinRequest joinRequest) {
+        if (joinRequest != null) {
+            //await joinRequestManager.Delete(joinRequest.Id);
+            requestMessage = "Funktion wird später implementiert";
+        }
+        StateHasChanged();
     }
 }

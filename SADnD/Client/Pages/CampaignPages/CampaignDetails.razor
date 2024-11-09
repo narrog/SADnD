@@ -28,33 +28,68 @@
     <p><strong>Zugangscode: </strong>@campaign.Id</p>
     <p><strong>Offene Anfragen</strong>
         @if(joinRequests != null && joinRequests.Any()) {
-            <ul>
-                @foreach(var request in joinRequests) {
-                    <li>
-                        @if (request.User != null) {
-                            @request.User.UserName;
-                        }
-                    </li>
-                    
-                }
-            </ul>
+            <table class="table table-sm table-hover table-striped align-middle">
+                <tbody>
+                    @foreach (var request in joinRequests) {
+                        <tr>
+                            @if (request.User != null) {
+                                <td>@request.User.UserName</td>
+                            }
+                            <td>
+                                <button class="btn btn-outline-primary me-2" @onclick="() => JoinRequestAccept(request)">Annehmen</button>
+                                <button class="btn btn-outline-danger me-2" @onclick="() => JoinRequestReject(request)">Ablehnen</button>
+                            </td>
+                            <td>
+                                @requestMessage
+                            </td>
+
+                        </tr>
+
+                    }
+                </tbody>
+                
+            </table>
         }
     </p>
 </div>
-<div>
-    <a class="btn btn-outline-primary me-2" onclick="history.back();">Zurück</a>
-    <button class="btn btn-outline-danger" @onclick="DeleteCampaign">Löschen</button>
+<div class="row my-4 pt-4 border-top">
+    <div>
+        <a class="btn btn-secondary me-2" onclick="history.back();">Zurück</a>
+        <button class="btn btn-danger" @onclick="DeleteCampaign">Löschen</button>
+    </div>
+    
 </div>
+
 
 @code {
     [Parameter] public required string Id { get; set; }
     private Campaign campaign = new Campaign();
     private IEnumerable<JoinRequest>? joinRequests;
+    private string requestMessage = "";
 
     protected override async Task OnInitializedAsync() {
         campaign = await campaignManager.GetByID(Id);
         joinRequests = await joinRequestManager.GetAll();
-        joinRequests = joinRequests.Where(x => x.CampaignId == Id);
+        joinRequests = joinRequests.Where(x => x.CampaignId == Id && x.Accepted == null);
+    }
+
+    private async Task JoinRequestAccept(JoinRequest joinRequest) {
+        //JoinRequest joinRequest = await joinRequestManager.GetByID(id);
+
+        if(joinRequest != null) {
+            //joinRequest.Accepted = DateTime.Now;
+            //await joinRequestManager.Update(joinRequest);
+            requestMessage = "Funktion wird später implementiert";
+        }
+        StateHasChanged();
+    }
+
+    private async void JoinRequestReject(JoinRequest joinRequest) {
+        if (joinRequest != null) {
+            //await joinRequestManager.Delete(joinRequest.Id);
+            requestMessage = "Funktion wird später implementiert";
+        }
+        StateHasChanged();
     }
 
     private async Task DeleteCampaign() {
