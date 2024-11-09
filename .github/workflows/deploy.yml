@@ -30,5 +30,4 @@ jobs:
           key: ${{ secrets.KEY }}
           script: |
             cd /share/Container/SADnD
-            docker compose down
-            docker compose up -d --build
+            ./buildRestart.sh
