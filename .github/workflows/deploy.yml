@@ -30,4 +30,4 @@ jobs:
           password: ${{ secrets.PASS }}
           script: |
             cd /share/Container/SADnD
-            sudo ./buildRestart.sh
+            echo ${{ secrets.PASS }} | sudo -S ./buildRestart.sh
