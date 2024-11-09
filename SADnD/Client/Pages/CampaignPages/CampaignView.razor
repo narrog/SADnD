@@ -1,4 +1,6 @@
 ﻿@inject CampaignManager campaignManager
+@inject JoinRequestManager joinRequestManager
+@inject IJSRuntime js
 
 <div class="container-fluid mt-3">
     <div class="row">
@@ -39,17 +41,49 @@
         }
     </div>
 </div>
+<div class="container-fluid mt-3">
+    @if (joinRequests != null) {
+        <div class="row mt-5">
+            <h4>Offene Anfragen</h4>
+            <table class="table table-sm table-hover table-striped align-middle">
+                <tbody>
+                    @foreach (var request in joinRequests) {
+                        <tr>
+                            <td>@request.CampaignId</td>
+                            @if (request.User != null) {
+                                <td>@request.User.UserName</td>
+                            }
+                            <td>
+                                
+                                @if(request.UserId == appState.UserId) {
+                                    <button class="btn btn-outline-danger me-2" @onclick="() => JoinRequestReject(request)">Abbrechen</button>
+                                }
+                                else {
+                                    <button class="btn btn-outline-danger me-2" @onclick="() => JoinRequestReject(request)">Ablehnen</button>
+                                    <button class="btn btn-outline-primary me-2" @onclick="() => JoinRequestAccept(request)">Annehmen</button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
 
+        </div>
+    }
+</div>
 
 
 @code {
+    [CascadingParameter]
+    public CascadingAppState appState { get; set; }
     [Parameter] public bool ShowAll { get; set; }
     string controllerName = "campaign";
     private IEnumerable<Campaign>? campaigns;
-
+    public IEnumerable<JoinRequest>? joinRequests;
 
     protected override async Task OnInitializedAsync() {
         await GetAllCampaigns();
+        await GetJoinRequests();
         if (campaigns != null) {
             if (!ShowAll) {
                 campaigns = campaigns.Count() < 3 ? campaigns.Take(campaigns.Count()) : campaigns.Take(3);
@@ -61,8 +95,31 @@
     private async Task GetAllCampaigns() {
         campaigns = await campaignManager.GetAll();
     }
+    private async Task GetJoinRequests() {
+        joinRequests = (await joinRequestManager.GetAll()).OrderBy(x => x.CampaignId);
+    }
 
     private void OpenCampaignDetails(string id) {
         navManager.NavigateTo($"campaign-details/{id}");
     }
+
+    private async void JoinRequestReject(JoinRequest joinRequest) {
+        if (joinRequest != null) {
+            await joinRequestManager.Delete(joinRequest.Id);
+            await js.InvokeVoidAsync("alert", "Beitrittsanfrage entfernt");
+            joinRequests = await joinRequestManager.GetAll();
+        }
+        StateHasChanged();
+    }
+    private async Task JoinRequestAccept(JoinRequest joinRequest) {
+        //JoinRequest joinRequest = await joinRequestManager.GetByID(id);
+
+        if (joinRequest != null) {
+            //joinRequest.Accepted = DateTime.Now;
+            //await joinRequestManager.Update(joinRequest);
+            await js.InvokeVoidAsync("alert", "Funktion JoinRequestAccept wird später implementiert");
+        }
+        StateHasChanged();
+    }
+
 }
