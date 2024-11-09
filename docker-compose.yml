@@ -1,13 +1,17 @@
 services:
   sadnd.server:
     image: ${DOCKER_REGISTRY-}sadndserver
-    container_name: SADnD.api
+    container_name: SADnD.server
     build:
       context: .
       dockerfile: SADnD/Server/Dockerfile
+    user: root
+    environment:
+      - ASPNETCORE_URLS=https://+443
     ports:
-      - 80:80
-      - 443:443
+      - 5000:443
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
     depends_on:
       - sadnd.database
 
