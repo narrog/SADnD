@@ -18,7 +18,7 @@ jobs:
         with: 
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
-          key: ${{ secrets.KEY }}
+          password: ${{ secrets.PASS }}
           source: "./"
           target: "/share/Container/SADnD/"
 
@@ -27,7 +27,7 @@ jobs:
         with: 
           host: ${{ secrets.HOST}}
           username: ${{ secrets.USER }}
-          key: ${{ secrets.KEY }}
+          password: ${{ secrets.PASS }}
           script: |
             cd /share/Container/SADnD
-            ./buildRestart.sh
+            sudo ./buildRestart.sh

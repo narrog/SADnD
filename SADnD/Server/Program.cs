@@ -14,7 +14,7 @@ if (!builder.Environment.IsDevelopment())
     {
         serverOptions.ListenAnyIP(443, listenOptions =>
         {
-            listenOptions.UseHttps("/etc/ssl/certs/fullchain.pem", "/etc/ssl/certs/privkey.pem");
+            listenOptions.UseHttps("/etc/letsencrypt/live/sadnd.benpeter.ch/fullchain.pem", "/etc/letsencrypt/live/sadnd.benpeter.ch/privkey.pem");
         });
     });
 }
