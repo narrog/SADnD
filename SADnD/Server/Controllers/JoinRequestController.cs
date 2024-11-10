@@ -18,12 +18,15 @@ namespace SADnD.Server.Controllers
     {
         UserManager<ApplicationUser> _userManager;
         EFRepositoryGeneric<JoinRequest,ApplicationDbContext> _requestManager;
+        EFRepositoryGeneric<Campaign, ApplicationDbContext> _campaignManager;
         public JoinRequestController(
             UserManager<ApplicationUser> userManager,
-            EFRepositoryGeneric<JoinRequest, ApplicationDbContext> requestManager)
+            EFRepositoryGeneric<JoinRequest, ApplicationDbContext> requestManager,
+            EFRepositoryGeneric<Campaign, ApplicationDbContext> campaignManager)
         {
             _userManager = userManager;
             _requestManager = requestManager;
+            _campaignManager = campaignManager;
         }
 
         [HttpGet]
@@ -89,7 +92,12 @@ namespace SADnD.Server.Controllers
                     return StatusCode(403);
                 }
 
-                if (request.Campaign.Players.Any(p => p.Id == id) || request.Campaign.DungeonMasters.Any(dm =>  dm.Id == id))
+                var campaign = (await _campaignManager.Get(c => c.Id == request.CampaignId,null,"DungeonMasters,Players")).FirstOrDefault();
+                if (campaign == null)
+                {
+                    return StatusCode(404);
+                }
+                if (campaign.Players.Any(p => p.Id == id) || campaign.DungeonMasters.Any(dm =>  dm.Id == id))
                 {
                     return Ok(new APIEntityResponse<JoinRequest>()
                     {
@@ -173,9 +181,8 @@ namespace SADnD.Server.Controllers
             try
             {
                 var userId = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
-                var user = await _userManager.FindByIdAsync(userId);
-                var request = await _requestManager.GetByID(id);
-                if (request != null && (request.User.Id == user.Id || request.Campaign.DungeonMasters.Any(dm => dm.Id == user.Id))) 
+                var request = (await _requestManager.Get(r => r.Id == id,null,"User,Campaign.DungeonMasters")).FirstOrDefault();
+                if (request != null && (request.User.Id == userId || request.Campaign.DungeonMasters.Any(dm => dm.Id == userId))) 
                 {
                     var success = await _requestManager.Delete(id);
                     if (success)
