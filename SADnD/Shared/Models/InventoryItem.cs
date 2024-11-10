@@ -12,7 +12,8 @@ namespace SADnD.Shared.Models
         public int Id { get; set; }
         public string Name { get; set; }
         public float? Weight { get; set; }
-        public string CampaignId { get; set; }
-        public Campaign? Campaign { get; set; }
+        public string UserId { get; set; }
+        [JsonIgnore]
+        public ApplicationUser? User { get; set; }
     }
 }

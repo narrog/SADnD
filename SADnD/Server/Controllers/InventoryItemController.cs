@@ -30,12 +30,8 @@ namespace SADnD.Server.Controllers
         {
             try
             {
-                var campaignClaims = User.Claims.Where(c => c.Type == "Campaign").ToList();
-                var result = new List<InventoryItem>();
-                foreach (var claim in campaignClaims)
-                {
-                    result.AddRange(await _itemManager.Get(i => i.CampaignId == claim.Value));
-                }
+                var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
+                var result = await _itemManager.Get(i => i.UserId == id);
                 return Ok(new APIListOfEntityResponse<InventoryItem>()
                 {
                     Success = true,

@@ -613,11 +613,11 @@ namespace SADnD.Server.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("CampaignId")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -626,7 +626,7 @@ namespace SADnD.Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CampaignId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("InventoryItems");
                 });
@@ -644,7 +644,8 @@ namespace SADnD.Server.Migrations
 
                     b.Property<string>("CampaignId")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(8)
+                        .HasColumnType("character varying(8)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -872,13 +873,13 @@ namespace SADnD.Server.Migrations
 
             modelBuilder.Entity("SADnD.Shared.Models.InventoryItem", b =>
                 {
-                    b.HasOne("SADnD.Shared.Models.Campaign", "Campaign")
+                    b.HasOne("SADnD.Shared.Models.ApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("CampaignId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Campaign");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SADnD.Shared.Models.JoinRequest", b =>
