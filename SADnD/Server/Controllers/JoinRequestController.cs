@@ -2,8 +2,10 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using SADnD.Client.Pages.CampaignPages;
 using SADnD.Server.Areas.Identity;
 using SADnD.Server.Data;
+using SADnD.Shared;
 using SADnD.Shared.Models;
 using System.Security.Claims;
 
@@ -17,8 +19,8 @@ namespace SADnD.Server.Controllers
         UserManager<ApplicationUser> _userManager;
         EFRepositoryGeneric<JoinRequest,ApplicationDbContext> _requestManager;
         public JoinRequestController(
-            UserManager<ApplicationUser> userManager, 
-            EFRepositoryGeneric<JoinRequest,ApplicationDbContext> requestManager)
+            UserManager<ApplicationUser> userManager,
+            EFRepositoryGeneric<JoinRequest, ApplicationDbContext> requestManager)
         {
             _userManager = userManager;
             _requestManager = requestManager;
@@ -82,11 +84,21 @@ namespace SADnD.Server.Controllers
             try
             {
                 var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
-                var user = await _userManager.FindByIdAsync(id);
-                if (user != null)
+                if (request.UserId != id)
                 {
-                    request.UserId = user.Id;
+                    return StatusCode(403);
                 }
+
+                if (request.Campaign.Players.Any(p => p.Id == id) || request.Campaign.DungeonMasters.Any(dm =>  dm.Id == id))
+                {
+                    return Ok(new APIEntityResponse<JoinRequest>()
+                    {
+                        Success = false,
+                        ErrorMessages = new List<string> { "Sie sind bereits Mitglied dieser Kampagne" },
+                        Data = null
+                    });
+                }
+
                 await _requestManager.Insert(request);
                 var result = await _requestManager.GetByID(request.Id);
                 if (result != null)
