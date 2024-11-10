@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SADnD.Shared.Models
+namespace SADnD.Shared
 {
     public interface IRepository<TEntity> where TEntity : class
     {

@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using SADnD.Shared.Models;
+using SADnD.Shared;
 using System.Net;
 using System.Net.Http.Json;
 

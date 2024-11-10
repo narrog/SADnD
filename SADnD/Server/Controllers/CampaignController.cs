@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SADnD.Server.Areas.Identity;
 using SADnD.Server.Data;
+using SADnD.Shared;
 using SADnD.Shared.Models;
 using System.Security.Claims;
 
