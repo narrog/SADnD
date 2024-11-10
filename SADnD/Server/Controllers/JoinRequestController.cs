@@ -140,8 +140,8 @@ namespace SADnD.Server.Controllers
             try
             {
                 var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
-                var user = await _userManager.FindByIdAsync(id);
-                if (!request.Campaign.DungeonMasters.Any(dm => dm.Id == id) && request.Accepted != null)
+                var campaign = (await _campaignManager.Get(c => c.Id == request.CampaignId, null, "DungeonMasters,Players")).FirstOrDefault();
+                if (!campaign.DungeonMasters.Any(dm => dm.Id == id) && request.Accepted != null)
                 {
                     return StatusCode(404);
                 }
@@ -152,7 +152,7 @@ namespace SADnD.Server.Controllers
                 await _requestManager.Update(request);
                 if (request.Accepted != null)
                 {
-                    var campaign = (await _campaignManager.Get(c => c.Id == request.CampaignId, null, "Players")).FirstOrDefault();
+                    var user = await _userManager.FindByIdAsync(request.UserId);
                     campaign.Players.Add(user);
                     await _campaignManager.Update(campaign);
                 }
