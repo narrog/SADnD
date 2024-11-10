@@ -44,7 +44,7 @@ namespace SADnD.Server.Data
                 foreach (var includeProperty in includeProperties.Split
                     (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
                 {
-                        query = query.Include(includeProperty);
+                    query = query.Include(includeProperty);
                 }
                 if (orderBy != null)
                 {

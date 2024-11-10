@@ -54,7 +54,7 @@ namespace SADnD.Server.Controllers
         {
             try
             {
-                var result = (await _campaignManager.Get(x => x.Id == id.ToUpper(),null,"DungeonMasters,Players")).FirstOrDefault();
+                var result = (await _campaignManager.Get(x => x.Id == id.ToUpper(), null, "DungeonMasters,Players")).FirstOrDefault();
                 if (result != null)
                 {
                     return Ok(new APIEntityResponse<Campaign>()
@@ -91,14 +91,15 @@ namespace SADnD.Server.Controllers
                 }
                 var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
                 var user = await _userManager.FindByIdAsync(id);
-                if (user != null && campaign.DungeonMasters == null)
+                if (user != null)
                 {
                     campaign.DungeonMasters = new List<ApplicationUser>() { user};
                 }
                 await _campaignManager.Insert(campaign);
-                var result = await _campaignManager.GetByID(campaign.Id);
+                var result = (await _campaignManager.Get(x => x.Id == campaign.Id)).FirstOrDefault();
                 if (result != null)
                 {
+
                     await _customClaimsService.AddCampaignClaims(user);
                     return Ok(new APIEntityResponse<Campaign>()
                     {
@@ -128,14 +129,8 @@ namespace SADnD.Server.Controllers
         {
             try
             {
-                var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
-                var user = await _userManager.FindByIdAsync(id);
-                if (!campaign.DungeonMasters.Any(x => x.Id == id))
-                {
-                    return StatusCode(403);
-                }
                 await _campaignManager.Update(campaign);
-                var result = await _campaignManager.GetByID(campaign.Id);
+                var result = (await _campaignManager.Get(x => x.Id == campaign.Id)).FirstOrDefault();
                 if (result != null)
                 {
                     return Ok(new APIEntityResponse<Campaign>()
@@ -167,7 +162,7 @@ namespace SADnD.Server.Controllers
         {
             try
             {
-                if (await _campaignManager.GetByID(id) != null)
+                if (await _campaignManager.Get(x => x.Id == id) != null) //&& User.HasClaim("CampaignRole", $"{id}:DungeonMaster"))
                 {
                     var success = await _campaignManager.Delete(id);
                     if (success)

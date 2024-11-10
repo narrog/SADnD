@@ -124,7 +124,7 @@
 </div>
 
 @code {
-    [CascadingParameter]
+    [CascadingParameter] 
     public CascadingAppState appState { get; set; }
     private Character character = new Character() {
             Classes = new List<CharacterClass>() {
@@ -182,7 +182,7 @@
     private async void Post() {
 
         try {
-            CheckClassValid();
+            CheckClassValidity();
 
             if (!showClassError) { 
                 CheckLevelSum();
@@ -235,7 +235,7 @@
         }
     }
 
-    private void CheckClassValid() {
+    private void CheckClassValidity() {
         if (character.Classes != null && character.Classes.Any(c => c.ClassId == 0)) {
             showClassError = true;
         }

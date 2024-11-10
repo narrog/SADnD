@@ -1,0 +1,90 @@
+﻿@page "/join-campaign"
+
+@attribute [Authorize]
+@using Newtonsoft.Json
+@inject IJSRuntime js
+
+@inject JoinRequestManager joinRequestManager
+@inject CampaignManager campaignManager
+
+<h3>Kampagne beitreten</h3>
+
+<EditForm Model="@joinRequest" OnValidSubmit="@Post">
+    <DataAnnotationsValidator /> 
+    Zugangscode:
+    <InputText @bind-Value="@joinRequest.CampaignId" @oninput="@(e => joinRequest.CampaignId = e.Value.ToString().ToUpper())"></InputText>
+
+    <div class="mt-3">
+        <button type="submit" class="btn btn-primary me-2">Speichern</button>
+        <button class="btn btn-secondary" type="button" @onclick="CancelButtonPressed">Zurück</button>
+    </div>
+    <ValidationSummary class="mt-3" />
+</EditForm>
+
+<div class="mt-3">
+    @UIMessage
+</div>
+
+@code {
+    [CascadingParameter]
+    public CascadingAppState appState { get; set; }
+    private JoinRequest joinRequest = new();
+    private IEnumerable<JoinRequest>? allJoinRequests;
+    private bool doubleRequest;
+    string UIMessage = "";
+
+    // private IEnumerable<Campaign>? allCampaigns;
+    // private bool validRequest;
+
+    protected override async Task OnInitializedAsync() {
+        joinRequest.UserId = appState.UserId;
+
+        allJoinRequests = await joinRequestManager.GetAll();
+        // allCampaigns = await campaignManager.GetAll();              // <- Holt nur Kampagnen vom Benutzer ab, nicht alle
+    }
+
+    private async void Post() {
+        try {
+            CheckForDoubleRequests(joinRequest);
+            // CheckForValidRequest(joinRequest.CampaignId);
+            if (doubleRequest) {
+                await js.InvokeVoidAsync("alert", "Anfrage bereits ausstehend");
+            }
+            // else if (!validRequest) {
+            //     await js.InvokeVoidAsync("alert", "Zugangscode ungültig");
+            // }
+            else {
+                await joinRequestManager.Insert(joinRequest);
+                await js.InvokeVoidAsync("alert", "Anfrage versendet");
+                await js.InvokeVoidAsync("history.back");
+            }
+                
+        }
+        catch (Exception ex) {
+            UIMessage = $"Fehler: {ex.Message}";
+            StateHasChanged();
+        }
+    }
+
+    private void CheckForDoubleRequests(JoinRequest joinRequest) {
+        if (allJoinRequests == null) return;
+
+        doubleRequest = allJoinRequests.Any(jr => 
+            jr.UserId == joinRequest.UserId && 
+            jr.CampaignId == joinRequest.CampaignId);
+    }
+    
+    // private void CheckForValidRequest(string accessCode) {
+    //     if (allCampaigns == null) return;
+
+    //     validRequest = allCampaigns.Any(x => x.Id == accessCode);
+    // }
+
+    private async void CancelButtonPressed() {
+        bool confirm = await js.InvokeAsync<bool>("confirm", "Eingabe wirklich abbrechen");
+        if (confirm)
+            await js.InvokeVoidAsync("history.back");
+        else
+            return;
+    }
+}
