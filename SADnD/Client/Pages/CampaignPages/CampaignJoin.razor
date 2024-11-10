@@ -30,29 +30,29 @@
     public CascadingAppState appState { get; set; }
     private JoinRequest joinRequest = new();
     private IEnumerable<JoinRequest>? allJoinRequests;
-    private IEnumerable<Campaign>? allCampaigns;
-    private bool campaignValidity = false;
-    string UIMessage = "";
     private bool doubleRequest;
-    private bool validRequest;
+    string UIMessage = "";
+
+    // private IEnumerable<Campaign>? allCampaigns;
+    // private bool validRequest;
 
     protected override async Task OnInitializedAsync() {
         joinRequest.UserId = appState.UserId;
 
         allJoinRequests = await joinRequestManager.GetAll();
-        allCampaigns = await campaignManager.GetAll();
+        // allCampaigns = await campaignManager.GetAll();              // <- Holt nur Kampagnen vom Benutzer ab, nicht alle
     }
 
     private async void Post() {
         try {
             CheckForDoubleRequests(joinRequest);
-            CheckForValidRequest(joinRequest.CampaignId);
+            // CheckForValidRequest(joinRequest.CampaignId);
             if (doubleRequest) {
                 await js.InvokeVoidAsync("alert", "Anfrage bereits ausstehend");
             }
-            else if (!validRequest) {
-                await js.InvokeVoidAsync("alert", "Zugangscode ungültig");
-            }
+            // else if (!validRequest) {
+            //     await js.InvokeVoidAsync("alert", "Zugangscode ungültig");
+            // }
             else {
                 await joinRequestManager.Insert(joinRequest);
                 await js.InvokeVoidAsync("alert", "Anfrage versendet");
@@ -73,11 +73,12 @@
             jr.UserId == joinRequest.UserId && 
             jr.CampaignId == joinRequest.CampaignId);
     }
-    private void CheckForValidRequest(string accessCode) {
-        if (allCampaigns == null) return;
+    
+    // private void CheckForValidRequest(string accessCode) {
+    //     if (allCampaigns == null) return;
 
-        validRequest = allCampaigns.Any(x => x.Id == accessCode);
-    }
+    //     validRequest = allCampaigns.Any(x => x.Id == accessCode);
+    // }
 
     private async void CancelButtonPressed() {
         bool confirm = await js.InvokeAsync<bool>("confirm", "Eingabe wirklich abbrechen");
