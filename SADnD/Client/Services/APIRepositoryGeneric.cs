@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using SADnD.Shared.Models;
+using SADnD.Shared;
 using System.Net;
 using System.Net.Http.Json;
 
@@ -130,6 +130,7 @@ namespace SADnD.Client.Services
         }
         public async Task<bool> Delete(object id)
         {
+            Console.WriteLine("Funktion Delete in APIRepositoryGeneric aufgerufen");
             try
             {
                 var url = _controllerName + "/" + WebUtility.HtmlEncode(id.ToString());
