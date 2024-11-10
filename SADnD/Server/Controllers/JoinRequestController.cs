@@ -140,6 +140,7 @@ namespace SADnD.Server.Controllers
             try
             {
                 var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
+                var user = await _userManager.FindByIdAsync(id);
                 if (!request.Campaign.DungeonMasters.Any(dm => dm.Id == id) && request.Accepted != null)
                 {
                     return StatusCode(403);
@@ -149,6 +150,12 @@ namespace SADnD.Server.Controllers
                     return StatusCode(403);
                 }
                 await _requestManager.Update(request);
+                if (request.Accepted != null)
+                {
+                    var campaign = (await _campaignManager.Get(c => c.Id == request.CampaignId, null, "Players")).FirstOrDefault();
+                    campaign.Players.Add(user);
+                    await _campaignManager.Update(campaign);
+                }
                 var result = (await _requestManager.GetByID(request.Id));
                 if (result != null)
                 {
