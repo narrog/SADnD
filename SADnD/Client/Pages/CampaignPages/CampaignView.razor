@@ -27,6 +27,23 @@
                         else {
                             <p>Kein DungeonMaster</p>
                         }
+                        @if (campaign.Players != null && campaign.Players.Any())
+                        {
+                            <p>
+                                Spieler
+                                <ul>
+                                    @foreach (var player in campaign.Players)
+                                    {
+                                        @if (player.UserName != null)
+                                        {
+                                            <li>
+                                                @player.UserName
+                                            </li>
+                                        }
+                                    }
+                                </ul>
+                            </p>
+                        }
                         <button class="btn btn-secondary" @onclick="() => OpenCampaignDetails(campaign.Id)">Details</button>
                     </div>
                 </div>

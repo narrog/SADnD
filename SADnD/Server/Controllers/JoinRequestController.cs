@@ -17,10 +17,12 @@ namespace SADnD.Server.Controllers
     public class JoinRequestController : ControllerBase
     {
         UserManager<ApplicationUser> _userManager;
+        CustomClaimsService<ApplicationDbContext, UserManager<ApplicationUser>> _customClaimsService;
         EFRepositoryGeneric<JoinRequest,ApplicationDbContext> _requestManager;
         EFRepositoryGeneric<Campaign, ApplicationDbContext> _campaignManager;
         public JoinRequestController(
             UserManager<ApplicationUser> userManager,
+            CustomClaimsService<ApplicationDbContext, UserManager<ApplicationUser>> customClaimsService,
             EFRepositoryGeneric<JoinRequest, ApplicationDbContext> requestManager,
             EFRepositoryGeneric<Campaign, ApplicationDbContext> campaignManager)
         {
@@ -155,6 +157,7 @@ namespace SADnD.Server.Controllers
                     var user = await _userManager.FindByIdAsync(request.UserId);
                     campaign.Players.Add(user);
                     await _campaignManager.Update(campaign);
+                    await _customClaimsService.AddCampaignClaims(user);
                 }
                 var result = (await _requestManager.GetByID(request.Id));
                 if (result != null)
