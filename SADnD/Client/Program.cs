@@ -22,5 +22,6 @@ builder.Services.AddScoped<CharacterManager>();
 builder.Services.AddScoped<RaceManager>();
 builder.Services.AddScoped<ClassManager>();
 builder.Services.AddScoped<JoinRequestManager>();
+builder.Services.AddScoped<InventoryItemManager>();
 
 await builder.Build().RunAsync();
