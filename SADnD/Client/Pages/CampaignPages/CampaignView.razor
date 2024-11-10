@@ -89,7 +89,7 @@
                 campaigns = campaigns.Count() < 3 ? campaigns.Take(campaigns.Count()) : campaigns.Take(3);
             }
         }
-        
+
     }
 
     private async Task GetAllCampaigns() {
@@ -105,19 +105,24 @@
 
     private async void JoinRequestReject(JoinRequest joinRequest) {
         if (joinRequest != null) {
-            await joinRequestManager.Delete(joinRequest.Id);
-            await js.InvokeVoidAsync("alert", "Beitrittsanfrage entfernt");
-            joinRequests = await joinRequestManager.GetAll();
+            if (appState.UserId.Equals(joinRequest.UserId)) {
+                // eigene Requests abbrechen funktioniert
+                await joinRequestManager.Delete(joinRequest.Id);
+                await js.InvokeVoidAsync("alert", "Beitrittsanfrage entfernt");
+                joinRequests = await joinRequestManager.GetAll();
+            }
+            else {
+                // Requests ablehnen aus Sicht DM funktioniert nicht
+                await joinRequestManager.Delete(joinRequest.Id);
+            }
         }
         StateHasChanged();
     }
     private async Task JoinRequestAccept(JoinRequest joinRequest) {
-        //JoinRequest joinRequest = await joinRequestManager.GetByID(id);
 
         if (joinRequest != null) {
-            //joinRequest.Accepted = DateTime.Now;
-            //await joinRequestManager.Update(joinRequest);
-            await js.InvokeVoidAsync("alert", "Funktion JoinRequestAccept wird später implementiert");
+            joinRequest.Accepted = DateTime.Now;
+            await joinRequestManager.Update(joinRequest);
         }
         StateHasChanged();
     }
