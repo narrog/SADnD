@@ -140,11 +140,12 @@ namespace SADnD.Server.Controllers
             try
             {
                 var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
-                if (!request.Campaign.DungeonMasters.Any(dm => dm.Id == id) && request.Accepted != null)
+                var campaign = (await _campaignManager.Get(c => c.Id == request.CampaignId, null, "DungeonMasters,Players")).FirstOrDefault();
+                if (campaign == null) 
                 {
-                    return StatusCode(403);
+                    return StatusCode(404);
                 }
-                if (!request.Campaign.Players.Any(p => p.Id == id))
+                if (campaign.Players.Any(p => p.Id == id) || !campaign.DungeonMasters.Any(dm => dm.Id == id)) 
                 {
                     return StatusCode(403);
                 }
@@ -171,6 +172,7 @@ namespace SADnD.Server.Controllers
             catch (Exception ex)
             {
                 // TODO: log Exception
+                Console.Write($"Exception: {ex.Message}");
                 return StatusCode(500);
             }
         }
