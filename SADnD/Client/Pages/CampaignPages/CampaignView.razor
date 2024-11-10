@@ -42,7 +42,7 @@
     </div>
 </div>
 <div class="container-fluid mt-3">
-    @if (joinRequests != null) {
+    @if(joinRequests != null && joinRequests.Any()) {
         <div class="row mt-5">
             <h4>Offene Anfragen</h4>
             <table class="table table-sm table-hover table-striped align-middle">
@@ -83,7 +83,7 @@
 
     protected override async Task OnInitializedAsync() {
         await GetAllCampaigns();
-        await GetJoinRequests();
+        await GetOpenJoinRequests();
         if (campaigns != null) {
             if (!ShowAll) {
                 campaigns = campaigns.Count() < 3 ? campaigns.Take(campaigns.Count()) : campaigns.Take(3);
@@ -95,36 +95,38 @@
     private async Task GetAllCampaigns() {
         campaigns = await campaignManager.GetAll();
     }
-    private async Task GetJoinRequests() {
+
+    private async Task GetOpenJoinRequests() {
         joinRequests = (await joinRequestManager.GetAll()).OrderBy(x => x.CampaignId);
+        joinRequests = joinRequests.Where(x => x.Accepted == null);
     }
-
-    private void OpenCampaignDetails(string id) {
-        navManager.NavigateTo($"campaign-details/{id}");
-    }
-
     private async void JoinRequestReject(JoinRequest joinRequest) {
         if (joinRequest != null) {
             if (appState.UserId.Equals(joinRequest.UserId)) {
-                // eigene Requests abbrechen funktioniert
                 await joinRequestManager.Delete(joinRequest.Id);
                 await js.InvokeVoidAsync("alert", "Beitrittsanfrage entfernt");
-                joinRequests = await joinRequestManager.GetAll();
             }
             else {
-                // Requests ablehnen aus Sicht DM funktioniert nicht
                 await joinRequestManager.Delete(joinRequest.Id);
+                await js.InvokeVoidAsync("alert", "Beitrittsanfrage abgelehnt");
             }
+            await GetOpenJoinRequests();
         }
         StateHasChanged();
     }
     private async Task JoinRequestAccept(JoinRequest joinRequest) {
 
         if (joinRequest != null) {
-            joinRequest.Accepted = DateTime.Now;
+            joinRequest.Accepted = DateTime.UtcNow;
+            joinRequest.User = null;
             await joinRequestManager.Update(joinRequest);
+            await js.InvokeVoidAsync("alert", "Beitrittsanfrage akzeptiert");
+            await GetOpenJoinRequests();
         }
         StateHasChanged();
     }
 
+    private void OpenCampaignDetails(string id) {
+        navManager.NavigateTo($"campaign-details/{id}");
+    }
 }

@@ -143,9 +143,9 @@ namespace SADnD.Server.Controllers
                 var user = await _userManager.FindByIdAsync(id);
                 if (!request.Campaign.DungeonMasters.Any(dm => dm.Id == id) && request.Accepted != null)
                 {
-                    return StatusCode(403);
+                    return StatusCode(404);
                 }
-                if (!request.Campaign.Players.Any(p => p.Id == id))
+                if (campaign.Players.Any(p => p.Id == id) || !campaign.DungeonMasters.Any(dm => dm.Id == id)) 
                 {
                     return StatusCode(403);
                 }

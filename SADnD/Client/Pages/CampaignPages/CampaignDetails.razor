@@ -27,29 +27,30 @@
         }
     <p><strong>Zugangscode: </strong>@campaign.Id</p>
     <p><strong>Offene Anfragen</strong>
+        <table class="table table-sm table-hover table-striped align-middle">
         @if(joinRequests != null && joinRequests.Any()) {
-            <table class="table table-sm table-hover table-striped align-middle">
-                <tbody>
-                    @foreach (var request in joinRequests) {
-                        <tr>
-                            @if (request.User != null) {
-                                <td>@request.User.UserName</td>
-                            }
-                            <td>
-                                <button class="btn btn-outline-primary me-2" @onclick="() => JoinRequestAccept(request)">Annehmen</button>
-                                <button class="btn btn-outline-danger me-2" @onclick="() => JoinRequestReject(request)">Ablehnen</button>
-                            </td>
-                            <td>
-                                @requestMessage
-                            </td>
+            <tbody>
+                @foreach (var request in joinRequests) {
+                    <tr>
+                        @if (request.User != null) {
+                            <td>@request.User.UserName</td>
+                        }
+                        <td>
+                            <button class="btn btn-outline-primary me-2" @onclick="() => JoinRequestAccept(request)">Annehmen</button>
+                            <button class="btn btn-outline-danger me-2" @onclick="() => JoinRequestReject(request)">Ablehnen</button>
+                        </td>
+                        <td>
+                            @requestMessage
+                        </td>
 
-                        </tr>
-
-                    }
-                </tbody>
-                
-            </table>
+                    </tr>
+                }
+            </tbody>
         }
+        else {
+            <tr><td>keine offenen Anfragen</td></tr>
+        }
+        </table>
     </p>
 </div>
 <div class="row my-4 pt-4 border-top">
@@ -69,25 +70,29 @@
 
     protected override async Task OnInitializedAsync() {
         campaign = await campaignManager.GetByID(Id);
+        await GetOpenJoinRequests();
+    }
+
+    private async Task GetOpenJoinRequests() {
         joinRequests = await joinRequestManager.GetAll();
         joinRequests = joinRequests.Where(x => x.CampaignId == Id && x.Accepted == null);
     }
-
-    private async Task JoinRequestAccept(JoinRequest joinRequest) {
-        //JoinRequest joinRequest = await joinRequestManager.GetByID(id);
-
-        if(joinRequest != null) {
-            //joinRequest.Accepted = DateTime.Now;
-            //await joinRequestManager.Update(joinRequest);
-            requestMessage = "Funktion wird später implementiert";
+    private async void JoinRequestReject(JoinRequest joinRequest) {
+        if (joinRequest != null) {
+            await joinRequestManager.Delete(joinRequest.Id);
+            await js.InvokeVoidAsync("alert", "Beitrittsanfrage abgelehnt");
+            await GetOpenJoinRequests();
         }
         StateHasChanged();
     }
+    private async Task JoinRequestAccept(JoinRequest joinRequest) {
 
-    private async void JoinRequestReject(JoinRequest joinRequest) {
         if (joinRequest != null) {
-            //await joinRequestManager.Delete(joinRequest.Id);
-            requestMessage = "Funktion wird später implementiert";
+            joinRequest.Accepted = DateTime.UtcNow;
+            joinRequest.User = null;
+            await joinRequestManager.Update(joinRequest);
+            await js.InvokeVoidAsync("alert", "Beitrittsanfrage akzeptiert");
+            await GetOpenJoinRequests();
         }
         StateHasChanged();
     }
