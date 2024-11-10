@@ -35,7 +35,7 @@ namespace SADnD.Server.Controllers
             {
                 var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
                 var user = await _userManager.FindByIdAsync(id);
-                var result = await _campaignManager.Get(x => x.DungeonMasters.Any(dm  => dm.Id == user.Id) || x.Players.Any(p => p.Id == user.Id));
+                var result = await _campaignManager.Get(x => x.DungeonMasters.Any(dm  => dm.Id == user.Id) || x.Players.Any(p => p.Id == user.Id),null,"DungeonMasters,Players");
                 return Ok(new APIListOfEntityResponse<Campaign>()
                 {
                     Success = true,
@@ -54,7 +54,7 @@ namespace SADnD.Server.Controllers
         {
             try
             {
-                var result = (await _campaignManager.Get(x => x.Id == id.ToUpper())).FirstOrDefault();
+                var result = (await _campaignManager.Get(x => x.Id == id.ToUpper(), null, "DungeonMasters,Players")).FirstOrDefault();
                 if (result != null)
                 {
                     return Ok(new APIEntityResponse<Campaign>()
@@ -79,29 +79,6 @@ namespace SADnD.Server.Controllers
                 return StatusCode(500);
             }
         }
-        //[HttpGet("{DungeonMaster}/searchbydungeonmaster")]
-        //public async Task<ActionResult<APIEntityResponse<Campaign>>> SearchByDungeonMaster(string id) {
-        //    try {
-        //        var result = (await _campaignManager.Get(x => x.Id == id.ToUpper())).FirstOrDefault();
-        //        if (result != null) {
-        //            return Ok(new APIEntityResponse<Campaign>() {
-        //                Success = true,
-        //                Data = result
-        //            });
-        //        }
-        //        else {
-        //            return Ok(new APIEntityResponse<Campaign>() {
-        //                Success = false,
-        //                ErrorMessages = new List<string>() { "Campaign Not Found" },
-        //                Data = null
-        //            });
-        //        }
-        //    }
-        //    catch (Exception ex) {
-        //        // TODO: log Exception
-        //        return StatusCode(500);
-        //    }
-        //}
 
         [HttpPost]
         public async Task<ActionResult<APIEntityResponse<Campaign>>> Post([FromBody] Campaign campaign)
