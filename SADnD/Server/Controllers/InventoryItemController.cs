@@ -80,45 +80,45 @@ namespace SADnD.Server.Controllers
             }
         }
 
-        //[HttpPost]
-        //public async Task<ActionResult<APIEntityResponse<InventoryItem>>> Post([FromBody] InventoryItem race)
-        //{
-        //    try
-        //    {
-        //        await _itemManager.Insert(race);
-        //        var result = (await _itemManager.Get(x => x.Id == race.Id)).FirstOrDefault();
-        //        if (result != null)
-        //        {
-        //            return Ok(new APIEntityResponse<InventoryItem>()
-        //            {
-        //                Success = true,
-        //                Data = result
-        //            });
-        //        }
-        //        else
-        //        {
-        //            return Ok(new APIEntityResponse<InventoryItem>()
-        //            {
-        //                Success = false,
-        //                ErrorMessages = new List<string>() { "Could not find race after adding it" },
-        //                Data = null
-        //            });
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // TODO: log Exception
-        //        return StatusCode(500);
-        //    }
-        //}
+        [HttpPost]
+        public async Task<ActionResult<APIEntityResponse<InventoryItem>>> Post([FromBody] InventoryItem item)
+        {
+            try
+            {
+                await _itemManager.Insert(item);
+                var result = (await _itemManager.Get(x => x.Id == item.Id)).FirstOrDefault();
+                if (result != null)
+                {
+                    return Ok(new APIEntityResponse<InventoryItem>()
+                    {
+                        Success = true,
+                        Data = result
+                    });
+                }
+                else
+                {
+                    return Ok(new APIEntityResponse<InventoryItem>()
+                    {
+                        Success = false,
+                        ErrorMessages = new List<string>() { "Could not find item after adding it" },
+                        Data = null
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                // TODO: log Exception
+                return StatusCode(500);
+            }
+        }
 
         //[HttpPut]
-        //public async Task<ActionResult<APIEntityResponse<InventoryItem>>> Put([FromBody] InventoryItem race)
+        //public async Task<ActionResult<APIEntityResponse<InventoryItem>>> Put([FromBody] InventoryItem item)
         //{
         //    try
         //    {
-        //        await _itemManager.Update(race);
-        //        var result = (await _itemManager.Get(x => x.Id == race.Id)).FirstOrDefault();
+        //        await _itemManager.Update(item);
+        //        var result = (await _itemManager.Get(x => x.Id == item.Id)).FirstOrDefault();
         //        if (result != null)
         //        {
         //            return Ok(new APIEntityResponse<InventoryItem>()
@@ -132,7 +132,7 @@ namespace SADnD.Server.Controllers
         //            return Ok(new APIEntityResponse<InventoryItem>()
         //            {
         //                Success = false,
-        //                ErrorMessages = new List<string>() { "Could not find race after updating it" },
+        //                ErrorMessages = new List<string>() { "Could not find item after updating it" },
         //                Data = null
         //            });
         //        }
