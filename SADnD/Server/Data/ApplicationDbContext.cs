@@ -20,6 +20,8 @@ namespace SADnD.Server.Data
         public DbSet<Race> Races { get; set; }
         public DbSet<Class> Classes { get; set; }
         public DbSet<CharacterClass> CharactersClasses { get; set; }
+        public DbSet<Inventory> Inventories { get; set; }
+        public DbSet<InventoryItem> InventoryItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

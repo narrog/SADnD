@@ -41,5 +41,6 @@ namespace SADnD.Shared.Models
         public string? CampaignId { get; set; }
         [JsonIgnore]
         public Campaign? Campaign { get; set; }
+        public ICollection<Inventory> Inventory { get; set; }
     }
 }
