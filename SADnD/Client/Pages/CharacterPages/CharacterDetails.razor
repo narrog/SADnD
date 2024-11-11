@@ -99,8 +99,9 @@
         //await characterManager.Delete(character.Id);
     }
 
-    private void ShowAddItems() {
+    private async void ShowAddItems() {
         showAddItems = true;
+        character = await characterManager.GetByID(Id);
         StateHasChanged();
     }
     private void HideAddItems() {

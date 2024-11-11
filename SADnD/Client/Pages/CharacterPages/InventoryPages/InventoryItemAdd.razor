@@ -1,5 +1,4 @@
-﻿@using SADnD.Client.Shared.Dropdown
-@using Newtonsoft.Json
+﻿@using Newtonsoft.Json
 @inject InventoryItemManager inventoryItemManager
 @inject CharacterManager characterManager
 @inject IJSRuntime js
@@ -39,11 +38,12 @@
 
     private async void Post() {
         try {
-            savedItem = await inventoryItemManager.Insert(item);
-            message = JsonConvert.SerializeObject(savedItem);
-            Console.WriteLine($"message item: {message}");
-            Character.Inventory.Add(new Inventory() { CharacterId = Character.Id, InventoryItemId = savedItem.Id, Count = count });
-            message = JsonConvert.SerializeObject(await characterManager.Update(Character));
+            //savedItem = await inventoryItemManager.Insert(item);
+            //message = JsonConvert.SerializeObject(savedItem);
+            //Console.WriteLine($"message item: {message}");
+            Character.Inventory.Add(new Inventory() { CharacterId = Character.Id, Item = item, Count = count });
+            Character = await characterManager.Update(Character);
+            message = JsonConvert.SerializeObject(Character);
             Console.WriteLine($"message character: {message}");
             await OnClose.InvokeAsync();
             StateHasChanged();
