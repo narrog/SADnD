@@ -6,7 +6,22 @@
 <EditForm Model="@item" OnValidSubmit="@Post">
     <DataAnnotationsValidator />
     <p>Anzahl: <InputNumber @bind-Value="@count"></InputNumber></p>
-    <p>Name: <InputText @bind-Value="@item.Name"></InputText></p>
+    <p>Name: <InputText @bind-Value="@item.Name" @oninput="UpdateSearchText"></InputText></p>
+
+    <p>
+        @if (FilteredItems != null && FilteredItems.Any()) {
+            <ul class="list-group mt-2">
+                @foreach (var item in FilteredItems) {
+                    <li class="list-group-item" @onclick="() => SelectItem(item)">@item.Name</li>
+                }
+            </ul>
+        }
+        else if (!string.IsNullOrWhiteSpace(item.Name)) {
+            <div class="mt-2">
+                <p class="alert-info">Neues Item "@item.Name" wird erstellt</p>
+            </div>
+        }
+    </p>
     <p>Gewicht: <InputNumber @bind-Value="@item.Weight"></InputNumber></p>
     <SubmitButton />
     <button class="btn btn-secondary" type="button" @onclick="Close">Abbrechen</button>
@@ -26,21 +41,28 @@
     private InventoryItem item = new InventoryItem();
     private InventoryItem savedItem = new InventoryItem();
 
+    private string SearchText {
+        get => item.Name;
+        set {
+            item.Name = value;
+            FilterItems();
+        }
+    }
+
     private IEnumerable<InventoryItem> allItems;
+    private IEnumerable<InventoryItem> FilteredItems { get; set; } = new List<InventoryItem>();
+
     private string message = "";
     private int count = 1;
 
     protected override async Task OnInitializedAsync() {
         item.UserId = appState.UserId;
-
-        //allItems = await inventoryItemManager.GetAllItems();
+        allItems = await inventoryItemManager.GetAll();
+        FilteredItems = allItems;
     }
 
     private async void Post() {
         try {
-            //savedItem = await inventoryItemManager.Insert(item);
-            //message = JsonConvert.SerializeObject(savedItem);
-            //Console.WriteLine($"message item: {message}");
             Character.Inventory.Add(new Inventory() { CharacterId = Character.Id, Item = item, Count = count });
             Character = await characterManager.Update(Character);
             message = JsonConvert.SerializeObject(Character);
@@ -54,9 +76,21 @@
         }
     }
 
+    private void UpdateSearchText(ChangeEventArgs e) {
+        SearchText = e.Value?.ToString() ?? string.Empty;
+        FilterItems();
+    }
+    private void FilterItems() {
+        var search = item.Name.ToLower();
+        FilteredItems = allItems
+            .Where(item => item.Name.ToLower().Contains(search))
+            .ToList();
+    }
+    private void SelectItem(InventoryItem selectedItem) {
+        item = selectedItem;
+    }
 
     private async void Close(){
-
         await OnClose.InvokeAsync();
     }
 }
