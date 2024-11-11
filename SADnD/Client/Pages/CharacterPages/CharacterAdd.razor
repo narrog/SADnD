@@ -93,11 +93,8 @@
                     Gewicht:<br />
                     <InputNumber @bind-Value="@character.Weight"></InputNumber>
                 </div>
-                
-                <div class="mt-3">
-                    <button type="submit" class="btn btn-primary me-2">Speichern</button>
-                    <button class="btn btn-secondary" type="button" @onclick="CancelButtonPressed">Abbrechen</button>
-                </div>
+
+                <FormButtons />
             </div>
 
             <ValidationSummary class="mt-3" />
@@ -205,13 +202,6 @@
             Console.WriteLine($"{ex.Message}");
             StateHasChanged();
         }
-    }
-    private async void CancelButtonPressed() {
-        bool confirm = await js.InvokeAsync<bool>("confirm", "Eingabe wirklich abbrechen?");
-        if (confirm)
-            await js.InvokeVoidAsync("history.back");
-        else
-            return;
     }
 
     private void AddClass() {
