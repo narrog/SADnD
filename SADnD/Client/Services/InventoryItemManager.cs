@@ -2,7 +2,7 @@
 
 namespace SADnD.Client.Services
 {
-    public class InventoryItemManager : APIRepositoryGeneric<Class>
+    public class InventoryItemManager : APIRepositoryGeneric<InventoryItem>
     {
         HttpClient _httpClient;
         public InventoryItemManager(HttpClient httpClient)
