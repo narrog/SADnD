@@ -9,22 +9,43 @@
 
 <div class="container-fluid mt-3">
     <strong>Dungeonmaster: </strong><br />
-        @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any()) {
-            <p>
-                <ul>
-                    @foreach (var master in campaign.DungeonMasters) {
-                        @if (master.UserName != null) {
+    @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any())
+    {
+        <p>
+            <ul>
+                @foreach (var master in campaign.DungeonMasters)
+                {
+                    @if (master.UserName != null)
+                    {
                         <li>
-                                @master.UserName
+                            @master.UserName
                         </li>
-                        }
                     }
-                </ul>
-            </p>
-        }
-        else {
-            <p>Kein DungeonMaster gefunden</p>
-        }
+                }
+            </ul>
+        </p>
+    }
+    else
+    {
+        <p>Kein DungeonMaster gefunden</p>
+    }
+    @if (campaign.Players != null && campaign.Players.Any())
+    {
+        <strong>Spieler: </strong><br />
+        <p>
+            <ul>
+                @foreach (var player in campaign.Players)
+                {
+                    @if (player.UserName != null)
+                    {
+                        <li>
+                            @player.UserName
+                        </li>
+                    }
+                }
+            </ul>
+        </p>
+    }
     <p><strong>Zugangscode: </strong>@campaign.Id</p>
     <p><strong>Offene Anfragen</strong>
         <table class="table table-sm table-hover table-striped align-middle">
