@@ -65,7 +65,7 @@
     protected override async Task OnInitializedAsync() {
         item.UserId = appState.UserId;
         allItems = await inventoryItemManager.GetAll();
-        FilteredItems = allItems;
+        //FilteredItems = allItems;
     }
 
     private async void Post() {
