@@ -57,6 +57,11 @@
                                     }
                                 </tr>
                             }
+                            <tr>
+                                <td></td>
+                                <td class="text-end">Gewicht Total</td>
+                                <td>@weightTotal @unitOfWeight</td>
+                            </tr>
                         }
                         else {
                             <tr><td>Keine Items gefunden</td></tr>
@@ -92,9 +97,12 @@
 
     private bool showAddItems;
     private string unitOfWeight = "kg";
+    private float weightTotal;
 
     protected override async Task OnInitializedAsync() {
         character = await characterManager.GetByID(Id);
+
+        GetWeightSum();
     }
 
 
@@ -115,5 +123,18 @@
     private void HideAddItems() {
         showAddItems = false;
         StateHasChanged();
+        GetWeightSum();
+    }
+    private void GetWeightSum() {
+        weightTotal = 0;
+        if (character.Inventory != null && character.Inventory.Any()) {
+            foreach (var inventoryItem in character.Inventory) {
+                @if (inventoryItem.Item != null) {
+                    @if (inventoryItem.Item.Weight != null) {
+                        weightTotal += inventoryItem.Item.Weight.Value;
+                    }
+                }
+            }
+        }
     }
 }
