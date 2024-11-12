@@ -32,6 +32,9 @@
                     </tbody>
                 </table>
             </div>
+            <div class="col-12 col-md-4">
+                <button class="btn btn-secondary" @onclick="AddItem">Neues Item</button>
+            </div>
          }
          @if (showEditForm) {
             <div class="col-12 col-md-4">
@@ -51,6 +54,8 @@
 
 
 @code {
+    [CascadingParameter]
+    public CascadingAppState appState { get; set; }
     private IEnumerable<InventoryItem> allItems;
     private InventoryItem item = new InventoryItem();
     private string unitOfWeight = "kg";
@@ -74,24 +79,36 @@
         }
         return;
     }
-    private async Task EditItem(InventoryItem itemToEdit) {
+    private void EditItem(InventoryItem itemToEdit) {
         item = itemToEdit;
+        showEditForm = true;
+    }
+    private void AddItem() {
+        item = new InventoryItem();
         showEditForm = true;
     }
 
     private async void Post() {
         try {
-            await inventoryItemManager.Update(item);
-            await js.InvokeVoidAsync("alert", $"Item '{item.Name}' erfolgreich bearbeitet");
-            Close();
+            if(item.Id != 0) {
+                await inventoryItemManager.Update(item);
+                await js.InvokeVoidAsync("alert", $"Item '{item.Name}' erfolgreich bearbeitet");                
+            }
+            else {
+                item.UserId = appState.UserId;
+                await inventoryItemManager.Insert(item);
+                await js.InvokeVoidAsync("alert", $"Item '{item.Name}' erfolgreich erstellt");
+            }
+            await Close();
         }
         catch (Exception ex) {
             Console.WriteLine($"{ex.Message}");
             StateHasChanged();
         }
     }
-    private void Close() {
+    private async Task Close() {
         showEditForm = false;
+        await GetAllItems();
         StateHasChanged();
     }
 }
