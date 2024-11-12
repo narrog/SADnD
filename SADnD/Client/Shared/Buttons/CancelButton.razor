@@ -1,0 +1,14 @@
+﻿@inject IJSRuntime js
+
+<button class="btn btn-secondary" type="button" @onclick="CancelButtonPressed">Abbrechen</button>
+
+@code{
+
+    private async void CancelButtonPressed() {
+        bool confirm = await js.InvokeAsync<bool>("confirm", "Eingabe wirklich abbrechen");
+        if (confirm)
+            await js.InvokeVoidAsync("history.back");
+        else
+            return;
+    }
+}

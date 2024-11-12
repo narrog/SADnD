@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SADnD.Server.Areas.Identity;
 using SADnD.Server.Data;
+using SADnD.Shared;
 using SADnD.Shared.Models;
 using System.Security.Claims;
 
@@ -30,7 +31,7 @@ namespace SADnD.Server.Controllers
             try
             {
                 var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
-                var result = await _characterManager.Get(x => x.UserId == id,null,"Race,Classes.Class");
+                var result = await _characterManager.Get(x => x.UserId == id,null,"Race,Classes.Class,Inventory.Item");
                 return Ok(new APIListOfEntityResponse<Character>()
                 {
                     Success = true,
@@ -49,7 +50,7 @@ namespace SADnD.Server.Controllers
         {
             try
             {
-                var result = await _characterManager.Get(x => x.Id == id, null, "Race,Classes.Class");
+                var result = await _characterManager.Get(x => x.Id == id, null, "Race,Classes.Class,Inventory.Item");
                 if (result != null)
                 {
                     return Ok(new APIEntityResponse<Character>()

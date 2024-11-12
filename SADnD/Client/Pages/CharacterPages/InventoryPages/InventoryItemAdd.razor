@@ -1,0 +1,116 @@
+﻿@using Newtonsoft.Json
+@inject InventoryItemManager inventoryItemManager
+@inject CharacterManager characterManager
+@inject IJSRuntime js
+
+<EditForm Model="@item" OnValidSubmit="@Post">
+    <DataAnnotationsValidator />
+    <p>Anzahl: <InputNumber @bind-Value="@count"></InputNumber></p>
+    <p>Name: <InputText @bind-Value="@item.Name" @oninput="UpdateSearchText" disabled="@isItemSelected"></InputText></p>
+
+    <p>
+        @if (FilteredItems != null && FilteredItems.Any()) {
+            <ul class="list-group mt-2">
+                @foreach (var filteredItem in FilteredItems) {
+                    <li class="list-group-item @(item == filteredItem ? "bg-secondary text-white" : "")" @onclick="() => SelectItem(filteredItem)">
+                        @filteredItem.Name 
+                        @if(filteredItem.Weight != null) {
+                            <span> - @filteredItem.Weight @UnitOfWeight</span>
+                        }
+                    </li>
+                }
+            </ul>
+        }
+        else if (!string.IsNullOrWhiteSpace(item.Name)) {
+            <div class="mt-2">
+                <p class="text-warning">Neues Item "@item.Name" wird erstellt</p>
+            </div>
+        }
+    </p>
+    <p>Gewicht: <InputNumber @bind-Value="@item.Weight" disabled="@isItemSelected"></InputNumber> @UnitOfWeight</p>
+    <SubmitButton />
+    <button class="btn btn-secondary" type="button" @onclick="Close">Abbrechen</button>
+
+    <ValidationSummary class="mt-3" />
+</EditForm> 
+
+
+@code {
+    [CascadingParameter] 
+    public CascadingAppState appState { get; set; }
+
+    [Parameter] public bool ShowAddItems { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public required Character Character { get; set; }
+    [Parameter] public required string UnitOfWeight { get; set; }
+
+    private InventoryItem item = new InventoryItem();
+    private InventoryItem savedItem = new InventoryItem();
+    private bool isItemSelected = false;
+
+    private string SearchText {
+        get => item.Name;
+        set {
+            item.Name = value;
+            FilterItems();
+        }
+    }
+
+    private IEnumerable<InventoryItem> allItems;
+    private IEnumerable<InventoryItem> FilteredItems { get; set; } = new List<InventoryItem>();
+
+    private string message = "";
+    private int count = 1;
+
+    protected override async Task OnInitializedAsync() {
+        item.UserId = appState.UserId;
+        allItems = await inventoryItemManager.GetAll();
+        //FilteredItems = allItems;
+    }
+
+    private async void Post() {
+        try {
+            bool itemExists = false;
+            if (Character.Inventory != null) {
+                if (Character.Inventory.Count > 0) {
+                    itemExists = Character.Inventory.Any(i => i.Item!.Id == item.Id);
+                }
+            }
+
+            if (itemExists) {
+                await js.InvokeVoidAsync("alert", "Item bereits im Inventar vorhanden");
+                Close();
+                return;
+            }
+            else {
+                Character.Inventory.Add(new Inventory() { CharacterId = Character.Id, Item = item, Count = count });
+                Character = await characterManager.Update(Character);
+                await OnClose.InvokeAsync();
+            }
+            StateHasChanged();
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"{ex.Message}");
+            StateHasChanged();
+        }
+    }
+
+    private void UpdateSearchText(ChangeEventArgs e) {
+        SearchText = e.Value?.ToString() ?? string.Empty;
+        FilterItems();
+    }
+    private void FilterItems() {
+        var search = item.Name.ToLower();
+        FilteredItems = allItems
+            .Where(item => item.Name.ToLower().Contains(search))
+            .ToList();
+    }
+    private void SelectItem(InventoryItem selected) {
+        isItemSelected = true;
+        item = selected;
+    }
+
+    private async void Close(){
+        await OnClose.InvokeAsync();
+    }
+}

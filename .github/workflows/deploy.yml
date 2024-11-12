@@ -12,17 +12,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-    
-      - name: Compress project
-        run: tar -czf project.tar.gz .
 
       - name: Copy files to server
         uses: appleboy/scp-action@v0.1.7
         with: 
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
-          key: ${{ secrets.KEY }}
-          source: "project.tar.gz"
+          password: ${{ secrets.PASS }}
+          source: "./"
           target: "/share/Container/SADnD/"
 
       - name: Deploy with Docker Compose
@@ -30,10 +27,7 @@ jobs:
         with: 
           host: ${{ secrets.HOST}}
           username: ${{ secrets.USER }}
-          key: ${{ secrets.KEY }}
+          password: ${{ secrets.PASS }}
           script: |
             cd /share/Container/SADnD
-            tar -xzf project.tar.gz
-            rm project.tar.gz
-            docker compose down
-            docker compose up -d --build
+            echo ${{ secrets.PASS }} | sudo -S ./buildRestart.sh

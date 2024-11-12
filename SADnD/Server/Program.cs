@@ -8,7 +8,17 @@ using SADnD.Server.Areas.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+if (!builder.Environment.IsDevelopment())
+{
+    builder.WebHost.ConfigureKestrel(serverOptions =>
+    {
+        serverOptions.ListenAnyIP(443, listenOptions =>
+        {
+            listenOptions.UseHttps("/etc/letsencrypt/live/sadnd.benpeter.ch/cert.pfx", "SADnD");
+        });
+    });
+}
+
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
@@ -18,7 +28,7 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.R
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddIdentityServer()
-    .AddInMemoryIdentityResources(Config.IdentityResources) 
+    .AddInMemoryIdentityResources(Config.IdentityResources)
     .AddInMemoryApiScopes(Config.ApiScopes)
     .AddApiAuthorization<ApplicationUser, ApplicationDbContext>()
     .AddProfileService<CustomProfileService>();
@@ -46,6 +56,7 @@ builder.Services.AddTransient<CharacterManager>();
 builder.Services.AddTransient<EFRepositoryGeneric<Race, ApplicationDbContext>>();
 builder.Services.AddTransient<EFRepositoryGeneric<Class, ApplicationDbContext>>();
 builder.Services.AddTransient<EFRepositoryGeneric<JoinRequest, ApplicationDbContext>>();
+builder.Services.AddTransient<EFRepositoryGeneric<InventoryItem, ApplicationDbContext>>();
 builder.Services.AddTransient<CustomClaimsService<ApplicationDbContext,UserManager<ApplicationUser>>>();
 
 builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, CustomUserClaimsPrincipalFactory>();
