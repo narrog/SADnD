@@ -5,14 +5,14 @@ using System.Net.Http.Json;
 
 namespace SADnD.Client.Services
 {
-    public class APIRepositoryGeneric<TEntity> : IRepository<TEntity>
+    public class APIRepository<TEntity> : IRepository<TEntity>
         where TEntity : class
     {
         string _controllerName;
         // string _primaryKeyName;
         HttpClient _httpClient;
 
-        public APIRepositoryGeneric(HttpClient httpClient, string controllerName)
+        public APIRepository(HttpClient httpClient, string controllerName)
         {
             _httpClient = httpClient;
             _controllerName = controllerName;
@@ -130,7 +130,7 @@ namespace SADnD.Client.Services
         }
         public async Task<bool> Delete(object id)
         {
-            Console.WriteLine("Funktion Delete in APIRepositoryGeneric aufgerufen");
+            Console.WriteLine("Funktion Delete in APIRepository aufgerufen");
             try
             {
                 var url = _controllerName + "/" + WebUtility.HtmlEncode(id.ToString());

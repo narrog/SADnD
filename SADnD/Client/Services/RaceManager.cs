@@ -2,7 +2,7 @@
 
 namespace SADnD.Client.Services
 {
-    public class RaceManager : APIRepositoryGeneric<Race>
+    public class RaceManager : APIRepository<Race>
     {
         HttpClient _httpClient;
         public RaceManager(HttpClient httpClient)

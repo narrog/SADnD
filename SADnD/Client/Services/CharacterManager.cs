@@ -2,7 +2,7 @@
 
 namespace SADnD.Client.Services
 {
-    public class CharacterManager : APIRepositoryGeneric<Character>
+    public class CharacterManager : APIRepository<Character>
     {
         HttpClient _httpClient;
         public CharacterManager(HttpClient httpClient)

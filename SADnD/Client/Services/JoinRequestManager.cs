@@ -5,7 +5,7 @@ using System.Net.Http.Json;
 
 namespace SADnD.Client.Services
 {
-    public class JoinRequestManager : APIRepositoryGeneric<JoinRequest>
+    public class JoinRequestManager : APIRepository<JoinRequest>
     {
         HttpClient _httpClient;
         public JoinRequestManager(HttpClient httpClient)
