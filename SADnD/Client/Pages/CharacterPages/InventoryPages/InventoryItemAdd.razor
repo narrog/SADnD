@@ -12,7 +12,15 @@
         @if (FilteredItems != null && FilteredItems.Any()) {
             <ul class="list-group mt-2">
                 @foreach (var filteredItem in FilteredItems) {
-                    <li class="list-group-item @(item == filteredItem ? "bg-secondary text-white" : "")" @onclick="() => SelectItem(filteredItem)">@filteredItem.Name</li>
+                    <li class="list-group-item @(item == filteredItem ? "bg-secondary text-white" : "")" @onclick="() => SelectItem(filteredItem)">
+                        @filteredItem.Name - 
+                        @if(filteredItem.Weight != null) {
+                            @filteredItem.Weight @UnitOfWeight
+                        }
+                        else {
+                            <span>ohne Gewicht</span>
+                        }
+                    </li>
                 }
             </ul>
         }
@@ -22,7 +30,7 @@
             </div>
         }
     </p>
-    <p>Gewicht: <InputNumber @bind-Value="@item.Weight"></InputNumber></p>
+    <p>Gewicht: <InputNumber @bind-Value="@item.Weight" disabled="@isItemSelected"></InputNumber> @UnitOfWeight</p>
     <SubmitButton />
     <button class="btn btn-secondary" type="button" @onclick="Close">Abbrechen</button>
 
@@ -37,6 +45,8 @@
     [Parameter] public bool ShowAddItems { get; set; }
     [Parameter] public EventCallback OnClose { get; set; }
     [Parameter] public required Character Character { get; set; }
+    [Parameter] public required string UnitOfWeight { get; set; }
+    [Parameter] public ICollection<Inventory>? CharacterInventory { get; set; }
 
     private InventoryItem item = new InventoryItem();
     private InventoryItem savedItem = new InventoryItem();
