@@ -1,5 +1,6 @@
 ﻿@page "/character-details/{id}"
 @using SADnD.Client.Pages.CharacterPages.InventoryPages
+@using Newtonsoft.Json
 @attribute [Authorize]
 @inject CharacterManager characterManager
 @inject IJSRuntime js
@@ -43,7 +44,13 @@
                         @if (character.Inventory != null && character.Inventory.Any() != false) {
                             @foreach (var inventoryItem in character.Inventory) {
                                 <tr>
-                                    <td>@inventoryItem.Count</td>
+                                    <td>
+                                        @inventoryItem.Count
+                                    </td>
+                                    <td>
+                                        <button @onclick="() => IncreaseItemCount(inventoryItem)" title="Anzahl erhöhen">+</button>
+                                        <button @onclick="() => DecreaseItemCount(inventoryItem)" title="Anzahl verringern">-</button>
+                                    </td>
                                     @if (inventoryItem.Item != null) {
                                         <td>@inventoryItem.Item.Name</td>
                                         @if (inventoryItem.Item.Weight != null) {
@@ -114,6 +121,18 @@
     }
     private void HideAddItems() {
         showAddItems = false;
+        StateHasChanged();
+    }
+
+    private async Task IncreaseItemCount(Inventory inventoryItem) {
+        inventoryItem.Count ++;
+        Console.WriteLine(JsonConvert.SerializeObject(character.Inventory));
+        await characterManager.Update(character);
+        StateHasChanged();
+    }
+    private async Task DecreaseItemCount(Inventory item) {
+        item.Count--;
+        await characterManager.Update(character);
         StateHasChanged();
     }
 }
