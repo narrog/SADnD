@@ -13,12 +13,9 @@
             <ul class="list-group mt-2">
                 @foreach (var filteredItem in FilteredItems) {
                     <li class="list-group-item @(item == filteredItem ? "bg-secondary text-white" : "")" @onclick="() => SelectItem(filteredItem)">
-                        @filteredItem.Name - 
+                        @filteredItem.Name 
                         @if(filteredItem.Weight != null) {
-                            @filteredItem.Weight @UnitOfWeight
-                        }
-                        else {
-                            <span>ohne Gewicht</span>
+                            <span> - @filteredItem.Weight @UnitOfWeight</span>
                         }
                     </li>
                 }
@@ -46,7 +43,6 @@
     [Parameter] public EventCallback OnClose { get; set; }
     [Parameter] public required Character Character { get; set; }
     [Parameter] public required string UnitOfWeight { get; set; }
-    [Parameter] public ICollection<Inventory>? CharacterInventory { get; set; }
 
     private InventoryItem item = new InventoryItem();
     private InventoryItem savedItem = new InventoryItem();
@@ -74,11 +70,23 @@
 
     private async void Post() {
         try {
-            Character.Inventory.Add(new Inventory() { CharacterId = Character.Id, Item = item, Count = count });
-            Character = await characterManager.Update(Character);
-            message = JsonConvert.SerializeObject(Character);
-            Console.WriteLine($"message character: {message}");
-            await OnClose.InvokeAsync();
+            bool itemExists = false;
+            if (Character.Inventory != null) {
+                if (Character.Inventory.Count > 0) {
+                    itemExists = Character.Inventory.Any(i => i.Item!.Id == item.Id);
+                }
+            }
+
+            if (itemExists) {
+                await js.InvokeVoidAsync("alert", "Item bereits im Inventar vorhanden");
+                Close();
+                return;
+            }
+            else {
+                Character.Inventory.Add(new Inventory() { CharacterId = Character.Id, Item = item, Count = count });
+                Character = await characterManager.Update(Character);
+                await OnClose.InvokeAsync();
+            }
             StateHasChanged();
         }
         catch (Exception ex) {

@@ -40,13 +40,20 @@
                 <h4>Inventar</h4>
                 <table class="table table-striped">
                     <tbody>
-                        @if (inventory != null && inventory.Any() != false) {
-                            @foreach (var inventoryItem in inventory) {
+                        @if (character.Inventory != null && character.Inventory.Any() != false) {
+                            @foreach (var inventoryItem in character.Inventory) {
                                 <tr>
                                     <td>@inventoryItem.Count</td>
                                     @if (inventoryItem.Item != null) {
                                         <td>@inventoryItem.Item.Name</td>
-                                        <td>@inventoryItem.Item.Weight @unitOfWeight</td>
+                                        @if (inventoryItem.Item.Weight != null) {
+                                            <td>
+                                                @inventoryItem.Item.Weight @unitOfWeight
+                                            </td>
+                                        }
+                                        else {
+                                            <td></td>
+                                        }
                                     }
                                 </tr>
                             }
@@ -65,7 +72,6 @@
                     <InventoryItemAdd ShowAddItems="@showAddItems" 
                                       OnClose="HideAddItems"
                                       Character="@character"
-                                      CharacterInventory="@inventory"
                                       UnitOfWeight="@unitOfWeight" />
                 }
             </div>
@@ -83,16 +89,12 @@
 @code {
     [Parameter] public required string Id { get; set; }
     private Character character = new Character();
-    private ICollection<Inventory>? inventory;
 
     private bool showAddItems;
     private string unitOfWeight = "kg";
 
     protected override async Task OnInitializedAsync() {
         character = await characterManager.GetByID(Id);
-        if (character != null) {
-            inventory = character.Inventory;
-        }
     }
 
 
