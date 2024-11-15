@@ -23,7 +23,6 @@ builder.Services.AddBlazorDB(options =>
 {
     options.Name = "SADnD.IndexedDB";
     options.Version = 1;
-
     options.StoreSchemas = new List<StoreSchema>()
     {
         new StoreSchema()
@@ -31,117 +30,117 @@ builder.Services.AddBlazorDB(options =>
             Name = "Character",
             PrimaryKey = "Id",
             PrimaryKeyAuto = true,
-            Indexes = new List<string> {"Id"}
+            UniqueIndexes = new List<string> {"Id"}
         },
         new StoreSchema()
         {
             Name = $"Character{Globals.LocalTransactionsSuffix}",
             PrimaryKey = "Id",
             PrimaryKeyAuto = true,
-            Indexes = new List<string> {"Id"}
+            UniqueIndexes = new List<string> {"Id"}
         },
         new StoreSchema()
         {
             Name = $"Character{Globals.KeysSuffix}",
             PrimaryKey = "Id",
             PrimaryKeyAuto = true,
-            Indexes = new List<string> {"Id"}
+            UniqueIndexes = new List<string> {"Id"}
         },
         new StoreSchema()
         {
             Name = "Campaign",
             PrimaryKey = "Id",
             PrimaryKeyAuto = true,
-            Indexes = new List<string> {"Id"}
+            UniqueIndexes = new List<string> { "Id" }
         },
         new StoreSchema()
         {
             Name = $"Campaign{Globals.LocalTransactionsSuffix}",
             PrimaryKey = "Id",
             PrimaryKeyAuto = true,
-            Indexes = new List<string> {"Id"}
+            UniqueIndexes = new List<string> { "Id" }
         },
         new StoreSchema()
         {
             Name = $"Campaign{Globals.KeysSuffix}",
             PrimaryKey = "Id",
             PrimaryKeyAuto = true,
-            Indexes = new List<string> {"Id"}
-        },
-        new StoreSchema()
-        {
-            Name = "Class",
-            PrimaryKey = "Id",
-            PrimaryKeyAuto = true,
-            Indexes = new List<string> {"Id"}
-        },
-        new StoreSchema()
-        {
-            Name = $"Class{Globals.LocalTransactionsSuffix}",
-            PrimaryKey = "Id",
-            PrimaryKeyAuto = true,
-            Indexes = new List<string> {"Id"}
-        },
-        new StoreSchema()
-        {
-            Name = $"Class{Globals.KeysSuffix}",
-            PrimaryKey = "Id",
-            PrimaryKeyAuto = true,
-            Indexes = new List<string> {"Id"}
+            UniqueIndexes = new List<string> { "Id" }
         },
         new StoreSchema()
         {
             Name = "JoinRequest",
             PrimaryKey = "Id",
             PrimaryKeyAuto = true,
-            Indexes = new List<string> {"Id"}
+            UniqueIndexes = new List<string> { "Id" }
         },
         new StoreSchema()
         {
             Name = $"JoinRequest{Globals.LocalTransactionsSuffix}",
             PrimaryKey = "Id",
             PrimaryKeyAuto = true,
-            Indexes = new List<string> {"Id"}
+            UniqueIndexes = new List<string> { "Id" }
         },
         new StoreSchema()
         {
             Name = $"JoinRequest{Globals.KeysSuffix}",
             PrimaryKey = "Id",
             PrimaryKeyAuto = true,
-            Indexes = new List<string> {"Id"}
+            UniqueIndexes = new List<string> { "Id" }
+        },
+        new StoreSchema()
+        {
+            Name = "Class",
+            PrimaryKey = "Id",
+            PrimaryKeyAuto = true,
+            UniqueIndexes = new List<string> {"Id"}
+        },
+        new StoreSchema()
+        {
+            Name = $"Class{Globals.LocalTransactionsSuffix}",
+            PrimaryKey = "Id",
+            PrimaryKeyAuto = true,
+            UniqueIndexes = new List<string> {"Id"}
+        },
+        new StoreSchema()
+        {
+            Name = $"Class{Globals.KeysSuffix}",
+            PrimaryKey = "Id",
+            PrimaryKeyAuto = true,
+            UniqueIndexes = new List<string> {"Id"}
         },
         new StoreSchema()
         {
             Name = "Race",
             PrimaryKey = "Id",
             PrimaryKeyAuto = true,
-            Indexes = new List<string> {"Id"}
+            UniqueIndexes = new List<string> {"Id"}
         },
         new StoreSchema()
         {
             Name = $"Race{Globals.LocalTransactionsSuffix}",
             PrimaryKey = "Id",
             PrimaryKeyAuto = true,
-            Indexes = new List<string> {"Id"}
+            UniqueIndexes = new List<string> {"Id"}
         },
         new StoreSchema()
         {
             Name = $"Race{Globals.KeysSuffix}",
             PrimaryKey = "Id",
             PrimaryKeyAuto = true,
-            Indexes = new List<string> {"Id"}
+            UniqueIndexes = new List<string> {"Id"}
         }
     };
 });
 builder.Services.AddScoped<CampaignManager>();
-builder.Services.AddScoped<CampaignSyncManager>();
+//builder.Services.AddScoped<CampaignSyncManager>();
 builder.Services.AddScoped<CharacterManager>();
 builder.Services.AddScoped<CharacterSyncManager>();
-builder.Services.AddScoped<RaceManager>();
-builder.Services.AddScoped<RaceSyncManager>();
+builder.Services.AddScoped<ClassManager>();
+builder.Services.AddScoped<ClassSyncManager>();
 builder.Services.AddScoped<RaceManager>();
 builder.Services.AddScoped<RaceSyncManager>();
 builder.Services.AddScoped<JoinRequestManager>();
-builder.Services.AddScoped<JoinRequestSyncManager>();
+//builder.Services.AddScoped<JoinRequestSyncManager>();
 
 await builder.Build().RunAsync();

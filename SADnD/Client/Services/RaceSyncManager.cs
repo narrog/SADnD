@@ -8,7 +8,7 @@ namespace SADnD.Client.Services
     public class RaceSyncManager : IndexedDBSyncRepository<Race>
     {
         public RaceSyncManager(IBlazorDbFactory dbFactory,RaceManager raceManager,IJSRuntime jsRuntime)
-            : base("SADnD.IndexedDB",true, dbFactory, raceManager,jsRuntime)
+            : base("SADnD.IndexedDB", dbFactory, raceManager,jsRuntime)
         {
         }
     }

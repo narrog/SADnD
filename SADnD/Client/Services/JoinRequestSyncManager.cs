@@ -8,7 +8,7 @@ namespace SADnD.Client.Services
     public class JoinRequestSyncManager : IndexedDBSyncRepository<JoinRequest>
     {
         public JoinRequestSyncManager(IBlazorDbFactory dbFactory,JoinRequestManager requestManager,IJSRuntime jsRuntime)
-            : base("SADnD.IndexedDB",true, dbFactory, requestManager,jsRuntime)
+            : base("SADnD.IndexedDB", dbFactory, requestManager,jsRuntime)
         {
         }
     }

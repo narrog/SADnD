@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using SADnD.Client.Services;
 
 namespace SADnD.Client.Shared
 {
@@ -15,7 +16,7 @@ namespace SADnD.Client.Shared
         private readonly IJSRuntime _jsruntime;
         string _dbName = "";
         //string _primaryKeyName = "";
-        bool _autoGenerateKey;
+        //bool _autoGenerateKey;
 
         IndexedDbManager manager;
         string storeName = "";
@@ -26,15 +27,13 @@ namespace SADnD.Client.Shared
         public delegate void OnlineStatusEventHandler(object sender, OnlineStatusEventArgs e);
         public event OnlineStatusEventHandler OnlineStatusChanged;
 
-        public IndexedDBSyncRepository(string dbName, bool autoGenerateKey, IBlazorDbFactory dbFactory,
+        public IndexedDBSyncRepository(string dbName, IBlazorDbFactory dbFactory,
             APIRepository<TEntity> apiRepository, IJSRuntime jsRuntime)
         {
             _dbName = dbName;
             _dbFactory = dbFactory;
             _apiRepository = apiRepository;
             _jsruntime = jsRuntime;
-            //_primaryKeyName = primaryKeyName;
-            _autoGenerateKey = autoGenerateKey;
 
             entityType = typeof(TEntity);
             storeName = entityType.Name;
@@ -203,6 +202,7 @@ namespace SADnD.Client.Shared
         {
             await EnsureManager();
             var array = await manager.ToArray<TEntity>(storeName);
+            //Console.WriteLine(JsonConvert.SerializeObject(array));
             if (array == null)
                 return new List<TEntity>();
             else
