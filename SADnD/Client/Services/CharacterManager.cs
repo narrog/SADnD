@@ -1,4 +1,5 @@
-﻿using SADnD.Shared.Models;
+﻿using SADnD.Client.Shared;
+using SADnD.Shared.Models;
 
 namespace SADnD.Client.Services
 {

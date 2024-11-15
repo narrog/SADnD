@@ -3,7 +3,7 @@ using SADnD.Shared;
 using System.Net;
 using System.Net.Http.Json;
 
-namespace SADnD.Client.Services
+namespace SADnD.Client.Shared
 {
     public class APIRepository<TEntity> : IRepository<TEntity>
         where TEntity : class

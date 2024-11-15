@@ -3,10 +3,9 @@ using Microsoft.JSInterop;
 using SADnD.Shared;
 using System.Linq.Expressions;
 using System.Reflection;
-using SADnD.Client.Shared;
 using Newtonsoft.Json;
 
-namespace SADnD.Client.Services
+namespace SADnD.Client.Shared
 {
     public class IndexedDBSyncRepository<TEntity> : IRepository<TEntity> where TEntity : class
     {
@@ -40,7 +39,7 @@ namespace SADnD.Client.Services
             storeName = entityType.Name;
             primaryKey = entityType.GetProperty("Id");
 
-            _ = _jsruntime.InvokeVoidAsync("connectivity.initialize",DotNetObjectReference.Create(this));
+            _ = _jsruntime.InvokeVoidAsync("connectivity.initialize", DotNetObjectReference.Create(this));
         }
 
         public string KeyStoreName
@@ -62,7 +61,7 @@ namespace SADnD.Client.Services
             else
             {
                 await SyncLocalToServer();
-                OnlineStatusChanged?.Invoke(this, new OnlineStatusEventArgs { IsOnline = true});
+                OnlineStatusChanged?.Invoke(this, new OnlineStatusEventArgs { IsOnline = true });
             }
         }
 
@@ -131,7 +130,8 @@ namespace SADnD.Client.Services
                 }
                 return true;
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 // TODO: Log exception
                 return false;
             }
@@ -175,7 +175,7 @@ namespace SADnD.Client.Services
                     if (!dontSync)
                     {
                         await ClearLocalDB();
-                        var result = await manager.BulkAddRecordAsync<TEntity>(storeName, list);
+                        var result = await manager.BulkAddRecordAsync(storeName, list);
                         var localList = (await GetAllOffline()).ToList();
                         var keys = new List<OnlineOfflineKey>();
                         for (int i = 0; i < list.Count(); i++)
@@ -189,7 +189,7 @@ namespace SADnD.Client.Services
                             });
                         }
                         await manager.ClearTableAsync(KeyStoreName);
-                        result = await manager.BulkAddRecordAsync<OnlineOfflineKey>(KeyStoreName, keys);
+                        result = await manager.BulkAddRecordAsync(KeyStoreName, keys);
                     }
                     return list;
                 }
@@ -255,7 +255,7 @@ namespace SADnD.Client.Services
                     StoreName = storeName,
                     Record = entity
                 };
-                var result = await manager.AddRecordAsync<TEntity>(record);
+                var result = await manager.AddRecordAsync(record);
                 var allItems = await GetAllOffline();
                 var last = allItems.Last();
                 var localId = primaryKey.GetValue(last);
@@ -394,7 +394,7 @@ namespace SADnD.Client.Services
                                     OnlineId = onlineId,
                                     LocalId = localId
                                 };
-                                await manager.AddRecordAsync<OnlineOfflineKey>(new StoreRecord<OnlineOfflineKey>()
+                                await manager.AddRecordAsync(new StoreRecord<OnlineOfflineKey>()
                                 {
                                     StoreName = KeyStoreName,
                                     Record = key
@@ -412,7 +412,7 @@ namespace SADnD.Client.Services
                                 break;
                         }
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         // TODO: Log exception
                     }
@@ -432,7 +432,7 @@ namespace SADnD.Client.Services
         private async Task<object> GetLocalId(object onlineId)
         {
             var keys = await GetKeys();
-            var key =  keys.Where(x => x.OnlineId.ToString() == onlineId.ToString()).FirstOrDefault();
+            var key = keys.Where(x => x.OnlineId.ToString() == onlineId.ToString()).FirstOrDefault();
             return key.LocalId;
         }
         private async Task<object> GetOnlineId(object localId)
@@ -450,7 +450,7 @@ namespace SADnD.Client.Services
         {
             var onlineId = primaryKey.GetValue(entity);
             var keys = await GetKeys();
-            if (keys == null) 
+            if (keys == null)
                 return null;
             var item = keys.Where(x => x.OnlineId.ToString() == onlineId.ToString()).FirstOrDefault();
             if (item == null)
