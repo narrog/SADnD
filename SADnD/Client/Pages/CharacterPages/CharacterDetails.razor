@@ -1,41 +1,89 @@
 ﻿@page "/character-details/{id}"
+@using SADnD.Client.Pages.CharacterPages.InventoryPages
 @attribute [Authorize]
 @inject CharacterSyncManager characterManager
 @inject IJSRuntime js
 
 @if (character != null) {
-    <h3>Charakter "@character.Name" - Details</h3>
+    <h3>Charakter "@character.Name"</h3>
 
     <div class="container-fluid mt-3">
         <div class="row">
-            <p><strong>Rasse: </strong>@(character.Race != null ? character.Race.Name : "Unbekannt")</p>
-            @if (character.Classes != null && character.Classes.Any()) {
-                <p>
-                    <strong>Klassen</strong>
-                    <ul>
-                        @foreach (var characterClass in character.Classes) {
-                            @if (characterClass.Class != null) {
-                                <li>
-                                    @characterClass.Class.Name, Level: @characterClass.Level
-                                </li>
+            <div class="col-12 col-md-4">
+                <h4>Details</h4>
+                <p><strong>Rasse: </strong>@(character.Race != null ? character.Race.Name : "Unbekannt")</p>
+                @if (character.Classes != null && character.Classes.Any()) {
+                    <p>
+                        <strong>Klassen</strong>
+                        <ul>
+                            @foreach (var characterClass in character.Classes) {
+                                @if (characterClass.Class != null) {
+                                    <li>
+                                        @characterClass.Class.Name, Level: @characterClass.Level
+                                    </li>
+                                }
                             }
+                        </ul>
+                    </p>
+                }
+                else {
+                    <p>Keine Klasse zugeordnet</p>
+                }
+                <p><strong>Grösse-Kategorie: </strong>@(character.SizeCategory != null ? character.SizeCategory : "Unbekannt")</p>
+                <p><strong>Grösse: </strong>@(character.Size != null ? character.Size : "Unbekannt")</p>
+                <p><strong>Geschlecht: </strong>@(character.Sex != null ? character.Sex : "Unbekannt")</p>
+                <p><strong>Gesinnung: </strong>@(character.Alignment != null ? character.Alignment : "Unbekannt")</p>
+                <p><strong>Alter: </strong>@(character.Age != null ? character.Age : "Unbekannt")</p>
+                <p><strong>Gewicht: </strong>@(character.Weight != null ? character.Weight : "Unbekannt")</p>
+            </div>
+            <div class="col-12 col-md-4">
+                <h4>Inventar</h4>
+                <table class="table table-striped">
+                    <tbody>
+                        @if (character.Inventory != null && character.Inventory.Any() != false) {
+                            @foreach (var inventoryItem in character.Inventory) {
+                                <tr>
+                                    <td>@inventoryItem.Count</td>
+                                    @if (inventoryItem.Item != null) {
+                                        <td>@inventoryItem.Item.Name</td>
+                                        @if (inventoryItem.Item.Weight != null) {
+                                            <td>
+                                                @inventoryItem.Item.Weight @unitOfWeight
+                                            </td>
+                                        }
+                                        else {
+                                            <td></td>
+                                        }
+                                    }
+                                </tr>
+                            }
+                            <tr>
+                                <td></td>
+                                <td class="text-end">Gewicht Total</td>
+                                <td>@weightTotal @unitOfWeight</td>
+                            </tr>
                         }
-                    </ul>
-                </p>
-            }
-            else {
-                <p>Keine Klasse zugeordnet</p>
-            }
-            <p><strong>Grösse-Kategorie: </strong>@(character.SizeCategory != null ? character.SizeCategory : "Unbekannt")</p>
-            <p><strong>Grösse: </strong>@(character.Size != null ? character.Size : "Unbekannt")</p>
-            <p><strong>Geschlecht: </strong>@(character.Sex != null ? character.Sex : "Unbekannt")</p>
-            <p><strong>Gesinnung: </strong>@(character.Alignment != null ? character.Alignment : "Unbekannt")</p>
-            <p><strong>Alter: </strong>@(character.Age != null ? character.Age : "Unbekannt")</p>
-            <p><strong>Gewicht: </strong>@(character.Weight != null ? character.Weight : "Unbekannt")</p>
-
+                        else {
+                            <tr><td>Keine Items gefunden</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-12 col-md-4">
+                @if (!showAddItems) {
+                    <button class="btn btn-secondary" @onclick="ShowAddItems">Item hinzufügen</button>
+                }
+                else {
+                    <InventoryItemAdd ShowAddItems="@showAddItems" 
+                                      OnClose="HideAddItems"
+                                      Character="@character"
+                                      UnitOfWeight="@unitOfWeight" />
+                }
+            </div>
+            
         </div>
     </div>
-    <div>
+    <div class="container-fluid mt-3">
         <a class="btn btn-outline-primary me-2" onclick="history.back();">Zurück</a>
         <button class="btn btn-outline-danger" @onclick="DeleteCharacter">Löschen</button>
     </div>
@@ -47,8 +95,14 @@
     [Parameter] public required string Id { get; set; }
     private Character character = new Character();
 
+    private bool showAddItems;
+    private string unitOfWeight = "kg";
+    private float weightTotal;
+
     protected override async Task OnInitializedAsync() {
         character = await characterManager.GetByID(Id);
+
+        GetWeightSum();
     }
 
 
@@ -61,4 +115,26 @@
         //await characterManager.Delete(character.Id);
     }
 
+    private async void ShowAddItems() {
+        showAddItems = true;
+        character = await characterManager.GetByID(Id);
+        StateHasChanged();
+    }
+    private void HideAddItems() {
+        showAddItems = false;
+        StateHasChanged();
+        GetWeightSum();
+    }
+    private void GetWeightSum() {
+        weightTotal = 0;
+        if (character.Inventory != null && character.Inventory.Any()) {
+            foreach (var inventoryItem in character.Inventory) {
+                @if (inventoryItem.Item != null) {
+                    @if (inventoryItem.Item.Weight != null) {
+                        weightTotal += inventoryItem.Item.Weight.Value;
+                    }
+                }
+            }
+        }
+    }
 }

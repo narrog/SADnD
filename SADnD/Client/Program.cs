@@ -141,6 +141,7 @@ builder.Services.AddScoped<ClassSyncManager>();
 builder.Services.AddScoped<RaceManager>();
 builder.Services.AddScoped<RaceSyncManager>();
 builder.Services.AddScoped<JoinRequestManager>();
+builder.Services.AddScoped<InventoryItemManager>();
 //builder.Services.AddScoped<JoinRequestSyncManager>();
 
 await builder.Build().RunAsync();
