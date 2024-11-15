@@ -4,6 +4,7 @@ using SADnD.Shared;
 using System.Linq.Expressions;
 using System.Reflection;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace SADnD.Client.Shared
 {
@@ -176,7 +177,7 @@ namespace SADnD.Client.Shared
                     {
                         await ClearLocalDB();
                         var result = await manager.BulkAddRecordAsync(storeName, list);
-                        var localList = (await GetAllOffline()).ToList();
+                        var localList = (await GetAllOffline(false)).ToList();
                         var keys = new List<OnlineOfflineKey>();
                         for (int i = 0; i < list.Count(); i++)
                         {
@@ -196,9 +197,9 @@ namespace SADnD.Client.Shared
                 return null;
             }
             else
-                return await GetAllOffline();
+                return await GetAllOffline(true);
         }
-        public async Task<IEnumerable<TEntity>> GetAllOffline()
+        public async Task<IEnumerable<TEntity>> GetAllOffline(bool onlineKeys)
         {
             await EnsureManager();
             var array = await manager.ToArray<TEntity>(storeName);
@@ -206,9 +207,12 @@ namespace SADnD.Client.Shared
                 return new List<TEntity>();
             else
             {
-                foreach (var entity in array)
+                if (onlineKeys)
                 {
-                    await UpdateKeyFromLocal(entity);
+                    foreach (var entity in array)
+                    {
+                        await UpdateKeyFromLocal(entity);
+                    }
                 }
                 return array.ToList();
             }
@@ -256,7 +260,7 @@ namespace SADnD.Client.Shared
                     Record = entity
                 };
                 var result = await manager.AddRecordAsync(record);
-                var allItems = await GetAllOffline();
+                var allItems = await GetAllOffline(false);
                 var last = allItems.Last();
                 var localId = primaryKey.GetValue(last);
 
@@ -463,9 +467,9 @@ namespace SADnD.Client.Shared
                 if (primaryKey.PropertyType.Name == nameof(Int32))
                     key = Convert.ToInt32(key);
             }
-            else if (typeName == "string")
+            else if (typeName == "String")
             {
-                if (primaryKey.PropertyType.Name != "string")
+                if (primaryKey.PropertyType.Name != "String")
                     key = key.ToString();
             }
             primaryKey.SetValue(entity, key);
@@ -488,9 +492,9 @@ namespace SADnD.Client.Shared
                 if (primaryKey.PropertyType.Name == nameof(Int32))
                     key = Convert.ToInt32(key);
             }
-            else if (typeName == "string")
+            else if (typeName == "String")
             {
-                if (primaryKey.PropertyType.Name != "string")
+                if (primaryKey.PropertyType.Name != "String")
                     key = key.ToString();
             }
             primaryKey.SetValue(entity, key);
