@@ -64,6 +64,12 @@
                                     }
                                 </tr>
                             }
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td class="text-end">Gewicht Total</td>
+                                <td>@weightTotal @unitOfWeight</td>
+                            </tr>
                         }
                         else {
                             <tr><td>Keine Items gefunden</td></tr>
@@ -100,9 +106,12 @@
 
     private bool showAddItems;
     private string unitOfWeight = "kg";
+    private float weightTotal;
 
     protected override async Task OnInitializedAsync() {
         character = await characterManager.GetByID(Id);
+
+        GetWeightSum();
     }
 
 
@@ -123,17 +132,36 @@
     private void HideAddItems() {
         showAddItems = false;
         StateHasChanged();
+        GetWeightSum();
+    }
+
+    private void GetWeightSum() {
+        weightTotal = 0;
+        float weightProduct;
+        if (character.Inventory != null && character.Inventory.Any()) {
+            foreach (var inventoryItem in character.Inventory) {
+                @if (inventoryItem.Item != null) {
+                    @if (inventoryItem.Item.Weight != null) {
+                        weightProduct = inventoryItem.Item.Weight.Value * inventoryItem.Count;
+                        weightTotal += weightProduct;
+                    }
+                }
+            }
+        }
     }
 
     private async Task IncreaseItemCount(Inventory inventoryItem) {
-        inventoryItem.Count ++;
-        Console.WriteLine(JsonConvert.SerializeObject(character.Inventory));
-        await characterManager.Update(character);
-        StateHasChanged();
+        inventoryItem.Count++;
+        await UpdateItemCount();
     }
-    private async Task DecreaseItemCount(Inventory item) {
-        item.Count--;
+    private async Task DecreaseItemCount(Inventory inventoryItem) {
+        inventoryItem.Count--;
+        
+        await UpdateItemCount();
+    }
+    private async Task UpdateItemCount() {
         await characterManager.Update(character);
+        GetWeightSum();
         StateHasChanged();
     }
 }
