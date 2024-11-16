@@ -1,8 +1,9 @@
-﻿using SADnD.Shared.Models;
+﻿using SADnD.Client.Shared;
+using SADnD.Shared.Models;
 
 namespace SADnD.Client.Services
 {
-    public class CharacterManager : APIRepositoryGeneric<Character>
+    public class CharacterManager : APIRepository<Character>
     {
         HttpClient _httpClient;
         public CharacterManager(HttpClient httpClient)

@@ -1,8 +1,9 @@
-﻿using SADnD.Shared.Models;
+﻿using SADnD.Client.Shared;
+using SADnD.Shared.Models;
 
 namespace SADnD.Client.Services
 {
-    public class RaceManager : APIRepositoryGeneric<Race>
+    public class RaceManager : APIRepository<Race>
     {
         HttpClient _httpClient;
         public RaceManager(HttpClient httpClient)

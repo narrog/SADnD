@@ -2,7 +2,7 @@
 @using SADnD.Client.Pages.CharacterPages.InventoryPages
 @using Newtonsoft.Json
 @attribute [Authorize]
-@inject CharacterManager characterManager
+@inject CharacterSyncManager characterManager
 @inject IJSRuntime js
 
 @if (character != null) {

@@ -1,4 +1,4 @@
-﻿@inject CharacterManager characterManager
+﻿@inject CharacterSyncManager characterManager
 
 <div class="container-fluid mt-3">
     <div class="row">
@@ -46,7 +46,8 @@
     string controllerName = "character";
     private IEnumerable<Character>? characters;
 
-    protected override async Task OnInitializedAsync() {
+    protected override async Task OnInitializedAsync()
+    {
         await GetAllCharacters();
         if (characters != null) {
             if (!ShowAll) {

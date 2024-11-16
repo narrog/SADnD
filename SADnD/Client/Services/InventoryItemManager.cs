@@ -1,8 +1,9 @@
-﻿using SADnD.Shared.Models;
+﻿using SADnD.Client.Shared;
+using SADnD.Shared.Models;
 
 namespace SADnD.Client.Services
 {
-    public class InventoryItemManager : APIRepositoryGeneric<InventoryItem>
+    public class InventoryItemManager : APIRepository<InventoryItem>
     {
         HttpClient _httpClient;
         public InventoryItemManager(HttpClient httpClient)
