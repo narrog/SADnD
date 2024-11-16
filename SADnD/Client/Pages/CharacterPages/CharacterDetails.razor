@@ -76,6 +76,13 @@
                         }
                     </tbody>
                 </table>
+                @if (showCountError) {
+                    <ul class="mt-3">
+                        <li class="validation-message">
+                            Anzahl muss mindestens 1 betragen
+                        </li>
+                    </ul>
+                }
                 <a class="btn btn-primary me-2" href="all-items">deine Items bearbeiten</a>
             </div>
             <div class="col-12 col-md-4">
@@ -105,6 +112,7 @@
     private Character character = new Character();
 
     private bool showAddItems;
+    private bool showCountError;
     private string unitOfWeight = "kg";
     private float weightTotal;
 
@@ -151,12 +159,19 @@
     }
 
     private async Task IncreaseItemCount(Inventory inventoryItem) {
+        showCountError = false;
         inventoryItem.Count++;
         await UpdateItemCount();
     }
     private async Task DecreaseItemCount(Inventory inventoryItem) {
+        showCountError = false;
+
+        if (inventoryItem.Count == 1) {
+            showCountError = true;
+            return;
+        }
+
         inventoryItem.Count--;
-        
         await UpdateItemCount();
     }
     private async Task UpdateItemCount() {

@@ -14,6 +14,7 @@ namespace SADnD.Shared.Models
         [Required]
         [StringLength(maximumLength: 50, MinimumLength = 1, ErrorMessage = "Name muss zwischen 1 und 50 Zeichen lang sein")]
         public string Name { get; set; }
+        [Range (0, int.MaxValue, ErrorMessage = "Gewicht darf nicht negativ sein")]
         public float? Weight { get; set; }
         public string UserId { get; set; }
         [JsonIgnore]
