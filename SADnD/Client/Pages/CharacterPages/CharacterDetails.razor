@@ -76,10 +76,10 @@
                         }
                     </tbody>
                 </table>
-                @if (showCountError) {
+                @if (showUIMessage) {
                     <ul class="mt-3">
                         <li class="validation-message">
-                            Anzahl muss mindestens 1 betragen
+                            @UIMessage
                         </li>
                     </ul>
                 }
@@ -90,13 +90,13 @@
                     <button class="btn btn-secondary" @onclick="ShowAddItems">Item hinzufügen</button>
                 }
                 else {
-                    <InventoryItemAdd ShowAddItems="@showAddItems" 
+                    <InventoryItemAdd ShowAddItems="@showAddItems"
                                       OnClose="HideAddItems"
                                       Character="@character"
                                       UnitOfWeight="@unitOfWeight" />
                 }
             </div>
-            
+
         </div>
     </div>
     <div class="container-fluid mt-3">
@@ -112,7 +112,8 @@
     private Character character = new Character();
 
     private bool showAddItems;
-    private bool showCountError;
+    private bool showUIMessage;
+    private string UIMessage = string.Empty;
     private string unitOfWeight = "kg";
     private float weightTotal;
 
@@ -159,15 +160,16 @@
     }
 
     private async Task IncreaseItemCount(Inventory inventoryItem) {
-        showCountError = false;
+        showUIMessage = false;
         inventoryItem.Count++;
         await UpdateItemCount();
     }
     private async Task DecreaseItemCount(Inventory inventoryItem) {
-        showCountError = false;
+        showUIMessage = false;
 
         if (inventoryItem.Count == 1) {
-            showCountError = true;
+
+            await DeleteItemFromInventory(inventoryItem);
             return;
         }
 
@@ -178,5 +180,28 @@
         await characterManager.Update(character);
         GetWeightSum();
         StateHasChanged();
+    }
+
+    private async Task DeleteItemFromInventory(Inventory inventoryItem) {
+        try {
+            if (character.Inventory != null && character.Inventory.Any()) {
+                var itemToRemove = character.Inventory.FirstOrDefault(i => i.Item.Id == inventoryItem.Item.Id);
+
+                if (itemToRemove != null) {
+
+                    string itemName = itemToRemove.Item!.Name;
+                    character.Inventory!.Remove(itemToRemove);
+                    UIMessage = $"Item '{itemName}' wurde aus dem Inventar entfernt";
+                    showUIMessage = true;
+                }
+            }
+
+            character = await characterManager.Update(character);
+
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"{ex.Message}");
+        }
+
     }
 }
