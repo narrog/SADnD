@@ -108,65 +108,51 @@ namespace SADnD.Server.Controllers
             }
         }
 
-        //[HttpPut]
-        //public async Task<ActionResult<APIEntityResponse<InventoryItem>>> Put([FromBody] InventoryItem item)
-        //{
-        //    try
-        //    {
-        //        await _itemManager.Update(item);
-        //        var result = (await _itemManager.Get(x => x.Id == item.Id)).FirstOrDefault();
-        //        if (result != null)
-        //        {
-        //            return Ok(new APIEntityResponse<InventoryItem>()
-        //            {
-        //                Success = true,
-        //                Data = result
-        //            });
-        //        }
-        //        else
-        //        {
-        //            return Ok(new APIEntityResponse<InventoryItem>()
-        //            {
-        //                Success = false,
-        //                ErrorMessages = new List<string>() { "Could not find item after updating it" },
-        //                Data = null
-        //            });
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // TODO: log Exception
-        //        return StatusCode(500);
-        //    }
-        //}
+        [HttpPut]
+        public async Task<ActionResult<APIEntityResponse<InventoryItem>>> Put([FromBody] InventoryItem item) {
+            try {
+                await _itemManager.Update(item);
+                var result = (await _itemManager.Get(x => x.Id == item.Id)).FirstOrDefault();
+                if (result != null) {
+                    return Ok(new APIEntityResponse<InventoryItem>() {
+                        Success = true,
+                        Data = result
+                    });
+                }
+                else {
+                    return Ok(new APIEntityResponse<InventoryItem>() {
+                        Success = false,
+                        ErrorMessages = new List<string>() { "Could not find item after updating it" },
+                        Data = null
+                    });
+                }
+            }
+            catch (Exception ex) {
+                // TODO: log Exception
+                return StatusCode(500);
+            }
+        }
 
-        //[HttpDelete("{id}")]
-        //public async Task<ActionResult> Delete(int id)
-        //{
-        //    try
-        //    {
-        //        if (await _itemManager.Get(x => x.Id == id) != null)
-        //        {
-        //            var success = await _itemManager.Delete(id);
-        //            if (success)
-        //            {
-        //                return NoContent();
-        //            }
-        //            else
-        //            {
-        //                return StatusCode(500);
-        //            }
-        //        }
-        //        else
-        //        {
-        //            return StatusCode(500);
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // TODO: log Exception
-        //        return StatusCode(500);
-        //    }
-        //}
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> Delete(int id) {
+            try {
+                if (await _itemManager.Get(x => x.Id == id) != null) {
+                    var success = await _itemManager.Delete(id);
+                    if (success) {
+                        return NoContent();
+                    }
+                    else {
+                        return StatusCode(500);
+                    }
+                }
+                else {
+                    return StatusCode(500);
+                }
+            }
+            catch (Exception ex) {
+                // TODO: log Exception
+                return StatusCode(500);
+            }
+        }
     }
 }

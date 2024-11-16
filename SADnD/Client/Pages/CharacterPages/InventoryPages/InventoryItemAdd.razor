@@ -32,6 +32,13 @@
     <button class="btn btn-secondary" type="button" @onclick="Close">Abbrechen</button>
 
     <ValidationSummary class="mt-3" />
+    @if (showCountError) {
+        <ul class="mt-3">
+            <li class="validation-message">
+                Anzahl muss mindestens 1 betragen
+            </li>
+        </ul>
+    }
 </EditForm> 
 
 
@@ -47,6 +54,7 @@
     private InventoryItem item = new InventoryItem();
     private InventoryItem savedItem = new InventoryItem();
     private bool isItemSelected = false;
+    private bool showCountError = false;
 
     private string SearchText {
         get => item.Name;
@@ -65,18 +73,21 @@
     protected override async Task OnInitializedAsync() {
         item.UserId = appState.UserId;
         allItems = await inventoryItemManager.GetAll();
-        //FilteredItems = allItems;
+        allItems = allItems.OrderBy(item => item.Name);
     }
 
     private async void Post() {
         try {
+            if(count < 1) {
+                showCountError = true;
+                return;
+            }
             bool itemExists = false;
             if (Character.Inventory != null) {
                 if (Character.Inventory.Count > 0) {
                     itemExists = Character.Inventory.Any(i => i.Item!.Id == item.Id);
                 }
             }
-
             if (itemExists) {
                 await js.InvokeVoidAsync("alert", "Item bereits im Inventar vorhanden");
                 Close();

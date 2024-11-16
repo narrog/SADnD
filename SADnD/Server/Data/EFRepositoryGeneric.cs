@@ -82,9 +82,10 @@ namespace SADnD.Server.Data
 
         public virtual async Task<TEntity> Update(TEntity entityToUpdate)
         {
-            var dbSet = context.Set<TEntity>();
-            dbSet.Attach(entityToUpdate);
-            context.Entry(entityToUpdate).State = EntityState.Modified;
+            //var dbSet = context.Set<TEntity>();
+            //dbSet.Attach(entityToUpdate);
+            //context.Entry(entityToUpdate).State = EntityState.Modified;
+            dbSet.Update(entityToUpdate);
             await context.SaveChangesAsync();
             return entityToUpdate;
         }
