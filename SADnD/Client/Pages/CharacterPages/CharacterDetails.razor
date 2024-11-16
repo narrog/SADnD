@@ -5,111 +5,113 @@
 @inject CharacterSyncManager characterManager
 @inject IJSRuntime js
 
-@if (character != null) {
-    <h3>Charakter "@character.Name"</h3>
+<CascadingValue Value="@this" IsFixed="true">
+    @if (Character != null) {
+        <h3>Charakter "@Character.Name"</h3>
 
-    <div class="container-fluid mt-3">
-        <div class="row">
-            <div class="col-12 col-md-4">
-                <h4>Details</h4>
-                <p><strong>Rasse: </strong>@(character.Race != null ? character.Race.Name : "Unbekannt")</p>
-                @if (character.Classes != null && character.Classes.Any()) {
-                    <p>
-                        <strong>Klassen</strong>
-                        <ul>
-                            @foreach (var characterClass in character.Classes) {
-                                @if (characterClass.Class != null) {
-                                    <li>
-                                        @characterClass.Class.Name, Level: @characterClass.Level
-                                    </li>
-                                }
-                            }
-                        </ul>
-                    </p>
-                }
-                else {
-                    <p>Keine Klasse zugeordnet</p>
-                }
-                <p><strong>Grösse-Kategorie: </strong>@(character.SizeCategory != null ? character.SizeCategory : "Unbekannt")</p>
-                <p><strong>Grösse: </strong>@(character.Size != null ? character.Size : "Unbekannt")</p>
-                <p><strong>Geschlecht: </strong>@(character.Sex != null ? character.Sex : "Unbekannt")</p>
-                <p><strong>Gesinnung: </strong>@(character.Alignment != null ? character.Alignment : "Unbekannt")</p>
-                <p><strong>Alter: </strong>@(character.Age != null ? character.Age : "Unbekannt")</p>
-                <p><strong>Gewicht: </strong>@(character.Weight != null ? character.Weight : "Unbekannt")</p>
-            </div>
-            <div class="col-12 col-md-4">
-                <h4>Inventar</h4>
-                <table class="table table-striped">
-                    <tbody>
-                        @if (character.Inventory != null && character.Inventory.Any() != false) {
-                            @foreach (var inventoryItem in character.Inventory) {
-                                <tr>
-                                    <td>
-                                        @inventoryItem.Count
-                                    </td>
-                                    <td>
-                                        <button @onclick="() => IncreaseItemCount(inventoryItem)" title="Anzahl erhöhen">+</button>
-                                        <button @onclick="() => DecreaseItemCount(inventoryItem)" title="Anzahl verringern">-</button>
-                                    </td>
-                                    @if (inventoryItem.Item != null) {
-                                        <td>@inventoryItem.Item.Name</td>
-                                        @if (inventoryItem.Item.Weight != null) {
-                                            <td>
-                                                @inventoryItem.Item.Weight @unitOfWeight
-                                            </td>
-                                        }
-                                        else {
-                                            <td></td>
-                                        }
+        <div class="container-fluid mt-3">
+            <div class="row">
+                <div class="col-12 col-md-4">
+                    <h4>Details</h4>
+                    <p><strong>Rasse: </strong>@(Character.Race != null ? Character.Race.Name : "Unbekannt")</p>
+                    @if (Character.Classes != null && Character.Classes.Any()) {
+                        <p>
+                            <strong>Klassen</strong>
+                            <ul>
+                                @foreach (var characterClass in Character.Classes) {
+                                    @if (characterClass.Class != null) {
+                                        <li>
+                                            @characterClass.Class.Name, Level: @characterClass.Level
+                                        </li>
                                     }
+                                }
+                            </ul>
+                        </p>
+                    }
+                    else {
+                        <p>Keine Klasse zugeordnet</p>
+                    }
+                    <p><strong>Grösse-Kategorie: </strong>@(Character.SizeCategory != null ? Character.SizeCategory : "Unbekannt")</p>
+                    <p><strong>Grösse: </strong>@(Character.Size != null ? Character.Size : "Unbekannt")</p>
+                    <p><strong>Geschlecht: </strong>@(Character.Sex != null ? Character.Sex : "Unbekannt")</p>
+                    <p><strong>Gesinnung: </strong>@(Character.Alignment != null ? Character.Alignment : "Unbekannt")</p>
+                    <p><strong>Alter: </strong>@(Character.Age != null ? Character.Age : "Unbekannt")</p>
+                    <p><strong>Gewicht: </strong>@(Character.Weight != null ? Character.Weight : "Unbekannt")</p>
+                </div>
+                <div class="col-12 col-md-4">
+                    <h4>Inventar</h4>
+                    <table class="table table-striped">
+                        <tbody>
+                            @if (Character.Inventory != null && Character.Inventory.Any() != false) {
+                                @foreach (var inventoryItem in Character.Inventory) {
+                                    <tr>
+                                        <td>
+                                            @inventoryItem.Count
+                                        </td>
+                                        <td>
+                                            <button @onclick="() => IncreaseItemCount(inventoryItem)" title="Anzahl erhöhen">+</button>
+                                            <button @onclick="() => DecreaseItemCount(inventoryItem)" title="Anzahl verringern">-</button>
+                                        </td>
+                                        @if (inventoryItem.Item != null) {
+                                            <td>@inventoryItem.Item.Name</td>
+                                            @if (inventoryItem.Item.Weight != null) {
+                                                <td>
+                                                    @inventoryItem.Item.Weight @unitOfWeight
+                                                </td>
+                                            }
+                                            else {
+                                                <td></td>
+                                            }
+                                        }
+                                    </tr>
+                                }
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td class="text-end">Gewicht Total</td>
+                                    <td>@weightTotal @unitOfWeight</td>
                                 </tr>
                             }
-                            <tr>
-                                <td></td>
-                                <td></td>
-                                <td class="text-end">Gewicht Total</td>
-                                <td>@weightTotal @unitOfWeight</td>
-                            </tr>
-                        }
-                        else {
-                            <tr><td>Keine Items gefunden</td></tr>
-                        }
-                    </tbody>
-                </table>
-                @if (showUIMessage) {
-                    <ul class="mt-3">
-                        <li class="validation-message">
-                            @UIMessage
-                        </li>
-                    </ul>
-                }
-                <a class="btn btn-primary me-2" href="all-items">deine Items bearbeiten</a>
-            </div>
-            <div class="col-12 col-md-4">
-                @if (!showAddItems) {
-                    <button class="btn btn-secondary" @onclick="ShowAddItems">Item hinzufügen</button>
-                }
-                else {
-                    <InventoryItemAdd ShowAddItems="@showAddItems"
-                                      OnClose="HideAddItems"
-                                      Character="@character"
-                                      UnitOfWeight="@unitOfWeight" />
-                }
-            </div>
+                            else {
+                                <tr><td>Keine Items gefunden</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                    @if (showUIMessage) {
+                        <ul class="mt-3">
+                            <li class="validation-message">
+                                @UIMessage
+                            </li>
+                        </ul>
+                    }
+                    <a class="btn btn-primary me-2" href="all-items">deine Items bearbeiten</a>
+                </div>
+                <div class="col-12 col-md-4">
+                    @if (!showAddItems) {
+                        <button class="btn btn-secondary" @onclick="ShowAddItems">Item hinzufügen</button>
+                    }
+                    else {
+                        <InventoryItemAdd ShowAddItems="@showAddItems"
+                                          OnClose="HideAddItems"
+                                          UnitOfWeight="@unitOfWeight" />
+                    }
+                </div>
 
+            </div>
         </div>
-    </div>
-    <div class="container-fluid mt-3">
-        <a class="btn btn-outline-primary me-2" onclick="history.back();">Zurück</a>
-        <button class="btn btn-outline-danger" @onclick="DeleteCharacter">Löschen</button>
-    </div>
-}
+        <div class="container-fluid mt-3">
+            <a class="btn btn-outline-primary me-2" onclick="history.back();">Zurück</a>
+            <button class="btn btn-outline-danger" @onclick="DeleteCharacter">Löschen</button>
+        </div>
+    }
+</CascadingValue>
 
 
 
 @code {
-    [Parameter] public required string Id { get; set; }
-    private Character character = new Character();
+    [Parameter] 
+    public required string Id { get; set; }
+    public Character Character = new Character();
 
     private bool showAddItems;
     private bool showUIMessage;
@@ -118,7 +120,7 @@
     private float weightTotal;
 
     protected override async Task OnInitializedAsync() {
-        character = await characterManager.GetByID(Id);
+        Character = await characterManager.GetByID(Id);
 
         GetWeightSum();
     }
@@ -135,7 +137,7 @@
 
     private async void ShowAddItems() {
         showAddItems = true;
-        character = await characterManager.GetByID(Id);
+        Character = await characterManager.GetByID(Id);
         StateHasChanged();
     }
     private void HideAddItems() {
@@ -147,8 +149,8 @@
     private void GetWeightSum() {
         weightTotal = 0;
         float weightProduct;
-        if (character.Inventory != null && character.Inventory.Any()) {
-            foreach (var inventoryItem in character.Inventory) {
+        if (Character.Inventory != null && Character.Inventory.Any()) {
+            foreach (var inventoryItem in Character.Inventory) {
                 @if (inventoryItem.Item != null) {
                     @if (inventoryItem.Item.Weight != null) {
                         weightProduct = inventoryItem.Item.Weight.Value * inventoryItem.Count;
@@ -177,26 +179,26 @@
         await UpdateItemCount();
     }
     private async Task UpdateItemCount() {
-        await characterManager.Update(character);
+        await characterManager.Update(Character);
         GetWeightSum();
         StateHasChanged();
     }
 
     private async Task DeleteItemFromInventory(Inventory inventoryItem) {
         try {
-            if (character.Inventory != null && character.Inventory.Any()) {
-                var itemToRemove = character.Inventory.FirstOrDefault(i => i.Item.Id == inventoryItem.Item.Id);
+            if (Character.Inventory != null && Character.Inventory.Any()) {
+                var itemToRemove = Character.Inventory.FirstOrDefault(i => i.Item.Id == inventoryItem.Item.Id);
 
                 if (itemToRemove != null) {
 
                     string itemName = itemToRemove.Item!.Name;
-                    character.Inventory!.Remove(itemToRemove);
+                    Character.Inventory!.Remove(itemToRemove);
                     UIMessage = $"Item '{itemName}' wurde aus dem Inventar entfernt";
                     showUIMessage = true;
                 }
             }
 
-            character = await characterManager.Update(character);
+            Character = await characterManager.Update(Character);
 
         }
         catch (Exception ex) {

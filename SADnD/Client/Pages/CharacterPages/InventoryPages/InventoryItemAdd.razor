@@ -45,11 +45,16 @@
 @code {
     [CascadingParameter] 
     public CascadingAppState appState { get; set; }
+    [CascadingParameter]
+    protected CharacterDetails Context { get; set; }
 
-    [Parameter] public bool ShowAddItems { get; set; }
-    [Parameter] public EventCallback OnClose { get; set; }
-    [Parameter] public required Character Character { get; set; }
-    [Parameter] public required string UnitOfWeight { get; set; }
+    [Parameter] 
+    public bool ShowAddItems { get; set; }
+    [Parameter] 
+    public EventCallback OnClose { get; set; }
+    // [Parameter] public required Character Character { get; set; }
+    [Parameter] 
+    public required string UnitOfWeight { get; set; }
 
     private InventoryItem item = new InventoryItem();
     private InventoryItem savedItem = new InventoryItem();
@@ -83,9 +88,9 @@
                 return;
             }
             bool itemExists = false;
-            if (Character.Inventory != null) {
-                if (Character.Inventory.Count > 0) {
-                    itemExists = Character.Inventory.Any(i => i.Item!.Id == item.Id);
+            if (Context.Character.Inventory != null) {
+                if (Context.Character.Inventory.Count > 0) {
+                    itemExists = Context.Character.Inventory.Any(i => i.Item!.Id == item.Id);
                 }
             }
             if (itemExists) {
@@ -94,8 +99,8 @@
                 return;
             }
             else {
-                Character.Inventory.Add(new Inventory() { CharacterId = Character.Id, Item = item, Count = count });
-                Character = await characterManager.Update(Character);
+                Context.Character.Inventory.Add(new Inventory() { CharacterId = Context.Character.Id, Item = item, Count = count });
+                Context.Character = await characterManager.Update(Context.Character);
                 await OnClose.InvokeAsync();
             }
             StateHasChanged();
