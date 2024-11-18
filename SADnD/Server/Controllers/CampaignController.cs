@@ -156,7 +156,7 @@ namespace SADnD.Server.Controllers
             }
         }
 
-        [Authorize(Policy="IsDungeonMaster")]
+        //[Authorize(Policy="IsDungeonMaster")]
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(string id)
         {
