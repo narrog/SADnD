@@ -36,12 +36,12 @@
                             @if (player.UserName != null) {
                                 <td>@player.UserName</td>
                             }
-                            <td>
-                                <button class="btn btn-outline-primary me-2" @onclick="() => RemovePlayer(player)">Infos</button>
+                            @* <td>
+                                <button class="btn btn-outline-primary me-2" @onclick="() => ShowPlayer(player)">Infos</button>
                                 @if (campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
                                     <button class="btn btn-outline-danger me-2" @onclick="() => RemovePlayer(player)">entfernen</button>
                                 }
-                            </td>
+                            </td> *@
                         </tr>
                     }
                 </tbody>
@@ -128,10 +128,6 @@
             await GetOpenJoinRequests();
         }
         StateHasChanged();
-    }
-
-    private async Task RemovePlayer(ApplicationUser player) {
-        await js.InvokeVoidAsync("alert", $"Funktion wird später implementiert");
     }
 
     private async Task DeleteCampaign() {
