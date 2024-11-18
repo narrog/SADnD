@@ -157,7 +157,7 @@ namespace SADnD.Server.Controllers
             catch (Exception ex)
             {
                 // TODO: log Exception
-                return StatusCode(500);
+                return StatusCode(500,ex);
             }
         }
 
