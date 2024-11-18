@@ -29,6 +29,7 @@ namespace SADnD.Server.Controllers
             _userManager = userManager;
             _requestManager = requestManager;
             _campaignManager = campaignManager;
+            _customClaimsService = customClaimsService;
         }
 
         [HttpGet]

@@ -9,14 +9,11 @@
 
 <div class="container-fluid mt-3">
     <strong>Dungeonmaster: </strong><br />
-    @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any())
-    {
+    @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any()) {
         <p>
             <ul>
-                @foreach (var master in campaign.DungeonMasters)
-                {
-                    @if (master.UserName != null)
-                    {
+                @foreach (var master in campaign.DungeonMasters) {
+                    @if (master.UserName != null) {
                         <li>
                             @master.UserName
                         </li>
@@ -25,71 +22,86 @@
             </ul>
         </p>
     }
-    else
-    {
+    else {
         <p>Kein DungeonMaster gefunden</p>
     }
-    @if (campaign.Players != null && campaign.Players.Any())
-    {
-        <strong>Spieler: </strong><br />
-        <p>
-            <ul>
-                @foreach (var player in campaign.Players)
-                {
-                    @if (player.UserName != null)
-                    {
-                        <li>
-                            @player.UserName
-                        </li>
-                    }
-                }
-            </ul>
-        </p>
-    }
     <p><strong>Zugangscode: </strong>@campaign.Id</p>
-    <p><strong>Offene Anfragen</strong>
+    <p>
+        <strong>Mitspieler</strong>
         <table class="table table-sm table-hover table-striped align-middle">
-        @if(joinRequests != null && joinRequests.Any()) {
-            <tbody>
-                @foreach (var request in joinRequests) {
-                    <tr>
-                        @if (request.User != null) {
-                            <td>@request.User.UserName</td>
-                        }
-                        <td>
-                            <button class="btn btn-outline-primary me-2" @onclick="() => JoinRequestAccept(request)">Annehmen</button>
-                            <button class="btn btn-outline-danger me-2" @onclick="() => JoinRequestReject(request)">Ablehnen</button>
-                        </td>
-                        <td>
-                            @requestMessage
-                        </td>
+            @if (campaign.Players != null && campaign.Players.Any()) {
+                <tbody>
+                    @foreach (var player in campaign.Players) {
+                        <tr>
+                            @if (player.UserName != null) {
+                                <td>@player.UserName</td>
+                            }
+                            @* <td>
+                                <button class="btn btn-outline-primary me-2" @onclick="() => ShowPlayer(player)">Infos</button>
+                                @if (campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
+                                    <button class="btn btn-outline-danger me-2" @onclick="() => RemovePlayer(player)">entfernen</button>
+                                }
+                            </td> *@
+                        </tr>
+                    }
+                </tbody>
+            }
+            else {
+                <tr><td>keine Mitspieler gefunden</td></tr>
+            }
+        </table>
+    </p>
+    <p>
+        <strong>Offene Anfragen</strong>
+        <table class="table table-sm table-hover table-striped align-middle">
+            @if (joinRequests != null && joinRequests.Any()) {
+                <tbody>
+                    @foreach (var request in joinRequests) {
+                        <tr>
+                            @if (request.User != null) {
+                                <td>@request.User.UserName</td>
+                            }
+                            <td>
+                                <button class="btn btn-outline-primary me-2" @onclick="() => JoinRequestAccept(request)">Annehmen</button>
+                                <button class="btn btn-outline-danger me-2" @onclick="() => JoinRequestReject(request)">Ablehnen</button>
+                            </td>
+                            <td>
+                                @requestMessage
+                            </td>
 
-                    </tr>
-                }
-            </tbody>
-        }
-        else {
-            <tr><td>keine offenen Anfragen</td></tr>
-        }
+                        </tr>
+                    }
+                </tbody>
+            }
+            else {
+                <tr><td>keine offenen Anfragen</td></tr>
+            }
         </table>
     </p>
 </div>
 <div class="row my-4 pt-4 border-top">
     <div>
         <a class="btn btn-secondary me-2" onclick="history.back();">Zurück</a>
-        <button class="btn btn-danger" @onclick="DeleteCampaign">Löschen</button>
+        @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
+            <button class="btn btn-danger" @onclick="DeleteCampaign">Löschen</button>
+        }
     </div>
-    
+
 </div>
 
 
 @code {
-    [Parameter] public required string Id { get; set; }
+    [CascadingParameter]
+    public CascadingAppState appState { get; set; }
+    [Parameter]
+    public required string Id { get; set; }
     private Campaign campaign = new Campaign();
     private IEnumerable<JoinRequest>? joinRequests;
     private string requestMessage = "";
+    private string currentUserId;
 
     protected override async Task OnInitializedAsync() {
+        currentUserId = appState.UserId;
         campaign = await campaignManager.GetByID(Id);
         await GetOpenJoinRequests();
     }
