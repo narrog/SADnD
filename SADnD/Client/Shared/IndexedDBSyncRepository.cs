@@ -240,7 +240,6 @@ namespace SADnD.Client.Shared
             if (IsOnline)
             {
                 returnValue = await _apiRepository.Insert(entity);
-                var Id = primaryKey.GetValue(returnValue);
                 await InsertOffline(returnValue);
             }
             else
@@ -314,18 +313,17 @@ namespace SADnD.Client.Shared
         }
         public async Task<TEntity> Update(TEntity entityToUpdate)
         {
-            TEntity returnValue;
-
+            TEntity localEntity;
             if (IsOnline)
             {
-                returnValue = await _apiRepository.Update(entityToUpdate);
-                var Id = primaryKey.GetValue(returnValue);
-                returnValue = await UpdateKeyToLocal(returnValue);
-                await UpdateOffline(returnValue);
+                entityToUpdate = await _apiRepository.Update(entityToUpdate);
+                localEntity = JsonConvert.DeserializeObject<TEntity>(JsonConvert.SerializeObject(entityToUpdate));
+                localEntity = await UpdateKeyToLocal(localEntity);
+                await UpdateOffline(localEntity);
             }
             else
-                returnValue = await UpdateOffline(entityToUpdate);
-            return returnValue;
+                await UpdateOffline(entityToUpdate);
+            return entityToUpdate;
         }
         public async Task<TEntity> UpdateOffline(TEntity entityToUpdate)
         {

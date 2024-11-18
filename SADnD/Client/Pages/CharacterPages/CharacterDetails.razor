@@ -168,7 +168,6 @@
     }
     private async Task DecreaseItemCount(Inventory inventoryItem) {
         showUIMessage = false;
-
         if (inventoryItem.Count == 1) {
 
             await DeleteItemFromInventory(inventoryItem);
@@ -185,11 +184,14 @@
     }
 
     private async Task DeleteItemFromInventory(Inventory inventoryItem) {
-        try {
-            if (Character.Inventory != null && Character.Inventory.Any()) {
+        try
+        {
+            if (Character.Inventory != null && Character.Inventory.Any())
+            {
                 var itemToRemove = Character.Inventory.FirstOrDefault(i => i.Item.Id == inventoryItem.Item.Id);
 
-                if (itemToRemove != null) {
+                if (itemToRemove != null)
+                {
 
                     string itemName = itemToRemove.Item!.Name;
                     Character.Inventory!.Remove(itemToRemove);
@@ -197,7 +199,6 @@
                     showUIMessage = true;
                 }
             }
-
             Character = await characterManager.Update(Character);
 
         }
