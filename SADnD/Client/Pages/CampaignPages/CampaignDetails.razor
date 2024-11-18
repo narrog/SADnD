@@ -131,13 +131,19 @@
     }
 
     private async Task DeleteCampaign() {
-        // string toDeleteName = campaign.Name;
-        // bool confirm = await js.InvokeAsync<bool>("confirm", $"Soll der Eintrag '{toDeleteName}' wirklich gelöscht werden?");
-        // if (!confirm) return;
+        string toDeleteName = campaign.Name;
+        bool confirm = await js.InvokeAsync<bool>("confirm", $"Soll der Eintrag '{toDeleteName}' wirklich gelöscht werden?");
+        if (!confirm) return;
 
-        //await campaignManager.Delete(campaign.Id);
+        bool success = await campaignManager.Delete(campaign.Id);
 
-        await js.InvokeVoidAsync("alert", $"Funktion wird später implementiert");
+        if (success) {
+            await js.InvokeVoidAsync("alert", $"Kampagne '{toDeleteName}' erfolgreich gelöscht.");
+            await js.InvokeVoidAsync("history.back");
+        }
+        else {
+            await js.InvokeVoidAsync("alert", $"Kampagne '{toDeleteName}' konnte nicht gelöscht werden.");
+        }
     }
 
 }

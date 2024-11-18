@@ -109,7 +109,7 @@
     }
 
     private async Task GetAllCampaigns() {
-        campaigns = await campaignManager.GetAll();
+        campaigns = (await campaignManager.GetAll()).OrderBy(x => x.Name);
     }
 
     private async Task GetOpenJoinRequests() {
