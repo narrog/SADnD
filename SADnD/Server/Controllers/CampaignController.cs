@@ -129,7 +129,14 @@ namespace SADnD.Server.Controllers
         {
             try
             {
-                await _campaignManager.Update(campaign);
+                var oldCampaign = (await _campaignManager.Get(x => x.Id == campaign.Id,null,"DungeonMasters,Players")).FirstOrDefault();
+                foreach (var player in oldCampaign.Players)
+                {
+                    if (!campaign.Players.Any(p => p.Id == player.Id))
+                        oldCampaign.Players.Remove(player);
+                }
+                oldCampaign.Name = campaign.Name;
+                await _campaignManager.Update(oldCampaign);
                 var result = (await _campaignManager.Get(x => x.Id == campaign.Id)).FirstOrDefault();
                 if (result != null)
                 {
