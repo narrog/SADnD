@@ -5,6 +5,7 @@ using SADnD.Server.Data;
 using SADnD.Shared.Models;
 using Microsoft.AspNetCore.Identity;
 using SADnD.Server.Areas.Identity;
+using SADnD.Server.Migrations;
 
 var builder = WebApplication.CreateBuilder(args);
 
