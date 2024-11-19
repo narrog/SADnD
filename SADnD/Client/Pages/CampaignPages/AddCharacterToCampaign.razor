@@ -45,6 +45,8 @@
     [Parameter]
     public required Campaign Campaign { get; set; }
     [Parameter]
+    public Character? OriginalCharacter { get; set; }
+    [Parameter]
     public EventCallback OnClose { get; set; }
 
     private IEnumerable<Character>? charactersFromUser;
@@ -73,9 +75,10 @@
     private async void Post() {
 
         try {
-            Console.WriteLine("Methode Post aufgerufen");
-            Console.WriteLine($"selechtedCharacter: {selectedCharacter}");
-            Console.WriteLine($"selectedCharacterId: {selectedCharacterId}");
+            if (OriginalCharacter != null) {
+                Campaign.Characters.Remove(OriginalCharacter);
+            }
+
             Campaign.Characters.Add(selectedCharacter);
             await campaignManager.Update(Campaign);
             Close();
