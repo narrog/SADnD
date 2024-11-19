@@ -41,16 +41,36 @@
                                     @if (player.UserName != null) {
                                         <td>@player.UserName</td>
                                     }
-                                    <td>
-                                        /* Charackter */
-                                    </td>
-                                    <td>
-                                        /* Rasse */
-                                    </td>
+                                    @if(campaign.Characters != null && campaign.Characters.Any(c => c.UserId == player.Id)) {
+                                        GetPlayerCharacter(player);
+                                        @if (playerCharacter.Name != null) {
+                                            <td>@playerCharacter.Name</td>
+                                        }
+                                        <td>
+                                            @playerCharacter.Race.Name
+                                        </td>
+                                        <td>
+                                            @if (playerCharacter.Classes != null & playerCharacter.Classes.Any()) {
+                                                <ul class="m-0">
+                                                    @foreach (var charClass in playerCharacter.Classes) {
+                                                        <li>@charClass.Class.Name - Level @charClass.Level</li>
+                                                    }
+                                                </ul>
+                                            }
+                                        </td>
+                                    }
+                                    else {
+                                        <td>
+                                            /* Charackter */
+                                        </td>
+                                        <td>
+                                            /* Rasse */
+                                        </td>
 
-                                    <td>
-                                        /* Klassen + Level */
-                                    </td>
+                                        <td>
+                                            /* Klassen + Level */
+                                        </td>
+                                    }
                                     <td>
                                         @* <button class="btn btn-outline-primary me-2" @onclick="() => ShowCharacter(player)">Infos</button> *@
                                         @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
@@ -67,38 +87,6 @@
                     }
                     else {
                         <tr><td>keine Mitspieler gefunden</td></tr>
-                    }
-                </table>
-            </p>
-            <p>
-                @* Nur zu Testzwecken, wird später gelöscht!  *@
-                <strong>Charaktere - zu Testzwecken, wird gelöscht und bei Mitspieler angezeigt</strong>
-                <table class="table table-sm table-hover table-striped align-middle">
-                    @if (campaign.Characters != null && campaign.Characters.Any()) {
-                        <tbody>
-                            @foreach (var character in campaign.Characters) {
-                                <tr>
-                                    @if (character.Name != null) {
-                                        <td>@character.Name</td>
-                                    }
-                                    <td>
-                                        @character.Race.Name
-                                    </td>
-                                    <td>
-                                        @if (character.Classes != null & character.Classes.Any()) {
-                                            <ul>
-                                                @foreach (var charClass in character.Classes) {
-                                                    <li>@charClass.Class.Name - Level @charClass.Level</li>
-                                                }
-                                            </ul>       
-                                        }
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    }
-                    else {
-                        <tr><td>keine Charaktere gefunden</td></tr>
                     }
                 </table>
             </p>
@@ -163,6 +151,7 @@
     [Parameter]
     public required string Id { get; set; }
     private Campaign campaign = new Campaign();
+    private Character playerCharacter = new Character();
     private IEnumerable<JoinRequest>? joinRequests;
     private string requestMessage = "";
     private string UIMessage = "";
@@ -218,6 +207,9 @@
     }
     private void ShowAddCharacter() {
         showAddCharacter = !showAddCharacter;
+    }
+    private void GetPlayerCharacter(ApplicationUser user) {
+        playerCharacter = campaign.Characters.FirstOrDefault(c => c.UserId == user.Id);
     }
 
     private async Task RemovePlayer(ApplicationUser playerToDelete, bool isKicked) {
