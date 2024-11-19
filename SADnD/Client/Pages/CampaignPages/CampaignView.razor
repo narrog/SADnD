@@ -84,8 +84,10 @@
                     }
                 </tbody>
             </table>
-
         </div>
+    }
+    @if (!string.IsNullOrEmpty(UIMessage)) {
+        <p>@UIMessage</p>
     }
 </div>
 
@@ -97,6 +99,7 @@
     string controllerName = "campaign";
     private IEnumerable<Campaign>? campaigns;
     public IEnumerable<JoinRequest>? joinRequests;
+    private string UIMessage = "";
 
     protected override async Task OnInitializedAsync() {
         await GetAllCampaigns();
@@ -120,11 +123,11 @@
         if (joinRequest != null) {
             if (appState.UserId.Equals(joinRequest.UserId)) {
                 await joinRequestManager.Delete(joinRequest.Id);
-                await js.InvokeVoidAsync("alert", "Beitrittsanfrage entfernt");
+                UIMessage = "Beitrittsanfrage entfernt";
             }
             else {
                 await joinRequestManager.Delete(joinRequest.Id);
-                await js.InvokeVoidAsync("alert", "Beitrittsanfrage abgelehnt");
+                UIMessage = "Beitrittsanfrage abgelehnt";
             }
             await GetOpenJoinRequests();
         }
@@ -136,7 +139,7 @@
             joinRequest.Accepted = DateTime.UtcNow;
             joinRequest.User = null;
             await joinRequestManager.Update(joinRequest);
-            await js.InvokeVoidAsync("alert", "Beitrittsanfrage akzeptiert");
+            UIMessage = "Beitrittsanfrage akzeptiert";
             await GetOpenJoinRequests();
         }
         StateHasChanged();
