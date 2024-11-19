@@ -1,0 +1,91 @@
+﻿@inject CharacterManager characterManager
+@inject CampaignManager campaignManager
+
+<h3>Charakter zuweisen</h3>
+
+<EditForm Model="@selectedCharacter" OnValidSubmit="Post">
+    <DataAnnotationsValidator />
+    Name:
+    @if (charactersFromUser != null) {
+        <InputSelect @bind-Value="SelectedCharacterId">
+            <option selected value="0">Bitte auswählen</option>
+            @foreach (var userCharacter in charactersFromUser) {
+                <option value="@userCharacter.Id">@userCharacter.Name</option>
+            }
+        </InputSelect>
+    }
+    <br /><br />
+    <SubmitButton />
+    <button class="btn btn-outline-secondary me-2" type="button" @onclick="Close">Abbrechen</button>
+
+    <ValidationSummary class="mt-3" />
+</EditForm>
+
+@if (selectedCharacter.Id != 0) {
+    <div class="mt-2">
+        <p>
+            <strong>Name:</strong> @selectedCharacter.Name <br />
+            <strong>Rasse:</strong> @selectedCharacter.Race.Name <br />
+            <strong>Klassen:</strong><br />
+            @if (selectedCharacter.Classes != null) {
+                <ul>
+                    @foreach (var characterClass in selectedCharacter.Classes) {
+                        <li>@characterClass.Class.Name - Level: @characterClass.Level</li>
+                    }
+                </ul>
+            }
+            
+        </p>
+    </div>
+}
+
+
+
+@code {
+    [Parameter]
+    public required Campaign Campaign { get; set; }
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    private IEnumerable<Character>? charactersFromUser;
+    private Character selectedCharacter = new();
+
+    private int selectedCharacterId;
+    public int SelectedCharacterId {
+        get => selectedCharacterId;
+        set {
+            selectedCharacterId = value;
+
+            // Setze den Charakter, falls vorhanden
+            selectedCharacter = charactersFromUser?.FirstOrDefault(c => c.Id == selectedCharacterId) ?? new Character();
+        }
+    }
+
+    protected override async Task OnInitializedAsync() {
+        charactersFromUser = await characterManager.GetAll();
+
+        // Initialisierung sicherstellen
+        if (charactersFromUser != null && !charactersFromUser.Any(c => c.Id == selectedCharacterId)) {
+            selectedCharacter = new Character();
+        }
+    }
+
+    private async void Post() {
+
+        try {
+            Console.WriteLine("Methode Post aufgerufen");
+            Console.WriteLine($"selechtedCharacter: {selectedCharacter}");
+            Console.WriteLine($"selectedCharacterId: {selectedCharacterId}");
+            Campaign.Characters.Add(selectedCharacter);
+            await campaignManager.Update(Campaign);
+            Close();
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"{ex.Message}");
+        }
+    }
+
+    private async void Close() {
+        await OnClose.InvokeAsync();
+    }
+}

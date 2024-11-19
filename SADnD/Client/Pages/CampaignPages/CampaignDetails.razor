@@ -9,7 +9,7 @@
 
 <div class="container-fluid mt-3">
     <div class="row">
-        <div class="col-12 col-md-6">
+        <div class="col-12 col-md-8">
             <strong>Dungeonmaster: </strong><br />
             @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any()) {
                 <p>
@@ -42,11 +42,22 @@
                                         <td>@player.UserName</td>
                                     }
                                     <td>
+                                        /* Charackter */
+                                    </td>
+                                    <td>
+                                        /* Rasse */
+                                    </td>
+
+                                    <td>
+                                        /* Klassen + Level */
+                                    </td>
+                                    <td>
                                         @* <button class="btn btn-outline-primary me-2" @onclick="() => ShowCharacter(player)">Infos</button> *@
                                         @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
-                                        <button class="btn btn-outline-danger me-2" @onclick="() => RemovePlayer(player, true)">entfernen</button>
+                                            <button class="btn btn-outline-danger me-2" @onclick="() => RemovePlayer(player, true)">entfernen</button>
                                         }
                                         @if (player.Id == currentUserId) {
+                                            <button class="btn btn-outline-primary me-2" @onclick="ShowAddCharacter">Zuweisung ändern</button>
                                             <button class="btn btn-outline-danger me-2" @onclick="() => RemovePlayer(player, false)">austreten</button>
                                         }
                                     </td>
@@ -56,6 +67,38 @@
                     }
                     else {
                         <tr><td>keine Mitspieler gefunden</td></tr>
+                    }
+                </table>
+            </p>
+            <p>
+                @* Nur zu Testzwecken, wird später gelöscht!  *@
+                <strong>Charaktere - zu Testzwecken, wird gelöscht und bei Mitspieler angezeigt</strong>
+                <table class="table table-sm table-hover table-striped align-middle">
+                    @if (campaign.Characters != null && campaign.Characters.Any()) {
+                        <tbody>
+                            @foreach (var character in campaign.Characters) {
+                                <tr>
+                                    @if (character.Name != null) {
+                                        <td>@character.Name</td>
+                                    }
+                                    <td>
+                                        @character.Race.Name
+                                    </td>
+                                    <td>
+                                        @if (character.Classes != null & character.Classes.Any()) {
+                                            <ul>
+                                                @foreach (var charClass in character.Classes) {
+                                                    <li>@charClass.Class.Name - Level @charClass.Level</li>
+                                                }
+                                            </ul>       
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    }
+                    else {
+                        <tr><td>keine Charaktere gefunden</td></tr>
                     }
                 </table>
             </p>
@@ -89,6 +132,12 @@
                 </p>
             }
         </div>
+        @if (showAddCharacter) {
+            <div class="col-12 col-md-4">
+                <AddCharacterToCampaign Campaign="campaign"
+                                        OnClose="ShowAddCharacter" />
+            </div>
+        }
     </div>
 </div>
 <div class="row my-4 pt-4 border-top">
@@ -118,6 +167,7 @@
     private string requestMessage = "";
     private string UIMessage = "";
     private string currentUserId = "";
+    private bool showAddCharacter;
 
     protected override async Task OnInitializedAsync() {
         currentUserId = appState.UserId;
@@ -165,6 +215,9 @@
         catch (Exception ex) {
             Console.WriteLine($"Fehler beim Teilen: {ex.Message}");
         }
+    }
+    private void ShowAddCharacter() {
+        showAddCharacter = !showAddCharacter;
     }
 
     private async Task RemovePlayer(ApplicationUser playerToDelete, bool isKicked) {
