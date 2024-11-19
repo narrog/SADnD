@@ -50,6 +50,11 @@
             </div>
         }
     </div>
+    @if(!string.IsNullOrEmpty(UIMessage)){
+        <div class="row mt-3">
+            @UIMessage
+        </div>
+    }
 </div>
 
 
@@ -60,6 +65,7 @@
     private InventoryItem item = new InventoryItem();
     private string unitOfWeight = "kg";
     private bool showEditForm;
+    private string UIMessage = "";
 
     protected override async Task OnInitializedAsync() {
         await GetAllItems();
@@ -73,17 +79,19 @@
         bool confirm = await js.InvokeAsync<bool>("confirm", $"Soll der Eintrag '{name}' wirklich gelöscht werden?\r\nDas Item wird bei allen Charakteren entfernt.\r\nDas Löschen kann nicht Rückgängig gemacht werden");
         if (confirm) {
             await inventoryItemManager.Delete(itemToDelete.Id);
-            await js.InvokeVoidAsync("alert", $"Item '{name}' erfolgreich gelöscht");
+            UIMessage = $"Item '{name}' erfolgreich gelöscht";
             await GetAllItems();
             StateHasChanged();
         }
         return;
     }
     private void EditItem(InventoryItem itemToEdit) {
+        UIMessage = "";
         item = itemToEdit;
         showEditForm = true;
     }
     private void AddItem() {
+        UIMessage = "";
         item = new InventoryItem();
         showEditForm = true;
     }
@@ -92,12 +100,12 @@
         try {
             if(item.Id != 0) {
                 await inventoryItemManager.Update(item);
-                await js.InvokeVoidAsync("alert", $"Item '{item.Name}' erfolgreich bearbeitet");                
+                UIMessage = $"Item '{item.Name}' erfolgreich bearbeitet";                
             }
             else {
                 item.UserId = appState.UserId;
                 await inventoryItemManager.Insert(item);
-                await js.InvokeVoidAsync("alert", $"Item '{item.Name}' erfolgreich erstellt");
+                UIMessage = $"Item '{item.Name}' erfolgreich erstellt";
             }
             await Close();
         }
