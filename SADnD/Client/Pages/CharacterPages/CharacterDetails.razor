@@ -7,12 +7,11 @@
 
 <CascadingValue Value="@this" IsFixed="true">
     @if (Character != null) {
-        <h3>Charakter "@Character.Name"</h3>
+        <h3>"@Character.Name"</h3>
 
         <div class="container-fluid mt-3">
             <div class="row">
                 <div class="col-12 col-md-4">
-                    <h4>Details</h4>
                     <p><strong>Rasse: </strong>@(Character.Race != null ? Character.Race.Name : "Unbekannt")</p>
                     @if (Character.Classes != null && Character.Classes.Any()) {
                         <p>
@@ -31,14 +30,40 @@
                     else {
                         <p>Keine Klasse zugeordnet</p>
                     }
-                    <p><strong>Grösse-Kategorie: </strong>@(Character.SizeCategory != null ? Character.SizeCategory : "Unbekannt")</p>
-                    <p><strong>Grösse: </strong>@(Character.Size != null ? Character.Size : "Unbekannt")</p>
-                    <p><strong>Geschlecht: </strong>@(Character.Sex != null ? Character.Sex : "Unbekannt")</p>
-                    <p><strong>Gesinnung: </strong>@(Character.Alignment != null ? Character.Alignment : "Unbekannt")</p>
-                    <p><strong>Alter: </strong>@(Character.Age != null ? Character.Age : "Unbekannt")</p>
-                    <p><strong>Gewicht: </strong>@(Character.Weight != null ? Character.Weight : "Unbekannt")</p>
+                    @* TODO:
+                    <p><strong>Trefferpunkte: </strong>@Character.Hitpoints </p>
+                    <p><strong>Spellslots: </strong></p> *@
+                    <a style="cursor: pointer;" @onclick="ShowCharacterDetails"><span class="oi oi-eye me-2"></span> Details anzeigen</a>
+                </div>
+                @if (showCharacterDetails) {
+                    <div class="col-12 col-md-2">
+                        <p>
+                            <strong>Grösse-Kategorie: </strong>@(Character.SizeCategory != null ? Character.SizeCategory : "Unbekannt")<br />
+                            <strong>Grösse: </strong>@(Character.Size != null ? Character.Size : "Unbekannt")<br />
+                            <strong>Geschlecht: </strong>@(Character.Sex != null ? Character.Sex : "Unbekannt")<br />
+                            <strong>Gesinnung: </strong>@(Character.Alignment != null ? Character.Alignment : "Unbekannt")<br />
+                            <strong>Alter: </strong>@(Character.Age != null ? Character.Age : "Unbekannt")<br />
+                            <strong>Gewicht: </strong>@(Character.Weight != null ? Character.Weight : "Unbekannt")
+                        </p>
+                    </div>
+                    <div class="col-12 col-md-2">
+                        @* TODO:
+                        <button class="btn btn-outline-primary" @onclick="EditCharacterDetails">bearbeiten</button> *@
+                        <button class="btn btn-outline-secondary" @onclick="ShowCharacterDetails">Details schliessen</button>
+                    </div>
+                }
+            </div>
+            <div class="row">
+                <div class="col-12 col-md-4">
+                    @* TODO:
+                       Icons für die verschiedenen Notizen
+
+                    *@
                 </div>
                 <div class="col-12 col-md-4">
+                    @* TODO:
+                        Inhalt Dynamisch anpassen, je nach dem, welcher "Menüpunkt" angewählt wird
+                    *@
                     <h4>Inventar</h4>
                     <table class="table table-striped">
                         <tbody>
@@ -118,6 +143,7 @@
 
     private bool showAddItems;
     private bool showUIMessage;
+    private bool showCharacterDetails;
     private string UIMessage = string.Empty;
     private string unitOfWeight = "kg";
     private float weightTotal;
@@ -135,6 +161,10 @@
         // if (!confirm) return;
 
         //await characterManager.Delete(character.Id);
+    }
+    private void ShowCharacterDetails() {
+        showCharacterDetails = !showCharacterDetails;
+        StateHasChanged();
     }
 
     private async void ShowAddItems() {
