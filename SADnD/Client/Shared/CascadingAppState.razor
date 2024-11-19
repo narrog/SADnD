@@ -1,4 +1,5 @@
 ﻿@using System.Security.Claims
+@inject NoteManager noteManager
 
 <CascadingValue Value="this">
     @ChildContent
@@ -30,5 +31,10 @@
             return claims;
         }
         private set {}
+    }
+    public IEnumerable<Note> Notes { get; set; }
+    public async Task GetNotes()
+    {
+        Notes = await noteManager.GetAll();
     }
 }

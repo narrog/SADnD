@@ -25,15 +25,12 @@ namespace SADnD.Shared.Models
         public string? Background {  get; set; }
         [Range (1, int.MaxValue, ErrorMessage = "Alter ungültig")]
         public int? Age { get; set; }
-        // Auswahl: S, M, L
         public char? SizeCategory { get; set; }
         [Range(0, int.MaxValue, ErrorMessage = "Grösse ungültig")]
         public float? Size {  get; set; }
         [Range(0, int.MaxValue, ErrorMessage = "Gewicht ungültig")]
         public float? Weight { get; set; }
-        // maybe dropdown?
         public string? Sex { get; set; }
-        // Auswahl: Rechtschaffen Gut, Neutral Gut, Chaotisch Gut, Rechtschaffen Neutral, Neutral, Chaotisch Neutral, Rechtschaffen Böse, Neutral Böse, Chaotisch Böse
         public string? Alignment { get; set; }
         public string? UserId { get; set; }
         [JsonIgnore]
@@ -42,5 +39,6 @@ namespace SADnD.Shared.Models
         [JsonIgnore]
         public Campaign? Campaign { get; set; }
         public ICollection<Inventory>? Inventory { get; set; }
+        public ICollection<Note>? Notes { get; set; }
     }
 }

@@ -150,6 +150,27 @@ builder.Services.AddBlazorDB(options =>
             PrimaryKey = "Id",
             PrimaryKeyAuto = true,
             UniqueIndexes = new List<string> {"Id"}
+        },
+        new StoreSchema()
+        {
+            Name = "Note",
+            PrimaryKey = "Id",
+            PrimaryKeyAuto = true,
+            UniqueIndexes = new List<string> {"Id"}
+        },
+        new StoreSchema()
+        {
+            Name = $"Note{Globals.LocalTransactionsSuffix}",
+            PrimaryKey = "Id",
+            PrimaryKeyAuto = true,
+            UniqueIndexes = new List<string> {"Id"}
+        },
+        new StoreSchema()
+        {
+            Name = $"Note{Globals.KeysSuffix}",
+            PrimaryKey = "Id",
+            PrimaryKeyAuto = true,
+            UniqueIndexes = new List<string> {"Id"}
         }
     };
 });
@@ -165,5 +186,7 @@ builder.Services.AddScoped<JoinRequestManager>();
 //builder.Services.AddScoped<JoinRequestSyncManager>();
 builder.Services.AddScoped<InventoryItemManager>();
 builder.Services.AddScoped<InventoryItemSyncManager>();
+builder.Services.AddScoped<NoteManager>();
+//builder.Services.AddScoped<NoteSyncManager>();
 
 await builder.Build().RunAsync();
