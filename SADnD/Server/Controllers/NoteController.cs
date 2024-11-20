@@ -40,7 +40,8 @@ namespace SADnD.Server.Controllers
         {
             try
             {
-                var result = await _noteManager.GetAll();
+                var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
+                var result = await _noteManager.Get(n => n.UserId == id);
                 return Ok(new APIListOfEntityResponse<Note>()
                 {
                     Success = true,
@@ -59,8 +60,9 @@ namespace SADnD.Server.Controllers
         {
             try
             {
-                var result = (await _noteManager.GetByID(id));
-                if (result != null)
+                var userId = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
+                var result = await _noteManager.GetByID(id);
+                if (result != null && result.UserId == userId)
                 {
                     return Ok(new APIEntityResponse<Note>()
                     {
@@ -136,6 +138,11 @@ namespace SADnD.Server.Controllers
             {
                 var note = (Note)jsNote.ToObject(typeMapping[jsNote["type"]?.ToString()]);
 
+                var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
+                if (note.UserId == null || note.UserId != id)
+                {
+                    return StatusCode(403);
+                }
                 await _noteManager.Update(note);
                 var result = (await _noteManager.Get(x => x.Id == note.Id)).FirstOrDefault();
                 if (result != null)
@@ -168,22 +175,26 @@ namespace SADnD.Server.Controllers
         {
             try
             {
-                if (await _noteManager.Get(x => x.Id == id) != null)
+                var target = (await _noteManager.Get(x => x.Id == id)).FirstOrDefault();
+                if (target != null)
                 {
-                    var success = await _noteManager.Delete(id);
-                    if (success)
+                    var userId = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
+                    if (target.UserId == userId)
                     {
-                        return NoContent();
+                        var success = await _noteManager.Delete(id);
+                        if (success)
+                        {
+                            return NoContent();
+                        }
+                        else
+                        {
+                            return StatusCode(500);
+                        }
                     }
                     else
-                    {
-                        return StatusCode(500);
-                    }
+                        return StatusCode(403);
                 }
-                else
-                {
-                    return StatusCode(500);
-                }
+                return StatusCode(500);
             }
             catch (Exception ex)
             {
