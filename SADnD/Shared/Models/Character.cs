@@ -19,6 +19,7 @@ namespace SADnD.Shared.Models
         public int RaceId { get; set; }
         public Race? Race { get; set; }
         public ICollection<CharacterClass>? Classes { get; set; }
+        public int? ArmorClass {  get; set; }
         public int Hitpoints { get; set; }
         public int TemporaryHitpoints { get; set; } = 0;
         public bool[]? DeathRoles { get; set; }
