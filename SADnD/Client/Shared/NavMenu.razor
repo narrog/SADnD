@@ -34,16 +34,20 @@
                 
             </ul>
             <LoginDisplay />
-            <ConnectivityIndicator>
-                <ShowOnline>
-                    <div>Online</div>
-                </ShowOnline>
-                <ShowOffline>
-                    <div>Offline</div>
-                </ShowOffline>
-            </ConnectivityIndicator>
-            <LoginDisplay />
+
         </div>
+        <ConnectivityIndicator>
+            <ShowOnline>
+                @* <div>Online</div> *@
+            </ShowOnline>
+            <ShowOffline>
+                <ul class="navbar-nav mb-2 mb-md-0">
+                    <li class="nav-item">
+                        <span class="bi bi-cloud-slash" aria-hidden="true"></span>
+                    </li>
+                </ul>
+            </ShowOffline>
+        </ConnectivityIndicator>
     </div>
 </nav>
 
