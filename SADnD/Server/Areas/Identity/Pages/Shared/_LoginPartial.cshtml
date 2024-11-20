@@ -15,6 +15,21 @@
 @if (SignInManager.IsSignedIn(User))
 {
     <li class="nav-item">
+        <a class="nav-link" href="/" Match="NavLinkMatch.All">
+            <span class="oi oi-home" aria-hidden="true"></span> Home
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/all-campaigns">
+            <span class="oi oi-document" aria-hidden="true"></span> Kampagnen
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/all-characters">
+            <span class="oi oi-people" aria-hidden="true"></span> Charakter
+        </a>
+    </li>
+    <li class="nav-item">
         <a  class="nav-link" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Dein Konto</a>
     </li>
     <li class="nav-item">
