@@ -76,11 +76,14 @@
 
         try {
             if (OriginalCharacter != null) {
-                Campaign.Characters.Remove(OriginalCharacter);
+                OriginalCharacter.CampaignId = null;
+                await characterManager.Update(OriginalCharacter);
+                //Campaign.Characters.Remove(OriginalCharacter);
             }
-
-            Campaign.Characters.Add(selectedCharacter);
-            await campaignManager.Update(Campaign);
+            selectedCharacter.CampaignId = Campaign.Id;
+            await characterManager.Update(selectedCharacter);
+            // Campaign.Characters.Add(selectedCharacter);
+            // await campaignManager.Update(Campaign);
             Close();
         }
         catch (Exception ex) {
