@@ -47,16 +47,16 @@
                                             <td>@entry.Character.Name</td>
                                         }
                                         <td>
-                                            @*@entry.Character.Race.Name*@
+                                            @entry.Character.Race.Name
                                         </td>
                                         <td>
-                                            @* @if (entry.Character.Classes != null & entry.Character.Classes.Any()) {
+                                            @if (entry.Character.Classes != null & entry.Character.Classes.Any()) {
                                                 <ul class="m-0">
                                                     @foreach (var charClass in entry.Character.Classes) {
                                                         <li>@charClass.Class.Name - Level @charClass.Level</li>
                                                     }
                                                 </ul>
-                                            } *@
+                                            }
                                         </td>
                                     }@* 
                                     else {

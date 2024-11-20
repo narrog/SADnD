@@ -35,7 +35,7 @@ namespace SADnD.Server.Controllers
             {
                 var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
                 var user = await _userManager.FindByIdAsync(id);
-                var result = await _campaignManager.Get(x => x.DungeonMasters.Any(dm  => dm.Id == user.Id) || x.Players.Any(p => p.Id == user.Id),null,"DungeonMasters,Players,Characters");
+                var result = await _campaignManager.Get(x => x.DungeonMasters.Any(dm  => dm.Id == user.Id) || x.Players.Any(p => p.Id == user.Id),null,"DungeonMasters,Players,Characters.Race,Characters.Classes.Class");
                 return Ok(new APIListOfEntityResponse<Campaign>()
                 {
                     Success = true,
@@ -54,7 +54,7 @@ namespace SADnD.Server.Controllers
         {
             try
             {
-                var result = (await _campaignManager.Get(x => x.Id == id.ToUpper(), null, "DungeonMasters,Players,Characters")).FirstOrDefault();
+                var result = (await _campaignManager.Get(x => x.Id == id.ToUpper(), null, "DungeonMasters,Players,Characters.Race,Characters.Classes.Class")).FirstOrDefault();
                 if (result != null)
                 {
                     return Ok(new APIEntityResponse<Campaign>()
