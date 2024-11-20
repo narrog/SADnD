@@ -41,12 +41,15 @@
                                     @if (player.UserName != null) {
                                         <td>@player.UserName</td>
                                     }
-                                    @* <td>
-                            <button class="btn btn-outline-primary me-2" @onclick="() => ShowCharacter(player)">Infos</button>
-                            @if (campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
-                            <button class="btn btn-outline-danger me-2" @onclick="() => RemovePlayer(player)">entfernen</button>
-                            }
-                            </td> *@
+                                    <td>
+                                        @* <button class="btn btn-outline-primary me-2" @onclick="() => ShowCharacter(player)">Infos</button> *@
+                                        @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
+                                        <button class="btn btn-outline-danger me-2" @onclick="() => RemovePlayer(player, true)">entfernen</button>
+                                        }
+                                        @if (player.Id == currentUserId) {
+                                            <button class="btn btn-outline-danger me-2" @onclick="() => RemovePlayer(player, false)">austreten</button>
+                                        }
+                                    </td>
                                 </tr>
                             }
                         </tbody>
@@ -56,33 +59,35 @@
                     }
                 </table>
             </p>
-            <p>
-                <strong>Offene Anfragen</strong>
-                <table class="table table-sm table-hover table-striped align-middle">
-                    @if (joinRequests != null && joinRequests.Any()) {
-                        <tbody>
-                            @foreach (var request in joinRequests) {
-                                <tr>
-                                    @if (request.User != null) {
-                                        <td>@request.User.UserName</td>
-                                    }
-                                    <td>
-                                        <button class="btn btn-outline-primary me-2" @onclick="() => JoinRequestAccept(request)">Annehmen</button>
-                                        <button class="btn btn-outline-danger me-2" @onclick="() => JoinRequestReject(request)">Ablehnen</button>
-                                    </td>
-                                    <td>
-                                        @requestMessage
-                                    </td>
+            @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
+                <p>
+                    <strong>Offene Anfragen</strong>
+                    <table class="table table-sm table-hover table-striped align-middle">
+                        @if (joinRequests != null && joinRequests.Any()) {
+                            <tbody>
+                                @foreach (var request in joinRequests) {
+                                    <tr>
+                                        @if (request.User != null) {
+                                            <td>@request.User.UserName</td>
+                                        }
+                                        <td>
+                                            <button class="btn btn-outline-primary me-2" @onclick="() => JoinRequestAccept(request)">Annehmen</button>
+                                            <button class="btn btn-outline-danger me-2" @onclick="() => JoinRequestReject(request)">Ablehnen</button>
+                                        </td>
+                                        <td>
+                                            @requestMessage
+                                        </td>
 
-                                </tr>
-                            }
-                        </tbody>
-                    }
-                    else {
-                        <tr><td>keine offenen Anfragen</td></tr>
-                    }
-                </table>
-            </p>
+                                    </tr>
+                                }
+                            </tbody>
+                        }
+                        else {
+                            <tr><td>keine offenen Anfragen</td></tr>
+                        }
+                    </table>
+                </p>
+            }
         </div>
     </div>
 </div>
@@ -95,6 +100,13 @@
     </div>
 </div>
 
+@if (!string.IsNullOrEmpty(UIMessage)) {
+    <div class="row my-4 pt-4">
+        <div>
+            @UIMessage
+        </div>
+    </div>
+}
 
 @code {
     [CascadingParameter]
@@ -104,7 +116,8 @@
     private Campaign campaign = new Campaign();
     private IEnumerable<JoinRequest>? joinRequests;
     private string requestMessage = "";
-    private string currentUserId;
+    private string UIMessage = "";
+    private string currentUserId = "";
 
     protected override async Task OnInitializedAsync() {
         currentUserId = appState.UserId;
@@ -119,7 +132,7 @@
     private async void JoinRequestReject(JoinRequest joinRequest) {
         if (joinRequest != null) {
             await joinRequestManager.Delete(joinRequest.Id);
-            await js.InvokeVoidAsync("alert", "Beitrittsanfrage abgelehnt");
+            UIMessage = $"Beitrittsanfrage abgelehnt";
             await GetOpenJoinRequests();
         }
         StateHasChanged();
@@ -130,8 +143,9 @@
             joinRequest.Accepted = DateTime.UtcNow;
             joinRequest.User = null;
             await joinRequestManager.Update(joinRequest);
-            await js.InvokeVoidAsync("alert", "Beitrittsanfrage akzeptiert");
+            UIMessage = $"Beitrittsanfrage akzeptiert";
             await GetOpenJoinRequests();
+            campaign = await campaignManager.GetByID(Id);
         }
         StateHasChanged();
     }
@@ -153,6 +167,40 @@
         }
     }
 
+    private async Task RemovePlayer(ApplicationUser playerToDelete, bool isKicked) {
+
+        try {
+            string toDeleteName = playerToDelete.UserName;
+            string confirmMessage = $"Soll der Spieler '{toDeleteName}' wirklich entfernt werden?";
+            string uiMessage = $"Spieler '{toDeleteName}' wurde entfernt";
+
+            if (!isKicked) {
+                confirmMessage = $"Möchtest du diese Kampagne wirklich verlassen?";
+                uiMessage = $"Kampagne erfolgreich verlassen";
+            }
+
+
+            bool confirm = await js.InvokeAsync<bool>("confirm", $"{confirmMessage}");
+            if (!confirm) return;
+
+            if (campaign.Players != null) {
+                campaign.Players.Remove(playerToDelete);
+                await campaignManager.Update(campaign);
+                UIMessage = uiMessage;
+                if (!isKicked) {
+                    await js.InvokeVoidAsync("history.back");
+                }
+            }
+            else {
+                Console.WriteLine($"Spieler '{toDeleteName}' nicht gefunden");
+            }
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"Exception RemovePlayer: {ex.Message}");
+        }
+
+    }
+
     private async Task DeleteCampaign() {
         string toDeleteName = campaign.Name;
         bool confirm = await js.InvokeAsync<bool>("confirm", $"Soll der Eintrag '{toDeleteName}' wirklich gelöscht werden?");
@@ -161,11 +209,11 @@
         bool success = await campaignManager.Delete(campaign.Id);
 
         if (success) {
-            await js.InvokeVoidAsync("alert", $"Kampagne '{toDeleteName}' erfolgreich gelöscht.");
+            UIMessage = $"Kampagne '{toDeleteName}' erfolgreich gelöscht.";
             await js.InvokeVoidAsync("history.back");
         }
         else {
-            await js.InvokeVoidAsync("alert", $"Kampagne '{toDeleteName}' konnte nicht gelöscht werden.");
+            UIMessage = $"Kampagne '{toDeleteName}' konnte nicht gelöscht werden.";
         }
     }
 

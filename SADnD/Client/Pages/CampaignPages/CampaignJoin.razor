@@ -48,10 +48,10 @@
             CheckForDoubleRequests(joinRequest);
             // CheckForValidRequest(joinRequest.CampaignId);
             if (doubleRequest) {
-                await js.InvokeVoidAsync("alert", "Anfrage bereits ausstehend");
+                UIMessage = "Anfrage bereits ausstehend";
             }
             // else if (!validRequest) {
-            //     await js.InvokeVoidAsync("alert", "Zugangscode ungültig");
+            //     UIMessage = "Zugangscode ungültig";
             // }
             else {
                 await joinRequestManager.Insert(joinRequest);
