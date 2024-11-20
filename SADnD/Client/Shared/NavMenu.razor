@@ -4,7 +4,7 @@
     <div class="container-fluid ps-4">
         @* <a class="navbar-brand" href="">SADnD</a> *@
         <button class="navbar-toggler @NavButtonCssClass" type="button" aria-controls="navbarCollapse"
-                aria-label="Toggle navigation" @onclick="GoBack">
+                aria-label="Go Back" @onclick="GoBack">
             <span class="bi bi-arrow-left-square"></span>
         </button>
         <button class="navbar-toggler @NavButtonCssClass" type="button" aria-controls="navbarCollapse"
@@ -33,6 +33,7 @@
                 </AuthorizeView>
                 
             </ul>
+            <LoginDisplay />
             <ConnectivityIndicator>
                 <ShowOnline>
                     <div>Online</div>
