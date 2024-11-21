@@ -1,5 +1,6 @@
 ﻿@page "/character-details/{id}"
 @using SADnD.Client.Pages.CharacterPages.InventoryPages
+@using SADnD.Client.Pages.CharacterPages.Notes
 @using Newtonsoft.Json
 @attribute [Authorize]
 @inject CharacterSyncManager characterManager
@@ -11,7 +12,7 @@
 
         <div class="container-fluid mt-3">
             <div class="row">
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-md-2">
                     <p><strong>Rasse: </strong>@(Character.Race != null ? Character.Race.Name : "Unbekannt")</p>
                     @if (Character.Classes != null && Character.Classes.Any()) {
                         <p>
@@ -53,7 +54,10 @@
                     </div>
                 }
             </div>
-            <div class="row">
+            <div class="row mt-3">
+                <div class="col-12 col-md-2" id="notes-icons-container">
+                    <CharacterNotesIcons @bind-ActiveCategory="activeCategory" />
+                </div>
                 <div class="col-12 col-md-4">
                     @* TODO:
                        Icons für die verschiedenen Notizen
@@ -147,6 +151,7 @@
     private string UIMessage = string.Empty;
     private string unitOfWeight = "kg";
     private float weightTotal;
+    public string activeCategory = "inventory";
 
     protected override async Task OnInitializedAsync() {
         Character = await characterManager.GetByID(Id);

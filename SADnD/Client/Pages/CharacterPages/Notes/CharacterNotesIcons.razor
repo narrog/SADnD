@@ -1,0 +1,27 @@
+﻿<div class="bg-dark ps-2 my-1 text-light" @onclick='() => ChangeView("inventory")'>
+    <i class="bi bi-backpack3"></i> Inventar
+</div>
+<div class="bg-dark ps-2 my-1 text-light" @onclick='() => ChangeView("story")'>
+    <i class="bi bi-journal-text"></i> Story
+</div>
+<div class="bg-dark ps-2 my-1 text-light" @onclick='() => ChangeView("people")'>
+    <i class="bi bi-people"></i> Personen
+</div>
+<div class="bg-dark ps-2 my-1 text-light" @onclick='() => ChangeView("places")'>
+    <i class="bi bi-pin-map-fill"></i> Orte
+</div>
+<div class="bg-dark ps-2 my-1 text-light" @onclick='() => ChangeView("others")'>
+    <i class="bi bi-chat-square-dots"></i> Sonstiges
+</div>
+
+@code {
+    [Parameter]
+    public required string ActiveCategory { get; set; }
+    [Parameter]
+    public EventCallback<string> ActiveItemChanged { get; set; }
+
+    private async Task ChangeView(string item) {
+        ActiveCategory = item;
+        await ActiveItemChanged.InvokeAsync(item);
+    }
+}
