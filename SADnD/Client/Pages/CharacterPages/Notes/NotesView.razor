@@ -3,18 +3,19 @@
 
 <div class="col-12 col-md-5 mt-3 mt-md-0">
     <h4>@NotesCategory - Notizen</h4>
-    <table class="table table-striped">
-        <tbody>
-            @if (allNotes != null && allNotes.Any() != false) {
-                @foreach (var note in allNotes) {
-                    
-                }
+    <div class="border border-1 my-2 p-2">
+        @if (allNotes != null && allNotes.Any() != false) {
+            @foreach (var note in allNotes) {
+                <h5>@note.Name</h5>
+                <p>@note.Content</p>
             }
-            else {
-                <tr><td>Keine Notizen gefunden</td></tr>
-            }
-        </tbody>
-    </table>
+        }
+        else {
+            <p>Keine Notizen gefunden</p>
+        }
+    </div>
+            
+
     @if (showUIMessage) {
         <ul class="mt-3">
             <li class="validation-message">
@@ -29,13 +30,16 @@
     }
     else {
         <NotesAdd NotesCategory="@NotesCategory"
-                          OnClose="HideAddItems" />
+                  CharacterId="@CharacterId"
+                  OnClose="HideAddItems" />
     }
 </div>
 
 @code {
     [Parameter]
     public required string NotesCategory { get; set; }
+    [Parameter]
+    public required int CharacterId { get; set; }
 
     private IEnumerable<Note>? allNotes;
 

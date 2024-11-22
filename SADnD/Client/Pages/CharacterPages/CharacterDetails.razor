@@ -62,14 +62,13 @@
                     <CharacterNotesIcons @bind-ActiveCategory="activeCategory" />
                 </div>
                 
-                @* TODO:
-                    Inhalt Dynamisch anpassen, je nach dem, welcher "Menüpunkt" angewählt wird
-                *@
+                
                 @if(activeCategory == "inventory") {
                     <InventoryView Character="@Character"/>
                 }
                 else {
-                    <NotesView NotesCategory="@activeCategory"/>
+                    <NotesView NotesCategory="@activeCategory"
+                               CharacterId="@Character.Id" />
                 }
             </div>
         </div>

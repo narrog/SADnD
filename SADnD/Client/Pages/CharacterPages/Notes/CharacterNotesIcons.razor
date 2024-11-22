@@ -7,11 +7,14 @@
 <div class="bg-dark ps-2 my-1 text-light" @onclick='() => ChangeView("people")'>
     <i class="bi bi-people"></i> Personen
 </div>
-<div class="bg-dark ps-2 my-1 text-light" @onclick='() => ChangeView("places")'>
+<div class="bg-dark ps-2 my-1 text-light" @onclick='() => ChangeView("locations")'>
     <i class="bi bi-pin-map-fill"></i> Orte
 </div>
-<div class="bg-dark ps-2 my-1 text-light" @onclick='() => ChangeView("others")'>
-    <i class="bi bi-chat-square-dots"></i> Sonstiges
+<div class="bg-dark ps-2 my-1 text-light" @onclick='() => ChangeView("quest")'>
+    <i class="bi bi-chat-square-dots"></i> Quests
+</div>
+<div class="bg-dark ps-2 my-1 text-light" @onclick='() => ChangeView("hints")'>
+    <i class="bi bi-lightbulb"></i> Hinweise
 </div>
 
 @code {
