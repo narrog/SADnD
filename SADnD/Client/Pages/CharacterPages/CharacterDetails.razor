@@ -68,6 +68,9 @@
                 @if(activeCategory == "inventory") {
                     <InventoryView Character="@Character"/>
                 }
+                else {
+                    <NotesView NotesCategory="@activeCategory"/>
+                }
             </div>
         </div>
         <div class="container-fluid mt-3">

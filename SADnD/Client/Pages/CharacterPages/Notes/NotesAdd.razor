@@ -1,0 +1,14 @@
+﻿<p>Hier kommt ein Formular, um Notizen der Kategorie @NotesCategory zu erstellen</p>
+
+<button class="btn btn-outline-secondary me-2" type="button" @onclick="Close">Abbrechen</button>
+
+@code {
+    [Parameter]
+    public required string NotesCategory { get; set; }
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    private async void Close() {
+        await OnClose.InvokeAsync();
+    }
+}
