@@ -33,6 +33,16 @@
                 </AuthorizeView>
                 
             </ul>
+            @if (showInstallButton)
+            {
+                <ul class="navbar-nav mb-2 mb-md-0">
+                    <li class="nav-item" onclick="@InstallPWA">
+                        <NavLink class="nav-link">
+                            <span class="bi bi-box-arrow-in-down" aria-hidden="true" ></span>
+                        </NavLink>
+                    </li>
+                </ul>
+            }
             <LoginDisplay />
 
         </div>
@@ -48,10 +58,6 @@
                 </ul>
             </ShowOffline>
         </ConnectivityIndicator>
-        @if (showInstallButton)
-        {
-            <button onclick="@InstallPWA">Lokal Installieren</button>
-        }
     </div>
 </nav>
 
@@ -78,17 +84,15 @@
     [JSInvokable("ActivateInstallButton")]
     public async Task ActivateInstallButton()
     {
+        Console.WriteLine("called activate");
         await Task.Run(() => showInstallButton = true);
         StateHasChanged();
     }
-    [JSInvokable("ChoiceResult")]
-    public async Task ChoiceResult(string result)
+    [JSInvokable("DeactivateInstallButton")]
+    public async Task DeactivateInstallButton()
     {
-        showInstallButton = false;
-        Console.WriteLine(result);
-        if (result == "dismissed")
-        {
-            Console.WriteLine(result);
-        }
+        Console.WriteLine("called deactivate");
+        await Task.Run(() => showInstallButton = false);
+        StateHasChanged();
     }
 }

@@ -1,12 +1,29 @@
 ﻿window.addEventListener('beforeinstallprompt', function (e) {
     e.preventDefault();
+
+    if (localStorage.getItem('installPromptDenied') === 'true') {
+        return;
+    }
+
     window.PWADeferredPrompt = e;
 
-    // Nach ca 10min durchgehender Benutzung soll die Frage für die Installation angezeigt werden.
-    setTimeout(() => {
-        BlazorPWA.ComponentReference.invokeMethodAsync("ActivateInstallButton")
-            .catch(err => console.error("Error invoking Blazor method:", err));
-    }, 600000);
+    let intervalStep = 100;
+    let intervalTimeout = 5000;
+    let intervalCounter = 0;
+
+    let intervalId = setInterval(() => {
+        if (BlazorPWA.ComponentReference === null) {
+            intervalCounter += intervalStep;
+            if (intervalCounter > intervalTimeout) {
+                clearInterval(intervalId);
+            }
+        }
+        else {
+            BlazorPWA.ComponentReference.invokeMethodAsync("ActivateInstallButton")
+                .catch(err => console.error("Error invoking Blazor method:", err));
+            clearInterval(intervalId);
+        }
+    }, intervalStep);
 });
 
 window.BlazorPWA = {
@@ -19,7 +36,10 @@ window.BlazorPWA = {
             window.PWADeferredPrompt.prompt();
             window.PWADeferredPrompt.userChoice
                 .then(function (choiceResult) {
-                    BlazorPWA.ComponentReference.invokeMethodAsync("ChoiceResult", choiceResult.outcome);
+                    if (choiceResult.outcome === 'dismissed') {
+                        localStorage.setItem('installPromptDenied', 'true');
+                    }
+                    BlazorPWA.ComponentReference.invokeMethodAsync("DeactivateInstallButton");
                     window.PWADeferredPrompt = null;
                 });
         }
