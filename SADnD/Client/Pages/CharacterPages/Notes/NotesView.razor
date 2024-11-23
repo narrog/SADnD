@@ -74,6 +74,7 @@
             "hints" => allNotes.Where(note => note is NoteHint),
             _ => allNotes
         };
+        filteredNotes = filteredNotes.Where(c => c.CharacterId == CharacterId);
     }
     private async void ShowAddNotes() {
         UIMessage = "";

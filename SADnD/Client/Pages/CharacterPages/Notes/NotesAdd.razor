@@ -54,7 +54,15 @@
     private async void Post() {
         try {
             note.CharacterId = CharacterId;
-            var result = await noteManager.Insert(note);
+            Note result;
+            if (note is NotePerson notePerson) {
+                notePerson.Location = notePerson.Location;
+                notePerson.Affiliation = notePerson.Affiliation;
+                result = await noteManager.Insert(notePerson);
+            }
+            else {
+                result = await noteManager.Insert(note);
+            }
 
             if (result != null) {
                 Console.WriteLine("Notiz erfolgreich gespeichert.");
