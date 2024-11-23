@@ -1,5 +1,6 @@
 ﻿@inject NoteManager noteManager
 @inject CharacterSyncManager characterManager
+@inject IJSRuntime js
 
 <div class="col-12 col-md-5 mt-3 mt-md-0">
     @* TODO: Titel entfernen, sollte durch einfärbung der Punkte ersichtlich sein *@
@@ -13,6 +14,12 @@
                     <p><strong>Ort: </strong>@notePerson.Location</p>
                     <p><strong>Zugehörigkeit: </strong>@notePerson.Affiliation</p>
                 }
+                <button class="pointer me-2 btn btn-outline-secondary" @onclick="() => ShowAddNotes(note.Id)">
+                    <i class="oi oi-pencil me-1"></i> bearbeiten
+                </button>
+                <button class="pointer me-2 btn btn-outline-secondary" @onclick="() => DeleteNote(note)">
+                    <i class="oi oi-trash text-danger me-1"></i> löschen
+                </button>
             </div>
         }
     }
@@ -32,12 +39,13 @@
 </div>
 <div class="col-12 col-md-5 mt-3 mt-md-0">
     @if (!showAddNotes) {
-        <button class="btn btn-secondary" @onclick="ShowAddNotes">Notiz hinzufügen</button>
+        <button class="btn btn-secondary" @onclick="() => ShowAddNotes(0)">Notiz hinzufügen</button>
     }
     else {
         <NotesAdd NotesCategory="@NotesCategory"
-                  CharacterId="@CharacterId"
-                  OnClose="HideAddNotes" />
+        SelectedNoteId="@selectedNoteId" 
+        CharacterId="@CharacterId"
+        OnClose="HideAddNotes" />
     }
 </div>
 
@@ -53,6 +61,7 @@
     private bool showAddNotes;
     private bool showUIMessage;
     private string UIMessage = string.Empty;
+    private int selectedNoteId;
 
     protected override async Task OnInitializedAsync() {
         await GetNotesAndApplyFilter();
@@ -77,7 +86,8 @@
         };
         filteredNotes = filteredNotes.Where(c => c.CharacterId == CharacterId);
     }
-    private async void ShowAddNotes() {
+    private async void ShowAddNotes(int noteId) {
+        selectedNoteId = noteId;
         UIMessage = "";
         showAddNotes = true;
         await OnParametersSetAsync();
@@ -90,6 +100,16 @@
     }
     public void ResetAddNotes() {
         showAddNotes = false;
+        StateHasChanged();
+    }
+
+    public async void DeleteNote(Note note) {
+        string toDeleteName = note.Name;
+        bool confirm = await js.InvokeAsync<bool>("confirm", $"Soll die Notiz '{toDeleteName}' wirklich gelöscht werden?");
+        if (!confirm) return;
+
+        await noteManager.Delete(note);
+        await GetNotesAndApplyFilter();
         StateHasChanged();
     }
 }
