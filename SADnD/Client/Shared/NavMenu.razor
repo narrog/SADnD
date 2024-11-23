@@ -48,6 +48,10 @@
                 </ul>
             </ShowOffline>
         </ConnectivityIndicator>
+        @if (showInstallButton)
+        {
+            <button onclick="@InstallPWA">Lokal Installieren</button>
+        }
     </div>
 </nav>
 
@@ -56,10 +60,35 @@
     private string? NavBarCssClass => collapseNavMenu ? null : "show";
     private string? NavButtonCssClass => collapseNavMenu ? "collapsed" : null;
 
+    public bool showInstallButton { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        await js.InvokeVoidAsync("BlazorPWA.StoreComponent", DotNetObjectReference.Create(this));
+    }
     private void ToggleNavMenu() {
         collapseNavMenu = !collapseNavMenu;
     }
     private async Task GoBack() {
         await js.InvokeVoidAsync("history.back");
+    }
+    private async Task InstallPWA()
+    {
+        await js.InvokeVoidAsync("BlazorPWA.InstallPWA");
+    }
+    [JSInvokable("ActivateInstallButton")]
+    public async Task ActivateInstallButton()
+    {
+        await Task.Run(() => showInstallButton = true);
+        StateHasChanged();
+    }
+    [JSInvokable("ChoiceResult")]
+    public async Task ChoiceResult(string result)
+    {
+        showInstallButton = false;
+        Console.WriteLine(result);
+        if (result == "dismissed")
+        {
+            Console.WriteLine(result);
+        }
     }
 }
