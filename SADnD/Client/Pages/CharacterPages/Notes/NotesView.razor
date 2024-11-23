@@ -110,6 +110,7 @@
 
         await noteManager.Delete(note);
         await GetNotesAndApplyFilter();
+        showAddNotes = false;
         StateHasChanged();
     }
 }
