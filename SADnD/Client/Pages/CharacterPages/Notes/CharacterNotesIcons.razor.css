@@ -5,3 +5,14 @@
 #notes-icons-container div {
     cursor: pointer;
 }
+@media (max-width: 767.98px) {
+    .bi {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width:575.98px) {
+    .bi {
+        font-size: 1.25rem;
+    }
+}
