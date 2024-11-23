@@ -54,15 +54,21 @@
     private async void Post() {
         try {
             note.CharacterId = CharacterId;
-            Note result;
-            if (note is NotePerson notePerson) {
-                notePerson.Location = notePerson.Location;
-                notePerson.Affiliation = notePerson.Affiliation;
-                result = await noteManager.Insert(notePerson);
-            }
-            else {
-                result = await noteManager.Insert(note);
-            }
+            
+            // Versuch, NotePerson anders zu speichern 
+            // -> Affiliation & Location werden aber auch so nicht mitgespeichert
+            // 
+            // Note result;
+            // if (note is NotePerson notePerson) {
+            //     notePerson.Location = notePerson.Location;
+            //     notePerson.Affiliation = notePerson.Affiliation;
+            //     result = await noteManager.Insert(notePerson);
+            // }
+            // else {
+            //     result = await noteManager.Insert(note);
+            // }
+
+            var result = await noteManager.Insert(note);
 
             if (result != null) {
                 Console.WriteLine("Notiz erfolgreich gespeichert.");

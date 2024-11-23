@@ -22,9 +22,13 @@
     public required string ActiveCategory { get; set; }
     [Parameter]
     public EventCallback<string> ActiveCategoryChanged { get; set; }
+    [Parameter]
+    public EventCallback OnCategoryChanged { get; set; }
 
-    private async Task ChangeView(string item) {
+    private async Task ChangeView(string item)
+    {
         ActiveCategory = item;
         await ActiveCategoryChanged.InvokeAsync(item);
+        await OnCategoryChanged.InvokeAsync();
     }
 }

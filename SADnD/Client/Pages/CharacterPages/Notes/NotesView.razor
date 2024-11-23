@@ -2,7 +2,8 @@
 @inject CharacterSyncManager characterManager
 
 <div class="col-12 col-md-5 mt-3 mt-md-0">
-    <h4>@NotesCategory - Notizen</h4>
+    @* TODO: Titel entfernen, sollte durch einfärbung der Punkte ersichtlich sein *@
+    <h4>@NotesCategory</h4>
     @if (filteredNotes != null && filteredNotes.Any() != false) {
         @foreach (var note in filteredNotes) {
             <div class="border border-1 my-2 p-2">
@@ -35,8 +36,8 @@
     }
     else {
         <NotesAdd NotesCategory="@NotesCategory"
-        CharacterId="@CharacterId"
-        OnClose="HideAddNotes" />
+                  CharacterId="@CharacterId"
+                  OnClose="HideAddNotes" />
     }
 </div>
 
@@ -54,15 +55,15 @@
     private string UIMessage = string.Empty;
 
     protected override async Task OnInitializedAsync() {
-        allNotes = await noteManager.GetAll();
-        ApplyNotesFilter();
+        await GetNotesAndApplyFilter();
     }
-    protected override async Task OnParametersSetAsync() { 
-        allNotes = await noteManager.GetAll();
-        ApplyNotesFilter();
+    protected override async Task OnParametersSetAsync() {
+        await GetNotesAndApplyFilter();
     }
 
-    private void ApplyNotesFilter(){
+    private async Task GetNotesAndApplyFilter(){
+        allNotes = await noteManager.GetAll();
+
         if (allNotes == null) return;
 
         filteredNotes = NotesCategory switch
@@ -84,6 +85,10 @@
     }
     private async void HideAddNotes() {
         await OnParametersSetAsync();
+        showAddNotes = false;
+        StateHasChanged();
+    }
+    public void ResetAddNotes() {
         showAddNotes = false;
         StateHasChanged();
     }
