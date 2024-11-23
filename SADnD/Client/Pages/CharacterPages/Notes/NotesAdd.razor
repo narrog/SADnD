@@ -1,6 +1,5 @@
 ﻿@inject NoteManager noteManager
 
-<p>Hier kommt ein Formular, um Notizen der Kategorie @NotesCategory zu erstellen</p>
 <EditForm Model="@note" OnValidSubmit="@Post" class="w-100">
     <DataAnnotationsValidator />
     <p>
@@ -38,11 +37,9 @@
     [Parameter]
     public EventCallback OnClose { get; set; }
 
-    private Note note;
+    private Note? note;
 
     protected override void OnInitialized() {
-        Console.WriteLine("Charakter-ID: " + CharacterId);
-        // Basierend auf NotesCategory eine passende Instanz erstellen
         note = NotesCategory switch {
             "story" => new NoteStory(),
             "people" => new NotePerson(),
