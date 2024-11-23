@@ -3,8 +3,7 @@
 @inject IJSRuntime js
 
 <div class="col-12 col-md-5 mt-3 mt-md-0">
-    @* TODO: Titel entfernen, sollte durch einfärbung der Punkte ersichtlich sein *@
-    <h4>@NotesCategory</h4>
+
     @if (filteredNotes != null && filteredNotes.Any() != false) {
         @foreach (var note in filteredNotes) {
             <div class="border border-1 my-2 p-2">

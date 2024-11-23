@@ -1,19 +1,19 @@
-﻿<div class="bg-dark ps-2 my-1 text-light" @onclick='() => ChangeView("inventory")'>
+﻿<div class="@GetCategoryClass("inventory")" @onclick='() => ChangeView("inventory")'>
     <i class="bi bi-backpack3"></i> Inventar
 </div>
-<div class="bg-dark ps-2 my-1 text-light" @onclick='() => ChangeView("story")'>
+<div class="@GetCategoryClass("story")" @onclick='() => ChangeView("story")'>
     <i class="bi bi-journal-text"></i> Story
 </div>
-<div class="bg-dark ps-2 my-1 text-light" @onclick='() => ChangeView("people")'>
+<div class="@GetCategoryClass("people")" @onclick='() => ChangeView("people")'>
     <i class="bi bi-people"></i> Personen
 </div>
-<div class="bg-dark ps-2 my-1 text-light" @onclick='() => ChangeView("locations")'>
+<div class="@GetCategoryClass("locations")" @onclick='() => ChangeView("locations")'>
     <i class="bi bi-pin-map-fill"></i> Orte
 </div>
-<div class="bg-dark ps-2 my-1 text-light" @onclick='() => ChangeView("quest")'>
+<div class="@GetCategoryClass("quest")" @onclick='() => ChangeView("quest")'>
     <i class="bi bi-chat-square-dots"></i> Quests
 </div>
-<div class="bg-dark ps-2 my-1 text-light" @onclick='() => ChangeView("hints")'>
+<div class="@GetCategoryClass("hints")" @onclick='() => ChangeView("hints")'>
     <i class="bi bi-lightbulb"></i> Hinweise
 </div>
 
@@ -25,10 +25,14 @@
     [Parameter]
     public EventCallback OnCategoryChanged { get; set; }
 
-    private async Task ChangeView(string item)
-    {
-        ActiveCategory = item;
-        await ActiveCategoryChanged.InvokeAsync(item);
+    private async Task ChangeView(string category) {
+        ActiveCategory = category;
+        await ActiveCategoryChanged.InvokeAsync(category);
         await OnCategoryChanged.InvokeAsync();
+    }
+    private string GetCategoryClass(string category) {
+        return ActiveCategory == category
+            ? "ps-2 my-1 bg-light text-dark border"
+            : "ps-2 my-1 bg-dark text-light";
     }
 }
