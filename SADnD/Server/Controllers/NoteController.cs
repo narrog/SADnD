@@ -92,7 +92,7 @@ namespace SADnD.Server.Controllers
         {
             try
             {
-                var note = (Note)jsNote.ToObject(typeMapping[jsNote["type"]?.ToString()]);
+                var note = (Note)jsNote.ToObject(typeMapping[jsNote["Type"]?.ToString()]);
 
                 var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
                 if (note.UserId == null || note.UserId != id)
@@ -136,7 +136,7 @@ namespace SADnD.Server.Controllers
         {
             try
             {
-                var note = (Note)jsNote.ToObject(typeMapping[jsNote["type"]?.ToString()]);
+                var note = (Note)jsNote.ToObject(typeMapping[jsNote["Type"]?.ToString()]);
 
                 var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
                 if (note.UserId == null || note.UserId != id)
