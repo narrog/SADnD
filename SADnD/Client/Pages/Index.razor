@@ -15,3 +15,12 @@
     <h3>Deine Charaktere</h3>
     <SADnD.Client.Pages.CharacterPages.CharacterView />
 </div>
+
+@code{
+    [CascadingParameter]
+    private CascadingAppState appState { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        appState.GetNotes();
+    }
+}

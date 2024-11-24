@@ -1,6 +1,12 @@
-﻿<nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">SADnD</a>
+﻿@inject IJSRuntime js
+
+<nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
+    <div class="container-fluid ps-4">
+        @* <a class="navbar-brand" href="">SADnD</a> *@
+        <button class="navbar-toggler @NavButtonCssClass" type="button" aria-controls="navbarCollapse"
+                aria-label="Go Back" @onclick="GoBack">
+            <span class="bi bi-arrow-left-square"></span>
+        </button>
         <button class="navbar-toggler @NavButtonCssClass" type="button" aria-controls="navbarCollapse"
                 aria-label="Toggle navigation" @onclick="ToggleNavMenu">
             <span class="navbar-toggler-icon"></span>
@@ -27,16 +33,21 @@
                 </AuthorizeView>
                 
             </ul>
-            <ConnectivityIndicator>
-                <ShowOnline>
-                    <div>Online</div>
-                </ShowOnline>
-                <ShowOffline>
-                    <div>Offline</div>
-                </ShowOffline>
-            </ConnectivityIndicator>
             <LoginDisplay />
+
         </div>
+        <ConnectivityIndicator>
+            <ShowOnline>
+                @* <div>Online</div> *@
+            </ShowOnline>
+            <ShowOffline>
+                <ul class="navbar-nav mb-2 mb-md-0">
+                    <li class="nav-item">
+                        <span class="bi bi-cloud-slash" aria-hidden="true"></span>
+                    </li>
+                </ul>
+            </ShowOffline>
+        </ConnectivityIndicator>
     </div>
 </nav>
 
@@ -47,5 +58,8 @@
 
     private void ToggleNavMenu() {
         collapseNavMenu = !collapseNavMenu;
+    }
+    private async Task GoBack() {
+        await js.InvokeVoidAsync("history.back");
     }
 }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SADnD.Server.Data;
@@ -11,9 +12,11 @@ using SADnD.Server.Data;
 namespace SADnD.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241119124028_AddedNotes")]
+    partial class AddedNotes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -442,9 +445,6 @@ namespace SADnD.Server.Migrations
                     b.Property<string>("Alignment")
                         .HasColumnType("text");
 
-                    b.Property<int?>("ArmorClass")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Background")
                         .HasColumnType("text");
 
@@ -704,12 +704,7 @@ namespace SADnD.Server.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -813,9 +808,11 @@ namespace SADnD.Server.Migrations
                     b.HasBaseType("SADnD.Shared.Models.Note");
 
                     b.Property<string>("Affiliation")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Location")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.ToTable("NotePerson", (string)null);
@@ -1025,18 +1022,16 @@ namespace SADnD.Server.Migrations
             modelBuilder.Entity("SADnD.Shared.Models.Note", b =>
                 {
                     b.HasOne("SADnD.Shared.Models.Campaign", "Campaign")
-                        .WithMany("Notes")
+                        .WithMany()
                         .HasForeignKey("CampaignId");
 
                     b.HasOne("SADnD.Shared.Models.Character", "Character")
-                        .WithMany("Notes")
+                        .WithMany()
                         .HasForeignKey("CharacterId");
 
                     b.HasOne("SADnD.Shared.Models.ApplicationUser", "User")
                         .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
 
                     b.Navigation("Campaign");
 
@@ -1055,8 +1050,6 @@ namespace SADnD.Server.Migrations
             modelBuilder.Entity("SADnD.Shared.Models.Campaign", b =>
                 {
                     b.Navigation("JoinRequests");
-
-                    b.Navigation("Notes");
                 });
 
             modelBuilder.Entity("SADnD.Shared.Models.Character", b =>
@@ -1064,8 +1057,6 @@ namespace SADnD.Server.Migrations
                     b.Navigation("Classes");
 
                     b.Navigation("Inventory");
-
-                    b.Navigation("Notes");
                 });
 #pragma warning restore 612, 618
         }
