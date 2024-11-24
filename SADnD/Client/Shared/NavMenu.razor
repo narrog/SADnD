@@ -4,11 +4,11 @@
     <div class="container-fluid ps-4">
         @* <a class="navbar-brand" href="">SADnD</a> *@
         <button class="navbar-toggler @NavButtonCssClass" type="button" aria-controls="navbarCollapse"
-                aria-label="Go Back" @onclick="GoBack">
+        aria-label="Go Back" @onclick="GoBack">
             <span class="bi bi-arrow-left-square"></span>
         </button>
         <button class="navbar-toggler @NavButtonCssClass" type="button" aria-controls="navbarCollapse"
-                aria-label="Toggle navigation" @onclick="ToggleNavMenu">
+        aria-label="Toggle navigation" @onclick="ToggleNavMenu">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse @NavBarCssClass" id="navbarCollapse" @onclick="ToggleNavMenu">
@@ -29,22 +29,20 @@
                     </NavLink>
                 </li>
                 <AuthorizeView>
-                   
+
                 </AuthorizeView>
-                
+
             </ul>
-            @if (showInstallButton)
-            {
+            <LoginDisplay />
+            @if (showInstallButton) {
                 <ul class="navbar-nav mb-2 mb-md-0">
                     <li class="nav-item" onclick="@InstallPWA">
                         <NavLink class="nav-link">
-                            <span class="bi bi-box-arrow-in-down" aria-hidden="true" ></span>
+                            <span class="bi bi-box-arrow-in-down" aria-hidden="true"></span>
                         </NavLink>
                     </li>
                 </ul>
             }
-            <LoginDisplay />
-
         </div>
         <ConnectivityIndicator>
             <ShowOnline>
