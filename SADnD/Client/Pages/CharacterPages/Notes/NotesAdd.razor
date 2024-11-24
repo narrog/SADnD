@@ -40,6 +40,8 @@
     [Parameter]
     public int CharacterId { get; set; }
     [Parameter]
+    public string CampaignId { get; set; }
+    [Parameter]
     public EventCallback OnClose { get; set; }
 
     private Note? note;
@@ -67,8 +69,12 @@
 
     private async void Post() {
         try {
-
-            note.CharacterId = CharacterId;
+            if(CharacterId != 0){
+                note.CharacterId = CharacterId;
+            }
+            else if(!string.IsNullOrEmpty(CampaignId)){
+                note.CampaignId = CampaignId;
+            }
 
             Note result;
             if (SelectedNoteId == 0) {
