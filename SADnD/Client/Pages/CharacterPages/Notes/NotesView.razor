@@ -42,9 +42,10 @@
     }
     else {
         <NotesAdd NotesCategory="@NotesCategory"
-        SelectedNoteId="@selectedNoteId" 
-        CharacterId="@CharacterId"
-        OnClose="HideAddNotes" />
+                    SelectedNoteId="@selectedNoteId" 
+                    CharacterId="@CharacterId"
+                    CampaignId="@CampaignId"
+                    OnClose="HideAddNotes" />
     }
 </div>
 
@@ -52,7 +53,11 @@
     [Parameter]
     public required string NotesCategory { get; set; }
     [Parameter]
-    public required int CharacterId { get; set; }
+    public int CharacterId { get; set; }
+    [Parameter]
+    public string? CampaignId { get; set; }
+    [Parameter]
+    public bool ViewTypeIsDM { get; set; }
 
     private IEnumerable<Note>? allNotes;
     private IEnumerable<Note>? filteredNotes;
@@ -83,7 +88,12 @@
             "hints" => allNotes.Where(note => note is NoteHint),
             _ => allNotes
         };
-        filteredNotes = filteredNotes.Where(c => c.CharacterId == CharacterId);
+        if (ViewTypeIsDM){
+            filteredNotes = filteredNotes.Where(c => c.CampaignId == CampaignId);
+        }
+        else {
+            filteredNotes = filteredNotes.Where(c => c.CharacterId == CharacterId);
+        }
     }
     private async void ShowAddNotes(int noteId) {
         selectedNoteId = noteId;
