@@ -1,5 +1,4 @@
 ﻿@inject NoteManager noteManager
-@using Newtonsoft.Json
 
 @if(note != null){
     <EditForm Model="@note" OnValidSubmit="@Post" class="w-100">
@@ -71,22 +70,8 @@
 
             note.CharacterId = CharacterId;
 
-            // Versuch, NotePerson anders zu speichern 
-            // -> Affiliation & Location werden aber auch so nicht mitgespeichert
-            // 
-            // Note result;
-            // if (note is NotePerson notePerson) {
-            //     notePerson.Location = notePerson.Location;
-            //     notePerson.Affiliation = notePerson.Affiliation;
-            //     result = await noteManager.Insert(notePerson);
-            // }
-            // else {
-            //     result = await noteManager.Insert(note);
-            // }
-
             Note result;
             if (SelectedNoteId == 0) {
-                Console.WriteLine($"GUI {JsonConvert.SerializeObject(note)}");
                 result = await noteManager.Insert(note);
             }
             else {

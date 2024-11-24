@@ -1,7 +1,4 @@
 ﻿@page "/character-details/{id}"
-@using SADnD.Client.Pages.CharacterPages.InventoryPages
-@using SADnD.Client.Pages.CharacterPages.Notes
-@using Newtonsoft.Json
 @attribute [Authorize]
 @inject CharacterSyncManager characterManager
 @inject IJSRuntime js
@@ -12,7 +9,7 @@
 
         <div class="container-fluid mt-3">
             <div class="row">
-                <div class="col-12 col-md-6">
+                <div class="col-12 col-md-4">
                     <p><strong>Rasse: </strong>@(Character.Race != null ? Character.Race.Name : "Unbekannt")</p>
                     @if (Character.Classes != null && Character.Classes.Any()) {
                         <p>
@@ -40,7 +37,7 @@
                    
                 </div>
                 @if (showCharacterDetails) {
-                    <div class="col-12 col-md-6 mt-3 mt-md-0">
+                    <div class="col-12 col-md-4 mt-3 mt-md-0">
                         <p>
                             <strong>Grösse-Kategorie: </strong>@(Character.SizeCategory != null ? Character.SizeCategory : "Unbekannt")<br />
                             <strong>Grösse: </strong>@(Character.Size != null ? Character.Size : "Unbekannt")<br />
