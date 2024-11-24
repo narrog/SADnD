@@ -8,21 +8,26 @@
 @inject CampaignManager campaignManager
 
 <h3>Kampagne beitreten</h3>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12 col-md-4 mt-3">
+            <EditForm Model="@joinRequest" OnValidSubmit="@Post">
+                <DataAnnotationsValidator /> 
+                <label for="code">Zugangscode:</label>
+                <InputText @bind-Value="@joinRequest.CampaignId" @oninput="@(e => joinRequest.CampaignId = e.Value.ToString().ToUpper())" id="code" class="form-control"></InputText>
 
-<EditForm Model="@joinRequest" OnValidSubmit="@Post">
-    <DataAnnotationsValidator /> 
-    Zugangscode:
-    <InputText @bind-Value="@joinRequest.CampaignId" @oninput="@(e => joinRequest.CampaignId = e.Value.ToString().ToUpper())"></InputText>
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary me-2">Speichern</button>
+                    <button class="btn btn-secondary" type="button" @onclick="CancelButtonPressed">Zurück</button>
+                </div>
+                <ValidationSummary class="mt-3" />
+            </EditForm>
 
-    <div class="mt-3">
-        <button type="submit" class="btn btn-primary me-2">Speichern</button>
-        <button class="btn btn-secondary" type="button" @onclick="CancelButtonPressed">Zurück</button>
+            <div class="mt-3">
+                @UIMessage
+            </div>
+        </div>
     </div>
-    <ValidationSummary class="mt-3" />
-</EditForm>
-
-<div class="mt-3">
-    @UIMessage
 </div>
 
 @code {
