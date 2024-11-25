@@ -56,6 +56,12 @@ namespace SADnD.Server.Data
                 .IsUnique();
 
             builder.Entity<Campaign>()
+                .HasMany(c => c.Notes)
+                .WithOne(n => n.Campaign)
+                .HasForeignKey(n => n.CampaignId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Campaign>()
                 .HasMany(c => c.DungeonMasters)
                 .WithMany(u => u.DungeonMasterCampaigns)
                 .UsingEntity(j => j.ToTable("CampaignDungeonMasters"));
