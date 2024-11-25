@@ -38,13 +38,16 @@
          }
          @if (showEditForm) {
             <div class="col-12 col-md-4">
-                <EditForm Model="@item" OnValidSubmit="@Post">
+                <EditForm Model="@item" OnValidSubmit="@Post" class="w-100">
                     <DataAnnotationsValidator />
-                    <p>Name: <InputText @bind-Value="@item.Name" ></InputText></p>
-                    <p>Gewicht: <InputNumber @bind-Value="@item.Weight"></InputNumber> @unitOfWeight</p>
-                    <SubmitButton />
-                    <button class="btn btn-secondary" type="button" @onclick="Close">Abbrechen</button>
-
+                    <label for="name">Name:</label>
+                    <InputText @bind-Value="@item.Name" id="name" class="form-control"></InputText>
+                    <label for="weight">Gewicht: (@unitOfWeight):</label>
+                    <InputNumber @bind-Value="@item.Weight" id="weight" class="form-control"></InputNumber>
+                    <div class="mt-3">
+                        <SubmitButton />
+                        <button class="btn btn-secondary" type="button" @onclick="Close">Abbrechen</button>
+                    </div>
                     <ValidationSummary class="mt-3" />
                 </EditForm>
             </div>

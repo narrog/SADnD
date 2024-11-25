@@ -89,6 +89,21 @@
                 </p>
             }
         </div>
+        
+    </div>
+    <div class="row">
+        @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId))
+        {
+            <div class="col-12 col-md-2" id="notes-icons-container">
+                <CharacterNotesIcons @bind-ActiveCategory="activeCategory"
+                                     OnCategoryChanged="HandleCategoryChanged"
+                                     ViewTypeIsDM="true" />
+            </div>
+            <NotesView NotesCategory="@activeCategory"
+                       CampaignId="@Id"
+                       ViewTypeIsDM="true"
+                       @ref="notesViewReference" />
+        }
     </div>
 </div>
 <div class="row my-4 pt-4 border-top">
@@ -118,6 +133,9 @@
     private string requestMessage = "";
     private string UIMessage = "";
     private string currentUserId = "";
+
+    public string activeCategory = "story";
+    private NotesView? notesViewReference;
 
     protected override async Task OnInitializedAsync() {
         currentUserId = appState.UserId;
@@ -199,6 +217,12 @@
             Console.WriteLine($"Exception RemovePlayer: {ex.Message}");
         }
 
+    }
+
+    private void HandleCategoryChanged() {
+        if (notesViewReference != null) {
+            notesViewReference.ResetAddNotes();
+        }
     }
 
     private async Task DeleteCampaign() {

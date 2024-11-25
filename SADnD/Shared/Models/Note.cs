@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -15,7 +16,10 @@ namespace SADnD.Shared.Models
             Type = GetType().Name;
         }
         public int Id { get; set; }
+        [Required (ErrorMessage = "Titel ist ein Pflichtfeld")]
+        [StringLength(maximumLength: 50, MinimumLength = 1, ErrorMessage = "Name muss zwischen 1 und 50 Zeichen lang sein")]
         public string Name { get; set; }
+        [Required (ErrorMessage = "Text ist ein Pflichtfeld")]
         public string Content { get; set; }
         public string Type { get; set; }
         public string? CampaignId { get; set; }
