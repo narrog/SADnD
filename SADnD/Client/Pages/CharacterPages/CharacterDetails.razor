@@ -1,6 +1,7 @@
 ﻿@page "/character-details/{id}"
 @attribute [Authorize]
 @inject CharacterSyncManager characterManager
+@* @inject NoteManager noteManager *@
 @inject IJSRuntime js
 
 <CascadingValue Value="@this" IsFixed="true">
@@ -37,7 +38,7 @@
                     <button class="btn btn-outline-primary mt-md-5" @onclick="EditCharacterDetails">
                         <span class="oi oi-pencil me-2"></span> bearbeiten
                     </button>
-                   
+
                 </div>
                 @if (showCharacterDetails) {
                     <div class="col-12 col-md-4 mt-3 mt-md-0">
@@ -50,39 +51,32 @@
                             <strong>Gewicht: </strong>@(Character.Weight != null ? Character.Weight : "Unbekannt")
                         </p>
                     </div>
-                    @* TODO:
-                        <div class="col-12 col-md-2">
-                            <button class="btn btn-outline-primary" @onclick="EditCharacterDetails">bearbeiten</button> 
-                        </div> 
-                        *@
                 }
             </div>
             @if (showEditCharacter) {
                 <CharacterAdd CharacterId="@Id"
-                              OnClose="HideEditCharacter" />
+                OnClose="HideEditCharacter" />
             }
             <div class="row mt-3">
                 <div class="col-12 col-md-2" id="notes-icons-container">
                     <CharacterNotesIcons @bind-ActiveCategory="activeCategory"
-                                         OnCategoryChanged="HandleCategoryChanged" />
+                    OnCategoryChanged="HandleCategoryChanged" />
                 </div>
-                
-                
+
+
                 @if(activeCategory == "inventory") {
                     <InventoryView Character="@Character"/>
                 }
                 else {
                     <NotesView NotesCategory="@activeCategory"
-                               CharacterId="@Character.Id"
-                               @ref="notesViewReference" />
+                    CharacterId="@Character.Id"
+                    @ref="notesViewReference" />
                 }
             </div>
         </div>
         <div class="container-fluid mt-3">
             <a class="btn btn-outline-primary me-2" onclick="history.back();">Zurück</a>
-            @* 
-            TODO:
-            <button class="btn btn-outline-danger" @onclick="DeleteCharacter">Löschen</button> *@
+            <button class="btn btn-outline-danger" @onclick="DeleteCharacter">Löschen</button>
         </div>
     }
 </CascadingValue>
@@ -93,6 +87,7 @@
     [Parameter] 
     public required string Id { get; set; }
     public Character Character = new Character();
+    // private IEnumerable<Note>? allNotes;
 
     private bool showCharacterDetails;
     private string showDetailsText = "Details anzeigen";
@@ -103,16 +98,32 @@
 
     protected override async Task OnInitializedAsync() {
         Character = await characterManager.GetByID(Id);
+        // allNotes = await noteManager.GetAll();
+        // allNotes = allNotes.Where(c => c.CharacterId== Character.Id);
     }
 
 
     private async Task DeleteCharacter() {
-        // string toDeleteName = character.Name;
-        // bool confirm = await js.InvokeAsync<bool>("confirm", $"Soll der Eintrag '{toDeleteName}' wirklich gelöscht werden?");
-        // if (!confirm) return;
+        string toDeleteName = Character.Name;
+        bool confirm = await js.InvokeAsync<bool>("confirm", $"Soll der Eintrag '{toDeleteName}' wirklich gelöscht werden?\r\nAlle Notizen werden ebenfalls gelöscht.\r\nDas Löschen kann nicht Rückgängig gemacht werden");
+        if (!confirm) return;
 
-        //await characterManager.Delete(character.Id);
+        // await DeleteNotesFromCharacter();
+        await characterManager.Delete(Character.Id);
+        await js.InvokeVoidAsync("history.back");
     }
+
+    // Notfall-Lösung um Notizen zu löschen
+
+    // private async Task DeleteNotesFromCharacter(){
+    //     if (allNotes != null) {
+    //         foreach (var note in allNotes) {
+    //             await noteManager.Delete(note.Id);
+    //             Console.WriteLine($"Notiz {note.Name} gelöscht");
+    //         }
+    //     }
+        
+    // }
     private void ShowCharacterDetails() {
         showCharacterDetails = !showCharacterDetails;
         showDetailsText = showCharacterDetails ? "Details ausblenden" : "Details anzeigen";
