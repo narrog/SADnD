@@ -23,10 +23,9 @@
 .nav-item .bi {
     color: #d7d7d7;
     border-radius: 4px;
-    height: 3rem;
-    display: flex;
-    align-items: center;
-    line-height: 3rem;
+    height: 2rem;
+    display: block;
+    line-height: 1rem;
 }
 .nav-item {
     font-size: 0.9rem;
