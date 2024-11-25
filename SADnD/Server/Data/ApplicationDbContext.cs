@@ -28,6 +28,18 @@ namespace SADnD.Server.Data
         {
             base.OnModelCreating(builder);
 
+            builder.Entity<Character>()
+                .HasMany(c => c.Inventory)
+                .WithOne(i => i.Character)
+                .HasForeignKey(i => i.CharacterId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Character>()
+                .HasMany(c => c.Notes)
+                .WithOne(n => n.Character)
+                .HasForeignKey(n => n.CharacterId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             builder.Entity<Note>()
                 .HasMany(n => n.Notes)
                 .WithMany(n => n.NoteMentions)
