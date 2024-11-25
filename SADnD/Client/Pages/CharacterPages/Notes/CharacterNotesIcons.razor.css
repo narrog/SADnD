@@ -15,6 +15,9 @@
     .bi {
         font-size: 2rem;
     }
+    .hide-on-mobile {
+        display: none;
+    }
 }
 
 @media (max-width:575.98px) {

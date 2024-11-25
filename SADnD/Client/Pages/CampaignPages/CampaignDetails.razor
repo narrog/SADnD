@@ -93,7 +93,7 @@
     </div>
     <div class="row">
         @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
-            <div class="col-12 col-md-2" id="notes-icons-container">
+            <div class="col-2" id="notes-icons-container">
                 <CharacterNotesIcons @bind-ActiveCategory="activeCategory"
                                      OnCategoryChanged="HandleCategoryChanged"
                                      CampaignId="@Id"
