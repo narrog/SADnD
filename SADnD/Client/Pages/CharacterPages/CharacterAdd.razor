@@ -1,4 +1,5 @@
-﻿@page "/new-character"
+﻿@page "/new-character/"
+@page "/new-character/{CharacterId}"
 
 @attribute [Authorize]
 @using Newtonsoft.Json
@@ -206,14 +207,13 @@
                         if (confirm) {
                             if (string.IsNullOrEmpty(CharacterId)) {
                                 message = JsonConvert.SerializeObject(await characterManager.Insert(character));
-                                await js.InvokeVoidAsync("history.back");
+                                
                             }
                             else {
                                 message = JsonConvert.SerializeObject(await characterManager.Update(character));
-                                await Close();
                             }
                             Console.WriteLine($"message: {message}");
-                            
+                            await js.InvokeVoidAsync("history.back");
                         }
                         else
                             return;

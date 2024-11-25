@@ -1,7 +1,6 @@
 ﻿@page "/character-details/{id}"
 @attribute [Authorize]
 @inject CharacterSyncManager characterManager
-@* @inject NoteManager noteManager *@
 @inject IJSRuntime js
 
 <CascadingValue Value="@this" IsFixed="true">
@@ -35,9 +34,9 @@
                     <button class="btn btn-outline-secondary mt-md-5" @onclick="ShowCharacterDetails">
                         <span class="oi oi-eye me-2"></span> @showDetailsText
                     </button>
-                    <button class="btn btn-outline-primary mt-md-5" @onclick="EditCharacterDetails">
+                    <a class="btn btn-outline-primary mt-md-5" href="/new-character/@Id">
                         <span class="oi oi-pencil me-2"></span> bearbeiten
-                    </button>
+                    </a>
 
                 </div>
                 @if (showCharacterDetails) {
@@ -53,10 +52,7 @@
                     </div>
                 }
             </div>
-            @if (showEditCharacter) {
-                <CharacterAdd CharacterId="@Id"
-                OnClose="HideEditCharacter" />
-            }
+
             <div class="row mt-3">
                 <div class="col-12 col-md-2" id="notes-icons-container">
                     <CharacterNotesIcons @bind-ActiveCategory="activeCategory"
@@ -84,65 +80,42 @@
 
 
 @code {
+    [CascadingParameter]
+    public CascadingAppState appState { get; set; }
     [Parameter] 
     public required string Id { get; set; }
     public Character Character = new Character();
-    // private IEnumerable<Note>? allNotes;
 
     private bool showCharacterDetails;
     private string showDetailsText = "Details anzeigen";
     public string activeCategory = "inventory";
     private NotesView? notesViewReference;
 
-    private bool showEditCharacter;
-
     protected override async Task OnInitializedAsync() {
         Character = await characterManager.GetByID(Id);
-        // allNotes = await noteManager.GetAll();
-        // allNotes = allNotes.Where(c => c.CharacterId== Character.Id);
+        await appState.GetNotes();
     }
-
 
     private async Task DeleteCharacter() {
         string toDeleteName = Character.Name;
         bool confirm = await js.InvokeAsync<bool>("confirm", $"Soll der Eintrag '{toDeleteName}' wirklich gelöscht werden?\r\nAlle Notizen werden ebenfalls gelöscht.\r\nDas Löschen kann nicht Rückgängig gemacht werden");
         if (!confirm) return;
 
-        // await DeleteNotesFromCharacter();
         await characterManager.Delete(Character.Id);
         await js.InvokeVoidAsync("history.back");
     }
 
-    // Notfall-Lösung um Notizen zu löschen
-
-    // private async Task DeleteNotesFromCharacter(){
-    //     if (allNotes != null) {
-    //         foreach (var note in allNotes) {
-    //             await noteManager.Delete(note.Id);
-    //             Console.WriteLine($"Notiz {note.Name} gelöscht");
-    //         }
-    //     }
-        
-    // }
     private void ShowCharacterDetails() {
         showCharacterDetails = !showCharacterDetails;
         showDetailsText = showCharacterDetails ? "Details ausblenden" : "Details anzeigen";
         StateHasChanged();
     }
-    private void EditCharacterDetails(){
-        showEditCharacter = !showEditCharacter;
-        StateHasChanged();
-    }
+
 
     private void HandleCategoryChanged() {
         if (notesViewReference != null) {
             notesViewReference.ResetAddNotes();
         }
     }
-    private async void HideEditCharacter() {
-        await OnParametersSetAsync();
-        Character = await characterManager.GetByID(Id);
-        showEditCharacter = false;
-        StateHasChanged();
-    }
+
 }
