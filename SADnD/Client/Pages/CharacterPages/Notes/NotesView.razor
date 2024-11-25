@@ -69,15 +69,15 @@
     private string UIMessage = string.Empty;
     private int selectedNoteId;
 
-    protected override void OnInitialized() {
-        GetNotesAndApplyFilter();
+    protected override async Task OnInitializedAsync() {
+        await GetNotesAndApplyFilter();
     }
-    protected override void OnParametersSet() {
-        GetNotesAndApplyFilter();
+    protected override async Task OnParametersSetAsync() {
+        await GetNotesAndApplyFilter();
     }
 
-    private void GetNotesAndApplyFilter(){
-        allNotes = appState.Notes;
+    private async Task GetNotesAndApplyFilter() {
+        allNotes = await noteManager.GetAll();
 
         if (allNotes == null) return;
 
@@ -120,7 +120,7 @@
         if (!confirm) return;
 
         await noteManager.Delete(note);
-        GetNotesAndApplyFilter();
+        await GetNotesAndApplyFilter();
         showAddNotes = false;
         StateHasChanged();
     }
