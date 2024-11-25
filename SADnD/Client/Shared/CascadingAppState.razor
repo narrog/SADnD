@@ -38,16 +38,4 @@
     {
         Notes = await noteManager.GetAll();
     }
-    // protected override async Task OnInitializedAsync()
-    // {
-    //     if (authenticationStateTask is not null)
-    //     {
-    //         var authState = await authenticationStateTask;
-    //         var user = authState?.User;
-    //         if (user?.Identity is not null && user.Identity.IsAuthenticated)
-    //         {
-    //             await _jsRuntime.InvokeVoidAsync("BlazorPWA.installPWA");
-    //         }
-    //     }
-    // }
 }
