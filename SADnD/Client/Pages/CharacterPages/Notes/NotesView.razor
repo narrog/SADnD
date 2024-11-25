@@ -42,14 +42,16 @@
     }
     else {
         <NotesAdd NotesCategory="@NotesCategory"
-                    SelectedNoteId="@selectedNoteId" 
-                    CharacterId="@CharacterId"
-                    CampaignId="@CampaignId"
-                    OnClose="HideAddNotes" />
+        SelectedNoteId="@selectedNoteId" 
+        CharacterId="@CharacterId"
+        CampaignId="@CampaignId"
+        OnClose="HideAddNotes" />
     }
 </div>
 
 @code {
+    [CascadingParameter]
+    CascadingAppState appState { get; set; }
     [Parameter]
     public required string NotesCategory { get; set; }
     [Parameter]
@@ -67,15 +69,15 @@
     private string UIMessage = string.Empty;
     private int selectedNoteId;
 
-    protected override async Task OnInitializedAsync() {
-        await GetNotesAndApplyFilter();
+    protected override void OnInitialized() {
+        GetNotesAndApplyFilter();
     }
-    protected override async Task OnParametersSetAsync() {
-        await GetNotesAndApplyFilter();
+    protected override void OnParametersSet() {
+        GetNotesAndApplyFilter();
     }
 
-    private async Task GetNotesAndApplyFilter(){
-        allNotes = await noteManager.GetAll();
+    private void GetNotesAndApplyFilter(){
+        allNotes = appState.Notes;
 
         if (allNotes == null) return;
 
@@ -118,7 +120,7 @@
         if (!confirm) return;
 
         await noteManager.Delete(note);
-        await GetNotesAndApplyFilter();
+        GetNotesAndApplyFilter();
         showAddNotes = false;
         StateHasChanged();
     }

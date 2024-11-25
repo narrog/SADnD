@@ -1,4 +1,4 @@
-﻿@if(!ViewTypeIsDM){
+﻿@if (!ViewTypeIsDM) {
     <div class="@GetCategoryClass("inventory")" @onclick='() => ChangeView("inventory")'>
         <i class="bi bi-backpack3"></i> Inventar
     </div>
@@ -12,7 +12,7 @@
 <div class="@GetCategoryClass("locations")" @onclick='() => ChangeView("locations")'>
     <i class="bi bi-pin-map-fill"></i> Orte
 </div>
-@if(!ViewTypeIsDM){
+@if (!ViewTypeIsDM) {
     <div class="@GetCategoryClass("quest")" @onclick='() => ChangeView("quest")'>
         <i class="bi bi-chat-square-dots"></i> Quests
     </div>
@@ -22,6 +22,8 @@
 }
 
 @code {
+    [CascadingParameter]
+    public CascadingAppState appState { get; set; }
     [Parameter]
     public required string ActiveCategory { get; set; }
     [Parameter]
@@ -29,16 +31,47 @@
     [Parameter]
     public EventCallback OnCategoryChanged { get; set; }
     [Parameter]
-    public bool ViewTypeIsDM { get; set; } 
+    public bool ViewTypeIsDM { get; set; }
+    [Parameter]
+    public int CharacterId { get; set; }
+    [Parameter]
+    public string? CampaignId { get; set; }
 
-    private async Task ChangeView(string category) {
+    private async Task ChangeView(string category)
+    {
         ActiveCategory = category;
         await ActiveCategoryChanged.InvokeAsync(category);
         await OnCategoryChanged.InvokeAsync();
     }
-    private string GetCategoryClass(string category) {
+    private string GetCategoryClass(string category)
+    {
+        bool filteredList;
+        if (ViewTypeIsDM) {
+            filteredList = category switch {
+                "inventory" => true,
+                "story" => appState.Notes.Any(note => note is NoteStory && note.CampaignId == CampaignId),
+                "people" => appState.Notes.Any(note => note is NotePerson && note.CampaignId == CampaignId),
+                "locations" => appState.Notes.Any(note => note is NoteLocation && note.CampaignId == CampaignId),
+                "quest" => appState.Notes.Any(note => note is NoteQuest && note.CampaignId == CampaignId),
+                "hints" => appState.Notes.Any(note => note is NoteHint && note.CampaignId == CampaignId),
+                _ => false
+            };
+        }
+        else {
+            filteredList = category switch {
+                "inventory" => true,
+                "story" => appState.Notes.Any(note => note is NoteStory && note.CharacterId == CharacterId),
+                "people" => appState.Notes.Any(note => note is NotePerson && note.CharacterId == CharacterId),
+                "locations" => appState.Notes.Any(note => note is NoteLocation && note.CharacterId == CharacterId),
+                "quest" => appState.Notes.Any(note => note is NoteQuest && note.CharacterId == CharacterId),
+                "hints" => appState.Notes.Any(note => note is NoteHint && note.CharacterId == CharacterId),
+                _ => false
+            };
+        }
+
         return ActiveCategory == category
             ? "ps-2 my-1 bg-light text-dark border"
-            : "ps-2 my-1 bg-dark text-light";
+            : $"ps-2 my-1 bg-dark text-light {filteredList}";
     }
+
 }

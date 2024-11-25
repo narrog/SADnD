@@ -1,6 +1,5 @@
 ﻿@using System.Security.Claims
 @inject NoteManager noteManager
-@inject IJSRuntime _jsRuntime
 
 <CascadingValue Value="this">
     @ChildContent
@@ -15,27 +14,32 @@
     private string userId;
     private IEnumerable<Claim> claims;
 
-    public string UserId 
-    { 
+    public string UserId
+    {
         get
         {
             userId = authenticationStateTask.Result.User.Claims.Where(x => x.Type == "sub").FirstOrDefault().Value;
             return userId;
-        } 
-        private set {}
+        }
+        private set { }
     }
-    public IEnumerable<Claim> Claims 
+    public IEnumerable<Claim> Claims
     {
         get
         {
             claims = authenticationStateTask.Result.User.Claims;
             return claims;
         }
-        private set {}
+        private set { }
     }
     public IEnumerable<Note> Notes { get; set; }
     public async Task GetNotes()
     {
         Notes = await noteManager.GetAll();
+    }
+    protected override async Task OnInitializedAsync()
+    {
+
+        await GetNotes();
     }
 }
