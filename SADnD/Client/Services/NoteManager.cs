@@ -3,8 +3,8 @@ using Newtonsoft.Json.Linq;
 using SADnD.Client.Shared;
 using SADnD.Shared;
 using SADnD.Shared.Models;
-using System.Net.Http.Json;
 using System.Net;
+using System.Text;
 
 namespace SADnD.Client.Services
 {
@@ -79,7 +79,8 @@ namespace SADnD.Client.Services
         {
             try
             {
-                var result = await _httpClient.PostAsJsonAsync("note", entity);
+                Console.WriteLine($"Insert {JsonConvert.SerializeObject(entity)}");
+                var result = await _httpClient.PostAsync("note", new StringContent(JsonConvert.SerializeObject(entity), Encoding.UTF8, "application/json"));
                 result.EnsureSuccessStatusCode();
                 string responseBody = await result.Content.ReadAsStringAsync();
                 var response = JsonConvert.DeserializeObject<APIEntityResponse<JObject>>(responseBody);
@@ -101,7 +102,7 @@ namespace SADnD.Client.Services
         {
             try
             {
-                var result = await _httpClient.PutAsJsonAsync("note", entity);
+                var result = await _httpClient.PutAsync("note", new StringContent(JsonConvert.SerializeObject(entity), Encoding.UTF8, "application/json"));
                 result.EnsureSuccessStatusCode();
                 string responseBody = await result.Content.ReadAsStringAsync();
                 var response = JsonConvert.DeserializeObject<APIEntityResponse<JObject>>(responseBody);
