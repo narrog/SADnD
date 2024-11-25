@@ -60,15 +60,35 @@
                                          OnCategoryChanged="HandleCategoryChanged" />
                 </div>
 
-
-                @if(activeCategory == "inventory") {
-                    <InventoryView Character="@Character"/>
-                }
-                else {
-                    <NotesView NotesCategory="@activeCategory"
-                    CharacterId="@Character.Id"
-                    @ref="notesViewReference" />
-                }
+                <div class="col-10 my-2">
+                    @if(activeCategory == "inventory") {
+                        @if (!showAddItems) {
+                            <InventoryView Character="@Character"
+                                           UnitOfWeight="@unitOfWeight" />
+                            <button class="btn btn-secondary mt-1" @onclick="ShowAddItems">Item hinzufügen</button>
+                        }
+                        else {
+                            <InventoryItemAdd OnClose="HideAddItems"
+                                              UnitOfWeight="@unitOfWeight" />
+                        }
+                        
+                    }
+                    else {
+                        @if (!showAddNotes) {
+                            <NotesView NotesCategory="@activeCategory"
+                                       CharacterId="@Character.Id"
+                                       @ref="notesViewReference" />
+                            <button class="btn btn-secondary mt-1" @onclick="() => ShowAddNotes(0)">Notiz hinzufügen</button>
+                        }
+                        else {
+                            <NotesAdd NotesCategory="@activeCategory"
+                                      SelectedNoteId="@selectedNoteId"
+                                      CharacterId="@Character.Id"
+                                      OnClose="HideAddNotes" />
+                        }
+                        
+                    }
+                </div>
             </div>
         </div>
         <div class="container-fluid mt-3">
@@ -91,6 +111,12 @@
     private string showDetailsText = "Details anzeigen";
     public string activeCategory = "inventory";
     private NotesView? notesViewReference;
+
+    private bool showAddItems;
+    private string unitOfWeight = "kg";
+
+    private bool showAddNotes;
+    private int selectedNoteId;
 
     protected override async Task OnInitializedAsync() {
         Character = await characterManager.GetByID(Id);
@@ -119,4 +145,31 @@
         }
     }
 
+    private async void ShowAddItems() {
+        showAddItems = true;
+        Character = await characterManager.GetByID(Character.Id);
+        StateHasChanged();
+    }
+    private async void HideAddItems() {
+        Character = await characterManager.GetByID(Character.Id);
+        showAddItems = false;
+        StateHasChanged();
+        // GetWeightSum();
+    }
+
+    private async void ShowAddNotes(int noteId) {
+        selectedNoteId = noteId;
+        showAddNotes = true;
+        await OnParametersSetAsync();
+        StateHasChanged();
+    }
+    private async void HideAddNotes() {
+        await OnParametersSetAsync();
+        showAddNotes = false;
+        StateHasChanged();
+    }
+    public void ResetAddNotes() {
+        showAddNotes = false;
+        StateHasChanged();
+    }
 }
