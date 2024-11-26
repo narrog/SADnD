@@ -64,7 +64,7 @@
                 <div class="col-10">
                     @if(activeCategory == "inventory") {
                         @if (!showAddItems) {
-                            <InventoryView Character="@Character"
+                            <InventoryView CharacterId="@Id"
                                            UnitOfWeight="@unitOfWeight" />
                             <button class="btn btn-secondary mt-1" @onclick="ShowAddItems">Item hinzufügen</button>
                         }
