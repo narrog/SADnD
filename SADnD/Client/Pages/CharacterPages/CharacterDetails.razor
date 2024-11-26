@@ -1,7 +1,7 @@
 ﻿@page "/character-details/{id}"
 @attribute [Authorize]
 @inject CharacterSyncManager characterManager
-@inject NoteManager noteManager
+@inject NoteApiManager noteManager
 @inject IJSRuntime js
 
 <CascadingValue Value="@this" IsFixed="true">

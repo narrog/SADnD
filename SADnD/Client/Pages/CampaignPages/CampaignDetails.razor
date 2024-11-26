@@ -2,7 +2,7 @@
 @attribute [Authorize]
 @inject CampaignApiManager campaignManager
 @inject JoinRequestApiManager joinRequestManager
-@* @inject NoteManager noteManager *@
+@inject NoteApiManager noteManager
 @inject IJSRuntime js
 @using Newtonsoft.Json
 
@@ -94,29 +94,7 @@
     </div>
     <div class="row">
         @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
-            <div class="col-2 my-1" id="notes-icons-container">
-                <NotesCategoryIcons @bind-ActiveCategory="activeCategory"
-                                    OnCategoryChanged="HandleCategoryChanged"
-                                    CampaignId="@Id"
-                                    ViewTypeIsDM="true" />
-            </div>
-            <div class="col-10">
-                @if (!showAddNotes) {
-                    <NotesView NotesCategory="@activeCategory"
-                               CampaignId="@Id"
-                               OnEditNote="ShowAddNotes"
-                               ViewTypeIsDM="true" />
-                    <button class="btn btn-secondary mt-1" @onclick="() => ShowAddNotes(0)">Notiz hinzufügen</button>
-                }
-                else{
-                    <NotesAdd NotesCategory="@activeCategory"
-                              SelectedNoteId="@selectedNoteId"
-                              CampaignId="@Id"
-                              OnClose="HideAddNotes" />
-                }
-
-            </div>
-            @* evtl. Alternative für Funktionsauruf via Manager?
+            
                 <div class="col-2 my-1" id="notes-icons-container">
                 <NotesCategoryIcons @bind-ActiveCategory="activeCategory"
                                     OnCategoryChanged="noteManager.HandleCategoryChanged"
@@ -140,7 +118,7 @@
                               OnClose="noteManager.HideAddNotesAsync" />
                 }
 
-            </div> *@
+            </div> 
         }
     </div>
 </div>
@@ -173,9 +151,6 @@
     private string currentUserId = "";
 
     public string activeCategory = "story";
-
-    private bool showAddNotes;
-    private int selectedNoteId;
 
     protected override async Task OnInitializedAsync() {
         currentUserId = appState.UserId;
@@ -256,24 +231,7 @@
         catch (Exception ex) {
             Console.WriteLine($"Exception RemovePlayer: {ex.Message}");
         }
-    }
-    private void HandleCategoryChanged() {
-        showAddNotes = false;
-        StateHasChanged();
-    }
-    
-    private async void ShowAddNotes(int noteId) {
-        selectedNoteId = noteId;
-        showAddNotes = true;
-        await OnParametersSetAsync();
-        StateHasChanged();
-    }
-    private async void HideAddNotes() {
-        await OnParametersSetAsync();
-        showAddNotes = false;
-        StateHasChanged();
-    }
- 
+    } 
 
     private async Task DeleteCampaign() {
         string toDeleteName = campaign.Name;
