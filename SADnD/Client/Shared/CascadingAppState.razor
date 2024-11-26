@@ -21,7 +21,6 @@
             userId = authenticationStateTask.Result.User.Claims.Where(x => x.Type == "sub").FirstOrDefault().Value;
             return userId;
         }
-        private set { }
     }
     public IEnumerable<Claim> Claims
     {
@@ -30,7 +29,6 @@
             claims = authenticationStateTask.Result.User.Claims;
             return claims;
         }
-        private set { }
     }
     public IEnumerable<Note> Notes { get; set; }
     public async Task GetNotes()
