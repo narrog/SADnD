@@ -43,35 +43,24 @@
         await ActiveCategoryChanged.InvokeAsync(category);
         await OnCategoryChanged.InvokeAsync();
     }
-    private string GetCategoryClass(string category)
-    {
-        bool filteredList;
-        if (ViewTypeIsDM) {
-            filteredList = category switch {
-                "inventory" => true,
-                "story" => appState.Notes.Any(note => note is NoteStory && note.CampaignId == CampaignId),
-                "people" => appState.Notes.Any(note => note is NotePerson && note.CampaignId == CampaignId),
-                "locations" => appState.Notes.Any(note => note is NoteLocation && note.CampaignId == CampaignId),
-                "quest" => appState.Notes.Any(note => note is NoteQuest && note.CampaignId == CampaignId),
-                "hints" => appState.Notes.Any(note => note is NoteHint && note.CampaignId == CampaignId),
-                _ => false
-            };
-        }
-        else {
-            filteredList = category switch {
-                "inventory" => true,
-                "story" => appState.Notes.Any(note => note is NoteStory && note.CharacterId == CharacterId),
-                "people" => appState.Notes.Any(note => note is NotePerson && note.CharacterId == CharacterId),
-                "locations" => appState.Notes.Any(note => note is NoteLocation && note.CharacterId == CharacterId),
-                "quest" => appState.Notes.Any(note => note is NoteQuest && note.CharacterId == CharacterId),
-                "hints" => appState.Notes.Any(note => note is NoteHint && note.CharacterId == CharacterId),
-                _ => false
-            };
-        }
+    private string GetCategoryClass(string category) {
+        bool Matches(Note note) =>
+            ViewTypeIsDM ? note.CampaignId == CampaignId : note.CharacterId == CharacterId;
+
+        bool categoryHasNotes = category switch
+        {
+            "inventory" => true, 
+            "story" => appState.Notes.Any(note => note is NoteStory && Matches(note)),
+            "people" => appState.Notes.Any(note => note is NotePerson && Matches(note)),
+            "locations" => appState.Notes.Any(note => note is NoteLocation && Matches(note)),
+            "quest" => appState.Notes.Any(note => note is NoteQuest && Matches(note)),
+            "hints" => appState.Notes.Any(note => note is NoteHint && Matches(note)),
+            _ => false 
+        };
 
         return ActiveCategory == category
             ? "ps-2 my-1 bg-light text-dark border"
-            : $"ps-2 my-1 bg-dark text-light {filteredList}";
+            : $"ps-2 my-1 bg-dark text-light {categoryHasNotes}";
     }
 
 }
