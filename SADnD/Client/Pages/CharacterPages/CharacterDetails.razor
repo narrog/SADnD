@@ -1,7 +1,7 @@
 ﻿@page "/character-details/{id}"
 @attribute [Authorize]
 @inject CharacterSyncManager characterManager
-@* @inject NoteManager noteManager *@
+@inject NoteManager noteManager
 @inject IJSRuntime js
 
 <CascadingValue Value="@this" IsFixed="true">
@@ -55,43 +55,6 @@
             </div>
 
             <div class="row mt-3">
-                <div class="col-2 my-1" id="notes-icons-container">
-                    <NotesCategoryIcons @bind-ActiveCategory="activeCategory"
-                                         CharacterId="@Character.Id"
-                                         OnCategoryChanged="HandleCategoryChanged" />
-                </div>
-
-                <div class="col-10">
-                    @if(activeCategory == "inventory") {
-                        @if (!showAddItems) {
-                            <InventoryView Character="@Character"
-                                           UnitOfWeight="@unitOfWeight" />
-                            <button class="btn btn-secondary mt-1" @onclick="ShowAddItems">Item hinzufügen</button>
-                        }
-                        else {
-                            <InventoryItemAdd OnClose="HideAddItems"
-                                              UnitOfWeight="@unitOfWeight" />
-                        }
-                        
-                    }
-                    else {
-                        @if (!showAddNotes) {
-                            <NotesView NotesCategory="@activeCategory"
-                                       CharacterId="@Character.Id"
-                                       OnEditNote="ShowAddNotes" />
-                            <button class="btn btn-secondary mt-1" @onclick="() => ShowAddNotes(0)">Notiz hinzufügen</button>
-                        }
-                        else {
-                            <NotesAdd NotesCategory="@activeCategory"
-                                      SelectedNoteId="@selectedNoteId"
-                                      CharacterId="@Character.Id"
-                                      OnClose="HideAddNotes" />
-                        }
-                        
-                    }
-                </div>
-            </div>
-            @* evtl. Alternative für Funktionsauruf via Manager?
                     <div class="col-2 my-1" id="notes-icons-container">
                     <NotesCategoryIcons @bind-ActiveCategory="activeCategory"
                                          CharacterId="@Character.Id"
@@ -128,7 +91,7 @@
                         
                     }
                 </div>
-            </div> *@
+            </div>
         </div>
         <div class="container-fluid mt-3">
             <a class="btn btn-outline-primary me-2" onclick="history.back();">Zurück</a>
@@ -152,9 +115,6 @@
 
     private bool showAddItems;
     private string unitOfWeight = "kg";
-
-    private bool showAddNotes;
-    private int selectedNoteId;
 
     protected override async Task OnInitializedAsync() {
         Character = await characterManager.GetByID(Id);
@@ -187,19 +147,4 @@
         StateHasChanged();
     }
 
-    private void HandleCategoryChanged() {
-        showAddNotes = false;
-        StateHasChanged();
-    }
-    private async void ShowAddNotes(int noteId) {
-        selectedNoteId = noteId;
-        showAddNotes = true;
-        await OnParametersSetAsync();
-        StateHasChanged();
-    }
-    private async void HideAddNotes() {
-        await OnParametersSetAsync();
-        showAddNotes = false;
-        StateHasChanged();
-    }
 }
