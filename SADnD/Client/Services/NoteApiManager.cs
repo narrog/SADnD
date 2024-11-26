@@ -17,9 +17,8 @@ namespace SADnD.Client.Services
             _httpClient = httpClient;
         }
 
-        //evtl. Alternative für Funktionsauruf via Manager?
-        //public bool ShowAddNotes { get; private set; } = false;
-        //public int SelectedNoteId { get; private set; } = 0;
+        public bool ShowAddNotes { get; private set; } = false;
+        public int SelectedNoteId { get; private set; } = 0;
 
         private Dictionary<string, Type> typeMapping = new Dictionary<string, Type>()
         {
@@ -163,21 +162,19 @@ namespace SADnD.Client.Services
             }
         }
 
-        // evtl. Alternative für Funktionsauruf via Manager?
-        //
-        //public void HandleCategoryChanged() {
-        //    ShowAddNotes = false;
-        //}
+        public void HandleCategoryChanged() {
+            ShowAddNotes = false;
+        }
 
-        //public Task ShowAddNotesAsync(int noteId) {
-        //    SelectedNoteId = noteId;
-        //    ShowAddNotes = true;
-        //    return Task.CompletedTask;
-        //}
+        public Task ShowAddNotesAsync(int noteId) {
+            SelectedNoteId = noteId;
+            ShowAddNotes = true;
+            return Task.CompletedTask;
+        }
 
-        //public Task HideAddNotesAsync() {
-        //    ShowAddNotes = false;
-        //    return Task.CompletedTask;
-        //}
+        public Task HideAddNotesAsync() {
+            ShowAddNotes = false;
+            return Task.CompletedTask;
+        }
     }
 }
