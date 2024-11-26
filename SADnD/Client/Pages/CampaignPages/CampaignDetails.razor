@@ -1,7 +1,7 @@
 ﻿@page "/campaign-details/{id}"
 @attribute [Authorize]
-@inject CampaignManager campaignManager
-@inject JoinRequestManager joinRequestManager
+@inject CampaignApiManager campaignManager
+@inject JoinRequestApiManager joinRequestManager
 @* @inject NoteManager noteManager *@
 @inject IJSRuntime js
 @using Newtonsoft.Json

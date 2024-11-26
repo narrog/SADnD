@@ -5,10 +5,10 @@ using System.Net;
 
 namespace SADnD.Client.Services
 {
-    public class CampaignManager : APIRepository<Campaign>
+    public class CampaignApiManager : APIRepository<Campaign>
     {
         HttpClient _httpClient;
-        public CampaignManager(HttpClient httpClient)
+        public CampaignApiManager(HttpClient httpClient)
             : base(httpClient, "campaign")
         {
             _httpClient = httpClient;

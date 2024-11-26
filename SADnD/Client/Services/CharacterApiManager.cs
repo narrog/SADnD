@@ -3,11 +3,11 @@ using SADnD.Shared.Models;
 
 namespace SADnD.Client.Services
 {
-    public class JoinRequestManager : APIRepository<JoinRequest>
+    public class CharacterApiManager : APIRepository<Character>
     {
         HttpClient _httpClient;
-        public JoinRequestManager(HttpClient httpClient)
-            : base(httpClient, "joinRequest")
+        public CharacterApiManager(HttpClient httpClient)
+            : base(httpClient, "character")
         {
             _httpClient = httpClient;
         }

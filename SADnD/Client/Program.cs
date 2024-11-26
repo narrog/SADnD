@@ -174,19 +174,19 @@ builder.Services.AddBlazorDB(options =>
         }
     };
 });
-builder.Services.AddScoped<CampaignManager>();
+builder.Services.AddScoped<CampaignApiManager>();
 //builder.Services.AddScoped<CampaignSyncManager>();
-builder.Services.AddScoped<CharacterManager>();
+builder.Services.AddScoped<CharacterApiManager>();
 builder.Services.AddScoped<CharacterSyncManager>();
-builder.Services.AddScoped<ClassManager>();
+builder.Services.AddScoped<ClassApiManager>();
 builder.Services.AddScoped<ClassSyncManager>();
-builder.Services.AddScoped<RaceManager>();
+builder.Services.AddScoped<RaceApiManager>();
 builder.Services.AddScoped<RaceSyncManager>();
-builder.Services.AddScoped<JoinRequestManager>();
+builder.Services.AddScoped<JoinRequestApiManager>();
 //builder.Services.AddScoped<JoinRequestSyncManager>();
-builder.Services.AddScoped<InventoryItemManager>();
+builder.Services.AddScoped<InventoryItemApiManager>();
 builder.Services.AddScoped<InventoryItemSyncManager>();
-builder.Services.AddScoped<NoteManager>();
+builder.Services.AddScoped<NoteApiManager>();
 //builder.Services.AddScoped<NoteSyncManager>();
 
 await builder.Build().RunAsync();

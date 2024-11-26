@@ -7,7 +7,7 @@ namespace SADnD.Client.Services
 {
     public class ClassSyncManager : IndexedDBSyncRepository<Class>
     {
-        public ClassSyncManager(IBlazorDbFactory dbFactory,ClassManager classManager,IJSRuntime jsRuntime)
+        public ClassSyncManager(IBlazorDbFactory dbFactory,ClassApiManager classManager,IJSRuntime jsRuntime)
             : base("SADnD.IndexedDB", dbFactory, classManager,jsRuntime)
         {
         }
