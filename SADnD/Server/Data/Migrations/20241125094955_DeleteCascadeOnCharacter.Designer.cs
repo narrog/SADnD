@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SADnD.Server.Data;
@@ -11,9 +12,11 @@ using SADnD.Server.Data;
 namespace SADnD.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241125094955_DeleteCascadeOnCharacter")]
+    partial class DeleteCascadeOnCharacter
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1027,8 +1030,7 @@ namespace SADnD.Server.Migrations
                 {
                     b.HasOne("SADnD.Shared.Models.Campaign", "Campaign")
                         .WithMany("Notes")
-                        .HasForeignKey("CampaignId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("CampaignId");
 
                     b.HasOne("SADnD.Shared.Models.Character", "Character")
                         .WithMany("Notes")

@@ -1,15 +1,12 @@
 ﻿using SADnD.Client.Shared;
 using SADnD.Shared.Models;
-using System.Diagnostics;
-using System.Net;
-using System.Net.Http.Json;
 
 namespace SADnD.Client.Services
 {
-    public class JoinRequestManager : APIRepository<JoinRequest>
+    public class JoinRequestApiManager : APIRepository<JoinRequest>
     {
         HttpClient _httpClient;
-        public JoinRequestManager(HttpClient httpClient)
+        public JoinRequestApiManager(HttpClient httpClient)
             : base(httpClient, "joinRequest")
         {
             _httpClient = httpClient;

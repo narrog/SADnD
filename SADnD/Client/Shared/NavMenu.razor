@@ -1,8 +1,14 @@
-﻿<nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">SADnD</a>
+﻿@inject IJSRuntime js
+
+<nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
+    <div class="container-fluid ps-4">
+        @* <a class="navbar-brand" href="">SADnD</a> *@
         <button class="navbar-toggler @NavButtonCssClass" type="button" aria-controls="navbarCollapse"
-                aria-label="Toggle navigation" @onclick="ToggleNavMenu">
+        aria-label="Go Back" @onclick="GoBack">
+            <span class="bi bi-arrow-left-square"></span>
+        </button>
+        <button class="navbar-toggler @NavButtonCssClass" type="button" aria-controls="navbarCollapse"
+        aria-label="Toggle navigation" @onclick="ToggleNavMenu">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse @NavBarCssClass" id="navbarCollapse" @onclick="ToggleNavMenu">
@@ -23,20 +29,33 @@
                     </NavLink>
                 </li>
                 <AuthorizeView>
-                   
+
                 </AuthorizeView>
-                
+
             </ul>
-            <ConnectivityIndicator>
-                <ShowOnline>
-                    <div>Online</div>
-                </ShowOnline>
-                <ShowOffline>
-                    <div>Offline</div>
-                </ShowOffline>
-            </ConnectivityIndicator>
             <LoginDisplay />
+            @if (showInstallButton) {
+                <ul class="navbar-nav mb-2 mb-md-0">
+                    <li class="nav-item" onclick="@InstallPWA">
+                        <NavLink class="nav-link">
+                            <span class="bi bi-box-arrow-in-down" aria-hidden="true"></span>
+                        </NavLink>
+                    </li>
+                </ul>
+            }
         </div>
+        <ConnectivityIndicator>
+            <ShowOnline>
+                @* <div>Online</div> *@
+            </ShowOnline>
+            <ShowOffline>
+                <ul class="navbar-nav mb-2 mb-md-0">
+                    <li class="nav-item">
+                        <span class="bi bi-cloud-slash" aria-hidden="true"></span>
+                    </li>
+                </ul>
+            </ShowOffline>
+        </ConnectivityIndicator>
     </div>
 </nav>
 
@@ -45,7 +64,33 @@
     private string? NavBarCssClass => collapseNavMenu ? null : "show";
     private string? NavButtonCssClass => collapseNavMenu ? "collapsed" : null;
 
+    public bool showInstallButton { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        await js.InvokeVoidAsync("BlazorPWA.StoreComponent", DotNetObjectReference.Create(this));
+    }
     private void ToggleNavMenu() {
         collapseNavMenu = !collapseNavMenu;
+    }
+    private async Task GoBack() {
+        await js.InvokeVoidAsync("history.back");
+    }
+    private async Task InstallPWA()
+    {
+        await js.InvokeVoidAsync("BlazorPWA.InstallPWA");
+    }
+    [JSInvokable("ActivateInstallButton")]
+    public async Task ActivateInstallButton()
+    {
+        Console.WriteLine("called activate");
+        await Task.Run(() => showInstallButton = true);
+        StateHasChanged();
+    }
+    [JSInvokable("DeactivateInstallButton")]
+    public async Task DeactivateInstallButton()
+    {
+        Console.WriteLine("called deactivate");
+        await Task.Run(() => showInstallButton = false);
+        StateHasChanged();
     }
 }

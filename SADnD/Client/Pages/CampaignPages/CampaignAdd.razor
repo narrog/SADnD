@@ -4,23 +4,28 @@
 @using Newtonsoft.Json
 @inject IJSRuntime js
 
-@inject CampaignManager campaignManager
+@inject CampaignApiManager campaignManager
 
 <h3>Kampagne hinzufügen</h3>
 
-<div class="mt-3">
-    <EditForm Model="@campaign" OnValidSubmit="@Post">
-        <DataAnnotationsValidator /> 
-        Name:
-        <InputText @bind-Value="@campaign.Name"></InputText>
-        <FormButtons />
-        
-        <ValidationSummary class="mt-3" />
-    </EditForm>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12 col-md-4 mt-3">
+            <EditForm Model="@campaign" OnValidSubmit="@Post">
+                <DataAnnotationsValidator />
+                <lable for="name">Name:</lable>
+                <InputText @bind-Value="@campaign.Name" id="name" class="form-control"></InputText>
+                <FormButtons />
+
+                <ValidationSummary class="mt-3" />
+            </EditForm>
+        </div>
+        <div class="mt-3">
+            @UIMessage
+        </div>
+    </div>
 </div>
-<div class="mt-3">
-    @UIMessage
-</div>
+
 
 @code {
     private Campaign campaign = new Campaign();

@@ -7,7 +7,7 @@ namespace SADnD.Client.Services
 {
     public class CharacterSyncManager : IndexedDBSyncRepository<Character>
     {
-        public CharacterSyncManager(IBlazorDbFactory dbFactory,CharacterManager characterManager,IJSRuntime jsRuntime)
+        public CharacterSyncManager(IBlazorDbFactory dbFactory,CharacterApiManager characterManager,IJSRuntime jsRuntime)
             : base("SADnD.IndexedDB", dbFactory, characterManager,jsRuntime)
         {
         }

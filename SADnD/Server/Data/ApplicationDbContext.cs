@@ -22,14 +22,44 @@ namespace SADnD.Server.Data
         public DbSet<CharacterClass> CharactersClasses { get; set; }
         public DbSet<Inventory> Inventories { get; set; }
         public DbSet<InventoryItem> InventoryItems { get; set; }
+        public DbSet<Note> Notes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
+            builder.Entity<Character>()
+                .HasMany(c => c.Inventory)
+                .WithOne(i => i.Character)
+                .HasForeignKey(i => i.CharacterId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Character>()
+                .HasMany(c => c.Notes)
+                .WithOne(n => n.Character)
+                .HasForeignKey(n => n.CharacterId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Note>()
+                .HasMany(n => n.Notes)
+                .WithMany(n => n.NoteMentions)
+                .UsingEntity(x => x.ToTable("NoteMentions"))
+                .UseTpcMappingStrategy();
+            builder.Entity<NoteStory>().ToTable(nameof(NoteStory));
+            builder.Entity<NotePerson>().ToTable(nameof(NotePerson));
+            builder.Entity<NoteLocation>().ToTable(nameof(NoteLocation));
+            builder.Entity<NoteQuest>().ToTable(nameof(NoteQuest));
+            builder.Entity<NoteHint>().ToTable(nameof(NoteHint));
+
             builder.Entity<Campaign>()
                 .HasIndex(c => c.Id)
                 .IsUnique();
+
+            builder.Entity<Campaign>()
+                .HasMany(c => c.Notes)
+                .WithOne(n => n.Campaign)
+                .HasForeignKey(n => n.CampaignId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<Campaign>()
                 .HasMany(c => c.DungeonMasters)

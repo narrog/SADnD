@@ -1,0 +1,27 @@
+﻿.bi {
+    font-size: 3rem;
+}
+
+#notes-icons-container div {
+    cursor: pointer;
+}
+
+#notes-icons-container .False {
+    background-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity)) !important;
+    --bs-bg-opacity: 0.5;
+}
+
+@media (max-width: 767.98px) {
+    .bi {
+        font-size: 2rem;
+    }
+    .hide-on-mobile {
+        display: none;
+    }
+}
+
+@media (max-width:575.98px) {
+    .bi {
+        font-size: 1.25rem;
+    }
+}

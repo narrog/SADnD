@@ -5,6 +5,7 @@ using SADnD.Server.Data;
 using SADnD.Shared.Models;
 using Microsoft.AspNetCore.Identity;
 using SADnD.Server.Areas.Identity;
+using SADnD.Server.Migrations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,6 +58,7 @@ builder.Services.AddTransient<EFRepositoryGeneric<Race, ApplicationDbContext>>()
 builder.Services.AddTransient<EFRepositoryGeneric<Class, ApplicationDbContext>>();
 builder.Services.AddTransient<EFRepositoryGeneric<JoinRequest, ApplicationDbContext>>();
 builder.Services.AddTransient<EFRepositoryGeneric<InventoryItem, ApplicationDbContext>>();
+builder.Services.AddTransient<EFRepositoryGeneric<Note, ApplicationDbContext>>();
 builder.Services.AddTransient<CustomClaimsService<ApplicationDbContext,UserManager<ApplicationUser>>>();
 
 builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, CustomUserClaimsPrincipalFactory>();

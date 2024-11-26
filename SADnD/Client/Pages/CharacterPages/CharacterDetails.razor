@@ -1,8 +1,7 @@
 ﻿@page "/character-details/{id}"
-@using SADnD.Client.Pages.CharacterPages.InventoryPages
-@using Newtonsoft.Json
 @attribute [Authorize]
 @inject CharacterSyncManager characterManager
+@inject NoteApiManager noteManager
 @inject IJSRuntime js
 
 <CascadingValue Value="@this" IsFixed="true">
@@ -33,10 +32,16 @@
                     @* TODO:
                     <p><strong>Trefferpunkte: </strong>@Character.Hitpoints </p>
                     <p><strong>Spellslots: </strong></p> *@
-                    <a style="cursor: pointer;" @onclick="ShowCharacterDetails"><span class="oi oi-eye me-2"></span> Details anzeigen</a>
+                    <button class="btn btn-outline-secondary mt-md-5" @onclick="ShowCharacterDetails">
+                        <span class="oi oi-eye me-2"></span> @showDetailsText
+                    </button>
+                    <a class="btn btn-outline-primary mt-md-5" href="/new-character/@Id">
+                        <span class="oi oi-pencil me-2"></span> bearbeiten
+                    </a>
+
                 </div>
                 @if (showCharacterDetails) {
-                    <div class="col-12 col-md-2">
+                    <div class="col-12 col-md-4 mt-3 mt-md-0">
                         <p>
                             <strong>Grösse-Kategorie: </strong>@(Character.SizeCategory != null ? Character.SizeCategory : "Unbekannt")<br />
                             <strong>Grösse: </strong>@(Character.Size != null ? Character.Size : "Unbekannt")<br />
@@ -46,90 +51,51 @@
                             <strong>Gewicht: </strong>@(Character.Weight != null ? Character.Weight : "Unbekannt")
                         </p>
                     </div>
-                    <div class="col-12 col-md-2">
-                        @* TODO:
-                        <button class="btn btn-outline-primary" @onclick="EditCharacterDetails">bearbeiten</button> *@
-                        <button class="btn btn-outline-secondary" @onclick="ShowCharacterDetails">Details schliessen</button>
-                    </div>
                 }
             </div>
-            <div class="row">
-                <div class="col-12 col-md-4">
-                    @* TODO:
-                       Icons für die verschiedenen Notizen
 
-                    *@
+            <div class="row mt-3">
+                    <div class="col-2 my-1" id="notes-icons-container">
+                    <NotesCategoryIcons @bind-ActiveCategory="activeCategory"
+                                         CharacterId="@Character.Id"
+                                         OnCategoryChanged="noteManager.HandleCategoryChanged" />
                 </div>
-                <div class="col-12 col-md-4">
-                    @* TODO:
-                        Inhalt Dynamisch anpassen, je nach dem, welcher "Menüpunkt" angewählt wird
-                    *@
-                    <h4>Inventar</h4>
-                    <table class="table table-striped">
-                        <tbody>
-                            @if (Character.Inventory != null && Character.Inventory.Any() != false) {
-                                @foreach (var inventoryItem in Character.Inventory) {
-                                    <tr>
-                                        <td width="8%" class="align-middle">
-                                            @inventoryItem.Count
-                                        </td>
-                                        <td width="12%" class="align-middle">
-                                            <button @onclick="() => IncreaseItemCount(inventoryItem)" title="Anzahl erhöhen">+</button>
-                                            <button @onclick="() => DecreaseItemCount(inventoryItem)" title="Anzahl verringern">-</button>
-                                        </td>
-                                        @if (inventoryItem.Item != null) {
-                                            <td width="50%" class="align-middle">@inventoryItem.Item.Name</td>
-                                            @if (inventoryItem.Item.Weight != null) {
-                                                <td width="15%" class="align-middle text-end">
-                                                    @inventoryItem.Item.Weight @unitOfWeight
-                                                </td>
-                                                <td width="15%" class="align-middle text-end">
-                                                    @(inventoryItem.Count * inventoryItem.Item.Weight) @unitOfWeight
-                                                </td>
-                                            }
-                                            else {
-                                                <td width="15%"></td>
-                                                <td width="15%"></td>
-                                            }
-                                        }
-                                    </tr>
-                                }
-                                <tr>
-                                    <td class="align-middle text-end" colspan="4">Gewicht Total</td>
-                                    <td class="align-middle text-end">@weightTotal @unitOfWeight</td>
-                                </tr>
-                            }
-                            else {
-                                <tr><td>Keine Items gefunden</td></tr>
-                            }
-                        </tbody>
-                    </table>
-                    @if (showUIMessage) {
-                        <ul class="mt-3">
-                            <li class="validation-message">
-                                @UIMessage
-                            </li>
-                        </ul>
-                    }
-                </div>
-                <div class="col-12 col-md-4">
-                    @if (!showAddItems) {
-                        <button class="btn btn-secondary" @onclick="ShowAddItems">Item hinzufügen</button>
+
+                <div class="col-10">
+                    @if(activeCategory == "inventory") {
+                        @if (!showAddItems) {
+                            <InventoryView CharacterId="@Id"
+                                           UnitOfWeight="@unitOfWeight" />
+                            <button class="btn btn-secondary mt-1" @onclick="ShowAddItems">Item hinzufügen</button>
+                        }
+                        else {
+                            <InventoryItemAdd OnClose="HideAddItems"
+                                              UnitOfWeight="@unitOfWeight" />
+                        }
+                        
                     }
                     else {
-                        <InventoryItemAdd ShowAddItems="@showAddItems"
-                                          OnClose="HideAddItems"
-                                          UnitOfWeight="@unitOfWeight" />
+                        @if (!noteManager.ShowAddNotes)
+                        {
+                            <NotesView NotesCategory="@activeCategory"
+                                       CharacterId="@Character.Id"
+                                       OnEditNote="noteManager.ShowAddNotesAsync" />
+                            <button class="btn btn-secondary mt-1" @onclick="() => noteManager.ShowAddNotesAsync(0)">Notiz hinzufügen</button>
+                        }
+                        else {
+                            <NotesAdd NotesCategory="@activeCategory"
+                                      SelectedNoteId="@noteManager.SelectedNoteId"
+                                      CharacterId="@Character.Id"
+                                      OnClose="noteManager.HideAddNotesAsync" />
+                        }
+                        
                     }
                 </div>
-
             </div>
         </div>
         <div class="container-fluid mt-3">
             <a class="btn btn-outline-primary me-2" onclick="history.back();">Zurück</a>
-            @* 
-            TODO:
-            <button class="btn btn-outline-danger" @onclick="DeleteCharacter">Löschen</button> *@
+            <button class="btn btn-outline-danger" @onclick="DeleteCharacter">Löschen</button>
         </div>
     }
 </CascadingValue>
@@ -137,106 +103,48 @@
 
 
 @code {
+    [CascadingParameter]
+    public CascadingAppState appState { get; set; }
     [Parameter] 
     public required string Id { get; set; }
     public Character Character = new Character();
 
-    private bool showAddItems;
-    private bool showUIMessage;
     private bool showCharacterDetails;
-    private string UIMessage = string.Empty;
+    private string showDetailsText = "Details anzeigen";
+    public string activeCategory = "inventory";
+
+    private bool showAddItems;
     private string unitOfWeight = "kg";
-    private float weightTotal;
 
     protected override async Task OnInitializedAsync() {
         Character = await characterManager.GetByID(Id);
-
-        GetWeightSum();
+        await appState.GetNotes();
     }
-
 
     private async Task DeleteCharacter() {
-        // string toDeleteName = character.Name;
-        // bool confirm = await js.InvokeAsync<bool>("confirm", $"Soll der Eintrag '{toDeleteName}' wirklich gelöscht werden?");
-        // if (!confirm) return;
+        string toDeleteName = Character.Name;
+        bool confirm = await js.InvokeAsync<bool>("confirm", $"Soll der Eintrag '{toDeleteName}' wirklich gelöscht werden?\r\nAlle Notizen werden ebenfalls gelöscht.\r\nDas Löschen kann nicht Rückgängig gemacht werden");
+        if (!confirm) return;
 
-        //await characterManager.Delete(character.Id);
+        await characterManager.Delete(Character.Id);
+        await js.InvokeVoidAsync("history.back");
     }
+
     private void ShowCharacterDetails() {
         showCharacterDetails = !showCharacterDetails;
+        showDetailsText = showCharacterDetails ? "Details ausblenden" : "Details anzeigen";
         StateHasChanged();
     }
 
     private async void ShowAddItems() {
         showAddItems = true;
-        Character = await characterManager.GetByID(Id);
+        Character = await characterManager.GetByID(Character.Id);
         StateHasChanged();
     }
-    private void HideAddItems() {
+    private async void HideAddItems() {
+        Character = await characterManager.GetByID(Character.Id);
         showAddItems = false;
         StateHasChanged();
-        GetWeightSum();
     }
 
-    private void GetWeightSum() {
-        weightTotal = 0;
-        float weightProduct;
-        if (Character.Inventory != null && Character.Inventory.Any()) {
-            foreach (var inventoryItem in Character.Inventory) {
-                @if (inventoryItem.Item != null) {
-                    @if (inventoryItem.Item.Weight != null) {
-                        weightProduct = inventoryItem.Item.Weight.Value * inventoryItem.Count;
-                        weightTotal += weightProduct;
-                    }
-                }
-            }
-        }
-    }
-
-    private async Task IncreaseItemCount(Inventory inventoryItem) {
-        showUIMessage = false;
-        inventoryItem.Count++;
-        await UpdateItemCount();
-    }
-    private async Task DecreaseItemCount(Inventory inventoryItem) {
-        showUIMessage = false;
-        if (inventoryItem.Count == 1) {
-
-            await DeleteItemFromInventory(inventoryItem);
-            return;
-        }
-
-        inventoryItem.Count--;
-        await UpdateItemCount();
-    }
-    private async Task UpdateItemCount() {
-        await characterManager.Update(Character);
-        GetWeightSum();
-        StateHasChanged();
-    }
-
-    private async Task DeleteItemFromInventory(Inventory inventoryItem) {
-        try
-        {
-            if (Character.Inventory != null && Character.Inventory.Any())
-            {
-                var itemToRemove = Character.Inventory.FirstOrDefault(i => i.Item.Id == inventoryItem.Item.Id);
-
-                if (itemToRemove != null)
-                {
-
-                    string itemName = itemToRemove.Item!.Name;
-                    Character.Inventory!.Remove(itemToRemove);
-                    UIMessage = $"Item '{itemName}' wurde aus dem Inventar entfernt";
-                    showUIMessage = true;
-                }
-            }
-            Character = await characterManager.Update(Character);
-
-        }
-        catch (Exception ex) {
-            Console.WriteLine($"{ex.Message}");
-        }
-
-    }
 }

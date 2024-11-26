@@ -1,0 +1,102 @@
+﻿@inject NoteApiManager noteManager
+
+@if(note != null){
+    <EditForm Model="@note" OnValidSubmit="@Post" class="w-100">
+        <DataAnnotationsValidator />
+        <p>
+            <label for="title">Titel: </label>
+            <InputText @bind-Value="@note.Name" id="title" class="form-control"></InputText>
+        </p>
+        <p>
+            <label for="text">Text: </label>
+            <InputTextArea @bind-Value="@note.Content" id="text" class="form-control" rows="7"></InputTextArea>
+        </p>
+    @if (note is NotePerson notePerson) {
+            <p>
+                <label for="location">Ort:</label>
+                <InputText @bind-Value="notePerson.Location" id="location" class="form-control"></InputText>
+            </p>
+            <p>
+                <label for="affiliation">Zugehörigkeit:</label>
+                <InputText @bind-Value="notePerson.Affiliation" id="affiliation" class="form-control"></InputText>
+            </p>
+        }
+
+        <SubmitButton />
+        <button class="btn btn-outline-secondary me-2" type="button" @onclick="Close">Abbrechen</button>
+
+        <ValidationSummary class="mt-3" />
+    </EditForm>
+}
+
+
+@code {
+    [CascadingParameter]
+    public CascadingAppState appState { get; set; }
+    [Parameter]
+    public required string NotesCategory { get; set; }
+    [Parameter]
+    public int SelectedNoteId { get; set; }
+    [Parameter]
+    public int CharacterId { get; set; }
+    [Parameter]
+    public string CampaignId { get; set; }
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+    
+    private Note? note;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        if(SelectedNoteId == 0){
+            note = NotesCategory switch
+            {
+                "story" => new NoteStory(),
+                "people" => new NotePerson(),
+                "locations" => new NoteLocation(),
+                "quest" => new NoteQuest(),
+                "hints" => new NoteHint(),
+                _ => throw new InvalidOperationException($"Unbekannte NotesCategory: {NotesCategory}")
+            };
+            note.UserId = appState.UserId;
+        }
+        else {
+            note = await noteManager.GetByID(SelectedNoteId);
+        }
+
+    }
+
+    private async void Post() {
+        try {
+            if(CharacterId != 0){
+                note.CharacterId = CharacterId;
+            }
+            else if(!string.IsNullOrEmpty(CampaignId)){
+                note.CampaignId = CampaignId;
+            }
+
+            Note result;
+            if (SelectedNoteId == 0) {
+                result = await noteManager.Insert(note);
+            }
+            else {
+                result = await noteManager.Update(note);
+            }
+
+            if (result != null) {
+                Console.WriteLine("Notiz erfolgreich gespeichert.");
+                await Close();
+            }
+            else {
+                Console.WriteLine("Fehler beim Speichern der Notiz.");
+            }
+        }
+        catch (Exception ex) {
+            Console.WriteLine($"{ex.Message}");
+        }
+    }
+    private async Task Close() {
+        await OnClose.InvokeAsync();
+    }
+}

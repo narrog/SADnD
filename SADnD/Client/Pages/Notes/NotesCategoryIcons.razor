@@ -1,0 +1,66 @@
+﻿@if (!ViewTypeIsDM) {
+    <div class="@GetCategoryClass("inventory")" @onclick='() => ChangeView("inventory")'>
+        <i class="bi bi-backpack3"></i> <span class="hide-on-mobile">Inventar</span>
+    </div>
+}
+<div class="@GetCategoryClass("story")" @onclick='() => ChangeView("story")'>
+    <i class="bi bi-journal-text"></i> <span class="hide-on-mobile">Story</span>
+</div>
+<div class="@GetCategoryClass("people")" @onclick='() => ChangeView("people")'>
+    <i class="bi bi-people"></i> <span class="hide-on-mobile">Personen</span>
+</div>
+<div class="@GetCategoryClass("locations")" @onclick='() => ChangeView("locations")'>
+    <i class="bi bi-pin-map-fill"></i> <span class="hide-on-mobile">Orte</span>
+</div>
+@if (!ViewTypeIsDM) {
+    <div class="@GetCategoryClass("quest")" @onclick='() => ChangeView("quest")'>
+        <i class="bi bi-chat-square-dots"></i> <span class="hide-on-mobile">Quests</span>
+    </div>
+    <div class="@GetCategoryClass("hints")" @onclick='() => ChangeView("hints")'>
+        <i class="bi bi-lightbulb"></i> <span class="hide-on-mobile">Hinweise</span>
+    </div>
+}
+
+@code {
+    [CascadingParameter]
+    public CascadingAppState appState { get; set; }
+    [Parameter]
+    public required string ActiveCategory { get; set; }
+    [Parameter]
+    public EventCallback<string> ActiveCategoryChanged { get; set; }
+    [Parameter]
+    public EventCallback OnCategoryChanged { get; set; }
+    [Parameter]
+    public bool ViewTypeIsDM { get; set; }
+    [Parameter]
+    public int CharacterId { get; set; }
+    [Parameter]
+    public string? CampaignId { get; set; }
+
+    private async Task ChangeView(string category)
+    {
+        ActiveCategory = category;
+        await ActiveCategoryChanged.InvokeAsync(category);
+        await OnCategoryChanged.InvokeAsync();
+    }
+    private string GetCategoryClass(string category) {
+        bool Matches(Note note) =>
+            ViewTypeIsDM ? note.CampaignId == CampaignId : note.CharacterId == CharacterId;
+
+        bool categoryHasNotes = category switch
+        {
+            "inventory" => true, 
+            "story" => appState.Notes.Any(note => note is NoteStory && Matches(note)),
+            "people" => appState.Notes.Any(note => note is NotePerson && Matches(note)),
+            "locations" => appState.Notes.Any(note => note is NoteLocation && Matches(note)),
+            "quest" => appState.Notes.Any(note => note is NoteQuest && Matches(note)),
+            "hints" => appState.Notes.Any(note => note is NoteHint && Matches(note)),
+            _ => false 
+        };
+
+        return ActiveCategory == category
+            ? "ps-2 my-1 bg-light text-dark border"
+            : $"ps-2 my-1 bg-dark text-light {categoryHasNotes}";
+    }
+
+}
