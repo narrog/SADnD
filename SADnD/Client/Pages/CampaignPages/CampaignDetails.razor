@@ -10,7 +10,7 @@
 
 <div class="container-fluid mt-3">
     <div class="row">
-        <div class="col-12 col-md-6">
+        <div class="col-12 col-md-8">
             <strong>Dungeonmaster: </strong><br />
             @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any()) {
                 <p>
@@ -114,37 +114,45 @@
                 </p>
             }
         </div>
-        <div class="row">
-            @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId))
-            {
-
-                <div class="col-2 my-1" id="notes-icons-container">
-                    <NotesCategoryIcons @bind-ActiveCategory="activeCategory"
-                                        OnCategoryChanged="noteManager.HandleCategoryChanged"
-                                        CampaignId="@Id"
-                                        ViewTypeIsDM="true" />
-                </div>
-                <div class="col-10">
-                    @if (!noteManager.ShowAddNotes)
-                    {
-                        <NotesView NotesCategory="@activeCategory"
-                                   CampaignId="@Id"
-                                   OnEditNote="noteManager.ShowAddNotesAsync"
-                                   ViewTypeIsDM="true" />
-
-                        <button class="btn btn-secondary mt-1" @onclick="() => noteManager.ShowAddNotesAsync(0)">Notiz hinzufügen</button>
-                    }
-                    else
-                    {
-                        <NotesAdd NotesCategory="@activeCategory"
-                                  SelectedNoteId="@noteManager.SelectedNoteId"
-                                  CampaignId="@Id"
-                                  OnClose="noteManager.HideAddNotesAsync" />
-                    }
-
-                </div>
-            }
+        @if (showAddCharacter)
+        {
+            <div class="col-12 col-md-4">
+                <AddCharacterToCampaign Campaign="campaign"
+                                        OriginalCharacter="selectedCharacter"
+                                        OnClose="HideAddCharacter" />
+            </div>
+        }
         </div>
+    <div class="row">
+        @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId))
+        {
+
+            <div class="col-2 my-1" id="notes-icons-container">
+                <NotesCategoryIcons @bind-ActiveCategory="activeCategory"
+                OnCategoryChanged="noteManager.HandleCategoryChanged"
+                CampaignId="@Id"
+                ViewTypeIsDM="true" />
+            </div>
+            <div class="col-10">
+                @if (!noteManager.ShowAddNotes)
+                {
+                    <NotesView NotesCategory="@activeCategory"
+                    CampaignId="@Id"
+                    OnEditNote="noteManager.ShowAddNotesAsync"
+                    ViewTypeIsDM="true" />
+
+                    <button class="btn btn-secondary mt-1" @onclick="() => noteManager.ShowAddNotesAsync(0)">Notiz hinzufügen</button>
+                }
+                else
+                {
+                    <NotesAdd NotesCategory="@activeCategory"
+                    SelectedNoteId="@noteManager.SelectedNoteId"
+                    CampaignId="@Id"
+                    OnClose="noteManager.HideAddNotesAsync" />
+                }
+
+            </div>
+        }
     </div>
 </div>
 <div class="row my-4 pt-4 border-top">
