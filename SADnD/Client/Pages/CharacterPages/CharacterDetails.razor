@@ -1,6 +1,7 @@
 ﻿@page "/character-details/{id}"
 @attribute [Authorize]
 @inject CharacterSyncManager characterManager
+@* @inject NoteManager noteManager *@
 @inject IJSRuntime js
 
 <CascadingValue Value="@this" IsFixed="true">
@@ -55,7 +56,7 @@
 
             <div class="row mt-3">
                 <div class="col-2 my-1" id="notes-icons-container">
-                    <CharacterNotesIcons @bind-ActiveCategory="activeCategory"
+                    <NotesCategoryIcons @bind-ActiveCategory="activeCategory"
                                          CharacterId="@Character.Id"
                                          OnCategoryChanged="HandleCategoryChanged" />
                 </div>
@@ -77,8 +78,7 @@
                         @if (!showAddNotes) {
                             <NotesView NotesCategory="@activeCategory"
                                        CharacterId="@Character.Id"
-                                       OnEditNote="ShowAddNotes"
-                                       @ref="notesViewReference" />
+                                       OnEditNote="ShowAddNotes" />
                             <button class="btn btn-secondary mt-1" @onclick="() => ShowAddNotes(0)">Notiz hinzufügen</button>
                         }
                         else {
@@ -91,6 +91,44 @@
                     }
                 </div>
             </div>
+            @* evtl. Alternative für Funktionsauruf via Manager?
+                    <div class="col-2 my-1" id="notes-icons-container">
+                    <NotesCategoryIcons @bind-ActiveCategory="activeCategory"
+                                         CharacterId="@Character.Id"
+                                         OnCategoryChanged="noteManager.HandleCategoryChanged" />
+                </div>
+
+                <div class="col-10">
+                    @if(activeCategory == "inventory") {
+                        @if (!showAddItems) {
+                            <InventoryView Character="@Character"
+                                           UnitOfWeight="@unitOfWeight" />
+                            <button class="btn btn-secondary mt-1" @onclick="ShowAddItems">Item hinzufügen</button>
+                        }
+                        else {
+                            <InventoryItemAdd OnClose="HideAddItems"
+                                              UnitOfWeight="@unitOfWeight" />
+                        }
+                        
+                    }
+                    else {
+                        @if (!noteManager.ShowAddNotes)
+                        {
+                            <NotesView NotesCategory="@activeCategory"
+                                       CharacterId="@Character.Id"
+                                       OnEditNote="noteManager.ShowAddNotesAsync" />
+                            <button class="btn btn-secondary mt-1" @onclick="() => noteManager.ShowAddNotesAsync(0)">Notiz hinzufügen</button>
+                        }
+                        else {
+                            <NotesAdd NotesCategory="@activeCategory"
+                                      SelectedNoteId="@noteManager.SelectedNoteId"
+                                      CharacterId="@Character.Id"
+                                      OnClose="noteManager.HideAddNotesAsync" />
+                        }
+                        
+                    }
+                </div>
+            </div> *@
         </div>
         <div class="container-fluid mt-3">
             <a class="btn btn-outline-primary me-2" onclick="history.back();">Zurück</a>
@@ -111,7 +149,6 @@
     private bool showCharacterDetails;
     private string showDetailsText = "Details anzeigen";
     public string activeCategory = "inventory";
-    private NotesView? notesViewReference;
 
     private bool showAddItems;
     private string unitOfWeight = "kg";
