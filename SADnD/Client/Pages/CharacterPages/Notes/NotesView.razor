@@ -11,9 +11,9 @@
                 <p><strong>Ort: </strong>@notePerson.Location</p>
                 <p><strong>Zugehörigkeit: </strong>@notePerson.Affiliation</p>
             }
-            @* <button class="pointer me-2 btn btn-outline-secondary" @onclick="() => ShowAddNotes(note.Id)">
+            <button class="pointer me-2 btn btn-outline-secondary" @onclick="() => OnEditNote.InvokeAsync(note.Id)">
                 <i class="oi oi-pencil me-1"></i> bearbeiten
-            </button> *@
+            </button>
             <button class="pointer me-2 btn btn-outline-secondary" @onclick="() => DeleteNote(note)">
                 <i class="oi oi-trash text-danger me-1"></i> löschen
             </button>
@@ -45,6 +45,8 @@ else {
     public string? CampaignId { get; set; }
     [Parameter]
     public bool ViewTypeIsDM { get; set; }
+    [Parameter] 
+    public EventCallback<int> OnEditNote { get; set; }
 
     private IEnumerable<Note>? allNotes;
     private IEnumerable<Note>? filteredNotes;
@@ -94,10 +96,10 @@ else {
     //     showAddNotes = false;
     //     StateHasChanged();
     // }
-    public void ResetAddNotes() {
-        showAddNotes = false;
-        StateHasChanged();
-    }
+    // public void ResetAddNotes() {
+    //     showAddNotes = false;
+    //     StateHasChanged();
+    // }
 
     public async void DeleteNote(Note note) {
         string toDeleteName = note.Name;

@@ -60,7 +60,7 @@
                                          OnCategoryChanged="HandleCategoryChanged" />
                 </div>
 
-                <div class="col-10 my-2">
+                <div class="col-10">
                     @if(activeCategory == "inventory") {
                         @if (!showAddItems) {
                             <InventoryView Character="@Character"
@@ -77,6 +77,7 @@
                         @if (!showAddNotes) {
                             <NotesView NotesCategory="@activeCategory"
                                        CharacterId="@Character.Id"
+                                       OnEditNote="ShowAddNotes"
                                        @ref="notesViewReference" />
                             <button class="btn btn-secondary mt-1" @onclick="() => ShowAddNotes(0)">Notiz hinzufügen</button>
                         }
@@ -138,13 +139,6 @@
         StateHasChanged();
     }
 
-
-    private void HandleCategoryChanged() {
-        if (notesViewReference != null) {
-            notesViewReference.ResetAddNotes();
-        }
-    }
-
     private async void ShowAddItems() {
         showAddItems = true;
         Character = await characterManager.GetByID(Character.Id);
@@ -154,9 +148,12 @@
         Character = await characterManager.GetByID(Character.Id);
         showAddItems = false;
         StateHasChanged();
-        // GetWeightSum();
     }
 
+    private void HandleCategoryChanged() {
+        showAddNotes = false;
+        StateHasChanged();
+    }
     private async void ShowAddNotes(int noteId) {
         selectedNoteId = noteId;
         showAddNotes = true;
@@ -165,10 +162,6 @@
     }
     private async void HideAddNotes() {
         await OnParametersSetAsync();
-        showAddNotes = false;
-        StateHasChanged();
-    }
-    public void ResetAddNotes() {
         showAddNotes = false;
         StateHasChanged();
     }

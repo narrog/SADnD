@@ -93,16 +93,29 @@
     </div>
     <div class="row">
         @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
-            <div class="col-2" id="notes-icons-container">
+            <div class="col-2 my-1" id="notes-icons-container">
                 <CharacterNotesIcons @bind-ActiveCategory="activeCategory"
                                      OnCategoryChanged="HandleCategoryChanged"
                                      CampaignId="@Id"
                                      ViewTypeIsDM="true" />
             </div>
-            <NotesView NotesCategory="@activeCategory"
-                       CampaignId="@Id"
-                       ViewTypeIsDM="true"
-                       @ref="notesViewReference" />
+            <div class="col-10">
+                @if (!showAddNotes) {
+                    <NotesView NotesCategory="@activeCategory"
+                               CampaignId="@Id"
+                               OnEditNote="ShowAddNotes"
+                               ViewTypeIsDM="true"
+                               @ref="notesViewReference" />
+                    <button class="btn btn-secondary mt-1" @onclick="() => ShowAddNotes(0)">Notiz hinzufügen</button>
+                }
+                else{
+                    <NotesAdd NotesCategory="@activeCategory"
+                              SelectedNoteId="@selectedNoteId"
+                              CampaignId="@Id"
+                              OnClose="HideAddNotes" />
+                }
+                
+            </div>
         }
     </div>
 </div>
@@ -136,6 +149,9 @@
 
     public string activeCategory = "story";
     private NotesView? notesViewReference;
+
+    private bool showAddNotes;
+    private int selectedNoteId;
 
     protected override async Task OnInitializedAsync() {
         currentUserId = appState.UserId;
@@ -220,9 +236,20 @@
     }
 
     private void HandleCategoryChanged() {
-        if (notesViewReference != null) {
-            notesViewReference.ResetAddNotes();
-        }
+        showAddNotes = false;
+        StateHasChanged();
+    }
+    
+    private async void ShowAddNotes(int noteId) {
+        selectedNoteId = noteId;
+        showAddNotes = true;
+        await OnParametersSetAsync();
+        StateHasChanged();
+    }
+    private async void HideAddNotes() {
+        await OnParametersSetAsync();
+        showAddNotes = false;
+        StateHasChanged();
     }
 
     private async Task DeleteCampaign() {
