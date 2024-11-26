@@ -1,7 +1,8 @@
 ﻿@page "/campaign-details/{id}"
 @attribute [Authorize]
-@inject CampaignManager campaignManager
-@inject JoinRequestManager joinRequestManager
+@inject CampaignApiManager campaignManager
+@inject JoinRequestApiManager joinRequestManager
+@inject NoteApiManager noteManager
 @inject IJSRuntime js
 @using Newtonsoft.Json
 
@@ -9,7 +10,7 @@
 
 <div class="container-fluid mt-3">
     <div class="row">
-        <div class="col-12 col-md-8">
+        <div class="col-12 col-md-6">
             <strong>Dungeonmaster: </strong><br />
             @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any()) {
                 <p>
@@ -113,13 +114,37 @@
                 </p>
             }
         </div>
-        @if (showAddCharacter) {
-            <div class="col-12 col-md-4">
-                <AddCharacterToCampaign Campaign="campaign"
-                OriginalCharacter="selectedCharacter"
-                OnClose="HideAddCharacter" />
-            </div>
-        }
+        <div class="row">
+            @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId))
+            {
+
+                <div class="col-2 my-1" id="notes-icons-container">
+                    <NotesCategoryIcons @bind-ActiveCategory="activeCategory"
+                                        OnCategoryChanged="noteManager.HandleCategoryChanged"
+                                        CampaignId="@Id"
+                                        ViewTypeIsDM="true" />
+                </div>
+                <div class="col-10">
+                    @if (!noteManager.ShowAddNotes)
+                    {
+                        <NotesView NotesCategory="@activeCategory"
+                                   CampaignId="@Id"
+                                   OnEditNote="noteManager.ShowAddNotesAsync"
+                                   ViewTypeIsDM="true" />
+
+                        <button class="btn btn-secondary mt-1" @onclick="() => noteManager.ShowAddNotesAsync(0)">Notiz hinzufügen</button>
+                    }
+                    else
+                    {
+                        <NotesAdd NotesCategory="@activeCategory"
+                                  SelectedNoteId="@noteManager.SelectedNoteId"
+                                  CampaignId="@Id"
+                                  OnClose="noteManager.HideAddNotesAsync" />
+                    }
+
+                </div>
+            }
+        </div>
     </div>
 </div>
 <div class="row my-4 pt-4 border-top">
@@ -151,6 +176,9 @@
     private IEnumerable<JoinRequest>? joinRequests;
     private string requestMessage = "";
     private string UIMessage = "";
+
+    public string activeCategory = "story";
+
     private string currentUserId = "";
     private bool showAddCharacter;
 
