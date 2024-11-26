@@ -8,10 +8,10 @@ using System.Text;
 
 namespace SADnD.Client.Services
 {
-    public class NoteManager : APIRepository<Note>
+    public class NoteApiManager : APIRepository<Note>
     {
         HttpClient _httpClient;
-        public NoteManager(HttpClient httpClient)
+        public NoteApiManager(HttpClient httpClient)
             : base(httpClient, "note")
         {
             _httpClient = httpClient;

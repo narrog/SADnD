@@ -3,11 +3,11 @@ using SADnD.Shared.Models;
 
 namespace SADnD.Client.Services
 {
-    public class RaceManager : APIRepository<Race>
+    public class JoinRequestApiManager : APIRepository<JoinRequest>
     {
         HttpClient _httpClient;
-        public RaceManager(HttpClient httpClient)
-            : base(httpClient, "race")
+        public JoinRequestApiManager(HttpClient httpClient)
+            : base(httpClient, "joinRequest")
         {
             _httpClient = httpClient;
         }

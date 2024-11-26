@@ -3,11 +3,11 @@ using SADnD.Shared.Models;
 
 namespace SADnD.Client.Services
 {
-    public class InventoryItemManager : APIRepository<InventoryItem>
+    public class RaceApiManager : APIRepository<Race>
     {
         HttpClient _httpClient;
-        public InventoryItemManager(HttpClient httpClient)
-            : base(httpClient, "inventoryItem")
+        public RaceApiManager(HttpClient httpClient)
+            : base(httpClient, "race")
         {
             _httpClient = httpClient;
         }
