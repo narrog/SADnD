@@ -3,11 +3,11 @@
 
 <h3>Charakter zuweisen</h3>
 
-<EditForm Model="@selectedCharacter" OnValidSubmit="Post">
+<EditForm Model="@selectedCharacter" OnValidSubmit="Post" class="w-100">
     <DataAnnotationsValidator />
     Name:
     @if (charactersFromUser != null) {
-        <InputSelect @bind-Value="SelectedCharacterId">
+        <InputSelect @bind-Value="SelectedCharacterId" class="form-select">
             <option selected value="0">Bitte auswählen</option>
             @foreach (var userCharacter in charactersFromUser) {
                 <option value="@userCharacter.Id">@userCharacter.Name</option>
@@ -34,7 +34,7 @@
                     }
                 </ul>
             }
-            
+
         </p>
     </div>
 }
@@ -58,7 +58,6 @@
         set {
             selectedCharacterId = value;
 
-            // Setze den Charakter, falls vorhanden
             selectedCharacter = charactersFromUser?.FirstOrDefault(c => c.Id == selectedCharacterId) ?? new Character();
         }
     }
@@ -66,7 +65,6 @@
     protected override async Task OnInitializedAsync() {
         charactersFromUser = await characterManager.GetAll();
 
-        // Initialisierung sicherstellen
         if (charactersFromUser != null && !charactersFromUser.Any(c => c.Id == selectedCharacterId)) {
             selectedCharacter = new Character();
         }
@@ -76,14 +74,12 @@
 
         try {
             if (OriginalCharacter != null) {
-                OriginalCharacter.CampaignId = null;
-                await characterManager.Update(OriginalCharacter);
-                //Campaign.Characters.Remove(OriginalCharacter);
+                Character characterToRemove = await characterManager.GetByID(OriginalCharacter.Id);
+                characterToRemove.CampaignId = null;
+                await characterManager.Update(characterToRemove);
             }
             selectedCharacter.CampaignId = Campaign.Id;
             await characterManager.Update(selectedCharacter);
-            // Campaign.Characters.Add(selectedCharacter);
-            // await campaignManager.Update(Campaign);
             Close();
         }
         catch (Exception ex) {
