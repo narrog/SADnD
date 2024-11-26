@@ -1,7 +1,8 @@
 ﻿@page "/campaign-details/{id}"
 @attribute [Authorize]
-@inject CampaignManager campaignManager
-@inject JoinRequestManager joinRequestManager
+@inject CampaignApiManager campaignManager
+@inject JoinRequestApiManager joinRequestManager
+@inject NoteApiManager noteManager
 @inject IJSRuntime js
 @using Newtonsoft.Json
 
@@ -44,7 +45,7 @@
                                     <td>
                                         @* <button class="btn btn-outline-primary me-2" @onclick="() => ShowCharacter(player)">Infos</button> *@
                                         @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
-                                        <button class="btn btn-outline-danger me-2" @onclick="() => RemovePlayer(player, true)">entfernen</button>
+                                            <button class="btn btn-outline-danger me-2" @onclick="() => RemovePlayer(player, true)">entfernen</button>
                                         }
                                         @if (player.Id == currentUserId) {
                                             <button class="btn btn-outline-danger me-2" @onclick="() => RemovePlayer(player, false)">austreten</button>
@@ -89,20 +90,35 @@
                 </p>
             }
         </div>
-        
+
     </div>
     <div class="row">
-        @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId))
-        {
-            <div class="col-12 col-md-2" id="notes-icons-container">
-                <CharacterNotesIcons @bind-ActiveCategory="activeCategory"
-                                     OnCategoryChanged="HandleCategoryChanged"
-                                     ViewTypeIsDM="true" />
+        @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
+            
+                <div class="col-2 my-1" id="notes-icons-container">
+                <NotesCategoryIcons @bind-ActiveCategory="activeCategory"
+                                    OnCategoryChanged="noteManager.HandleCategoryChanged"
+                                    CampaignId="@Id"
+                                    ViewTypeIsDM="true" />
             </div>
-            <NotesView NotesCategory="@activeCategory"
-                       CampaignId="@Id"
-                       ViewTypeIsDM="true"
-                       @ref="notesViewReference" />
+            <div class="col-10">
+                @if (!noteManager.ShowAddNotes)
+                {
+                    <NotesView NotesCategory="@activeCategory"
+                               CampaignId="@Id"
+                               OnEditNote="noteManager.ShowAddNotesAsync"
+                               ViewTypeIsDM="true" />
+
+                    <button class="btn btn-secondary mt-1" @onclick="() => noteManager.ShowAddNotesAsync(0)">Notiz hinzufügen</button>
+                }
+                else{
+                    <NotesAdd NotesCategory="@activeCategory"
+                              SelectedNoteId="@noteManager.SelectedNoteId"
+                              CampaignId="@Id"
+                              OnClose="noteManager.HideAddNotesAsync" />
+                }
+
+            </div> 
         }
     </div>
 </div>
@@ -135,7 +151,6 @@
     private string currentUserId = "";
 
     public string activeCategory = "story";
-    private NotesView? notesViewReference;
 
     protected override async Task OnInitializedAsync() {
         currentUserId = appState.UserId;
@@ -216,14 +231,7 @@
         catch (Exception ex) {
             Console.WriteLine($"Exception RemovePlayer: {ex.Message}");
         }
-
-    }
-
-    private void HandleCategoryChanged() {
-        if (notesViewReference != null) {
-            notesViewReference.ResetAddNotes();
-        }
-    }
+    } 
 
     private async Task DeleteCampaign() {
         string toDeleteName = campaign.Name;

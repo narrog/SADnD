@@ -8,14 +8,18 @@ using System.Text;
 
 namespace SADnD.Client.Services
 {
-    public class NoteManager : APIRepository<Note>
+    public class NoteApiManager : APIRepository<Note>
     {
         HttpClient _httpClient;
-        public NoteManager(HttpClient httpClient)
+        public NoteApiManager(HttpClient httpClient)
             : base(httpClient, "note")
         {
             _httpClient = httpClient;
         }
+
+        public bool ShowAddNotes { get; private set; } = false;
+        public int SelectedNoteId { get; private set; } = 0;
+
         private Dictionary<string, Type> typeMapping = new Dictionary<string, Type>()
         {
             {"NoteStory",typeof(NoteStory)},
@@ -156,6 +160,21 @@ namespace SADnD.Client.Services
                 Console.WriteLine(ex.Message);
                 return false;
             }
+        }
+
+        public void HandleCategoryChanged() {
+            ShowAddNotes = false;
+        }
+
+        public Task ShowAddNotesAsync(int noteId) {
+            SelectedNoteId = noteId;
+            ShowAddNotes = true;
+            return Task.CompletedTask;
+        }
+
+        public Task HideAddNotesAsync() {
+            ShowAddNotes = false;
+            return Task.CompletedTask;
         }
     }
 }

@@ -7,7 +7,7 @@ namespace SADnD.Client.Services
 {
     public class NoteSyncManager : IndexedDBSyncRepository<Note>
     {
-        public NoteSyncManager(IBlazorDbFactory dbFactory,NoteManager noteManager,IJSRuntime jsRuntime)
+        public NoteSyncManager(IBlazorDbFactory dbFactory,NoteApiManager noteManager,IJSRuntime jsRuntime)
             : base("SADnD.IndexedDB", dbFactory, noteManager, jsRuntime)
         {
         }

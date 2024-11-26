@@ -1,4 +1,4 @@
-﻿@inject NoteManager noteManager
+﻿@inject NoteApiManager noteManager
 
 @if(note != null){
     <EditForm Model="@note" OnValidSubmit="@Post" class="w-100">
@@ -43,7 +43,7 @@
     public string CampaignId { get; set; }
     [Parameter]
     public EventCallback OnClose { get; set; }
-
+    
     private Note? note;
 
 
