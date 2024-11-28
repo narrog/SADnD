@@ -102,8 +102,7 @@
                 }
                 else {
                     <div class="mt-3">
-                        <SubmitButton />
-                        <button class="btn btn-outline-secondary me-2" type="button" @onclick="Close">Abbrechen</button>
+                        <FormButtons />
                     </div>
                 }
             </div>
@@ -135,8 +134,6 @@
     public CascadingAppState appState { get; set; }
     [Parameter]
     public string? CharacterId { get; set; }
-    [Parameter]
-    public EventCallback OnClose { get; set; }
 
     private Character character = new Character() {
             Classes = new List<CharacterClass>() {
@@ -271,8 +268,5 @@
                 levelErrorMessage = string.Empty;
             }
         }
-    }
-    private async Task Close() {
-        await OnClose.InvokeAsync();
     }
 }
