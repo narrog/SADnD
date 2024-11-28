@@ -1,5 +1,7 @@
 ﻿@inject CharacterApiManager characterManager
 @inject CampaignApiManager campaignManager
+@inject IJSRuntime js
+@using Newtonsoft.Json
 
 <h3>Charakter zuweisen</h3>
 
@@ -27,36 +29,22 @@
     public CascadingAppState appState { get; set; }
     [Parameter]
     public required string CharacterId { get; set; }
-    // [Parameter]
-    // public required Campaign Campaign { get; set; }
-    // [Parameter]
-    // public Character? OriginalCharacter { get; set; }
     [Parameter]
     public EventCallback OnClose { get; set; }
 
-    // private IEnumerable<Character>? charactersFromUser;
-    private Character selectedCharacter = new();
+    private IEnumerable<Character>? charactersFromCampaign;
+    private Character characterToAdd = new();
+    private Character? existingCharacter;
+    private bool hasOtherCharacter;
 
     private IEnumerable<Campaign>? campaignsFromUser;
     private Campaign selectedCampaign = new();
     private string selectedCampaignId = "";
 
-    // private int selectedCharacterId;
-    // public int SelectedCharacterId {
-    //     get => selectedCharacterId;
-    //     set {
-    //         selectedCharacterId = value;
-
-    //         selectedCharacter = charactersFromUser?.FirstOrDefault(c => c.Id == selectedCharacterId) ?? new Character();
-    //     }
-    // }
-
     protected override async Task OnInitializedAsync() {
-        Console.WriteLine($"CharacterId: {CharacterId}");
         if (!string.IsNullOrEmpty(CharacterId)) {
-            selectedCharacter = await characterManager.GetByID(CharacterId);
+            characterToAdd = await characterManager.GetByID(CharacterId);
         }
-        Console.WriteLine($"selectedCharacter.Id: {selectedCharacter.Id}");
         await GetCampaignsFromUser();
     }
     private async Task GetCampaignsFromUser() {
@@ -65,16 +53,21 @@
     }
 
     private async void Post() {
-
         try {
-            // if (OriginalCharacter != null) {
-            //     Character characterToRemove = await characterManager.GetByID(OriginalCharacter.Id);
-            //     characterToRemove.CampaignId = null;
-            //     await characterManager.Update(characterToRemove);
-            // }
-            selectedCharacter.CampaignId = selectedCampaignId;
-                        
-            await characterManager.Update(selectedCharacter);
+
+            await CheckForExistingCharacter();
+            if (hasOtherCharacter && existingCharacter != null) {
+                bool confirm = await js.InvokeAsync<bool>("confirm", "Bei dieser Kampagne ist bereits ein Charakter zugewiesen.\r\nSoll der bestehende Charakter überschrieben werden?");
+
+                if (!confirm) return;
+                
+                Character characterToRemove = await characterManager.GetByID(existingCharacter.Id);
+                characterToRemove.CampaignId = null;
+                await characterManager.Update(characterToRemove);
+            }
+            characterToAdd.CampaignId = selectedCampaignId;
+
+            await characterManager.Update(characterToAdd);
             Close();
         }
         catch (Exception ex) {
@@ -82,7 +75,19 @@
         }
     }
 
+    private async Task CheckForExistingCharacter() {
+        selectedCampaign = await campaignManager.GetByID(selectedCampaignId);
+        charactersFromCampaign = selectedCampaign.Characters;
+        if (charactersFromCampaign != null) {
+            if (charactersFromCampaign.Any(x => x.UserId == appState.UserId)) {
+                hasOtherCharacter = true;
+                existingCharacter = charactersFromCampaign.FirstOrDefault(x => x.UserId == appState.UserId);
+            }
+        }
+    }
+
     private async void Close() {
         await OnClose.InvokeAsync();
     }
+
 }
