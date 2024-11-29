@@ -7,7 +7,7 @@ namespace SADnD.Client.Services
     {
         public NoteManager(NoteApiManager apiManager)
             : base(apiManager)
-        {
+        { 
         }
     }
 }

@@ -10,6 +10,8 @@ namespace SADnD.Client.Shared
         public DataManager(APIRepository<TEntity> apiRepository)
         {
             _apiRepository = apiRepository;
+            list = new List<TEntity>();
+            GetAll();
         }
         public IReadOnlyList<TEntity> List => list.AsReadOnly();
         private async Task EnsureList() {
@@ -36,7 +38,7 @@ namespace SADnD.Client.Shared
                 throw new Exception("Entity nicht in Liste");
             list[index] = entityToUpdate;
         }
-        public async Task Delete(TEntity entityToDelete)
+        public async Task Remove(TEntity entityToDelete)
         {
             if (await _apiRepository.Delete(entityToDelete))
                 list.Remove(entityToDelete);

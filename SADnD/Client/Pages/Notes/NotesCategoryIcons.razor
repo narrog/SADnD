@@ -1,4 +1,6 @@
-﻿@if (!ViewTypeIsDM) {
+﻿@inject NoteApiManager noteManager
+
+@if (!ViewTypeIsDM) {
     <div class="@GetCategoryClass("inventory")" @onclick='() => ChangeView("inventory")'>
         <i class="bi bi-backpack3"></i> <span class="hide-on-mobile">Inventar</span>
     </div>

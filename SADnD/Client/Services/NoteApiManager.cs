@@ -16,7 +16,6 @@ namespace SADnD.Client.Services
         {
             _httpClient = httpClient;
         }
-
         public bool ShowAddNotes { get; private set; } = false;
         public int SelectedNoteId { get; private set; } = 0;
 
@@ -162,17 +161,20 @@ namespace SADnD.Client.Services
             }
         }
 
-        public void HandleCategoryChanged() {
+        public void HandleCategoryChanged()
+        {
             ShowAddNotes = false;
         }
 
-        public Task ShowAddNotesAsync(int noteId) {
+        public Task ShowAddNotesAsync(int noteId)
+        {
             SelectedNoteId = noteId;
             ShowAddNotes = true;
             return Task.CompletedTask;
         }
 
-        public Task HideAddNotesAsync() {
+        public Task HideAddNotesAsync()
+        {
             ShowAddNotes = false;
             return Task.CompletedTask;
         }

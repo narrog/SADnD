@@ -62,7 +62,7 @@
             note.UserId = appState.UserId;
         }
         else {
-            note = await noteManager.GetByID(SelectedNoteId);
+            note = appState.Notes.FirstOrDefault(n => n.Id == SelectedNoteId);
         }
 
     }
@@ -76,21 +76,21 @@
                 note.CampaignId = CampaignId;
             }
 
-            Note result;
+            // Note result;
             if (SelectedNoteId == 0) {
-                result = await noteManager.Insert(note);
+                await noteManager.Insert(note);
             }
             else {
-                result = await noteManager.Update(note);
+                await noteManager.Update(note);
             }
 
-            if (result != null) {
-                Console.WriteLine("Notiz erfolgreich gespeichert.");
+            // if (result != null) {
+            //     Console.WriteLine("Notiz erfolgreich gespeichert.");
                 await Close();
-            }
-            else {
-                Console.WriteLine("Fehler beim Speichern der Notiz.");
-            }
+            // }
+            // else {
+            //     Console.WriteLine("Fehler beim Speichern der Notiz.");
+            // }
         }
         catch (Exception ex) {
             Console.WriteLine($"{ex.Message}");

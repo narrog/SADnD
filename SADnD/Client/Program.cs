@@ -187,7 +187,6 @@ builder.Services.AddScoped<JoinRequestApiManager>();
 builder.Services.AddScoped<InventoryItemApiManager>();
 builder.Services.AddScoped<InventoryItemSyncManager>();
 builder.Services.AddScoped<NoteApiManager>();
-builder.Services.AddScoped<NoteManager>();  
 //builder.Services.AddScoped<NoteSyncManager>();
 
 await builder.Build().RunAsync();

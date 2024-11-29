@@ -48,7 +48,7 @@ else {
     [Parameter] 
     public EventCallback<int> OnEditNote { get; set; }
 
-    private IEnumerable<Note>? allNotes;
+    // private IEnumerable<Note>? allNotes;
     private IEnumerable<Note>? filteredNotes;
 
     private bool showAddNotes;
@@ -64,18 +64,18 @@ else {
     }
 
     private async Task GetNotesAndApplyFilter() {
-        allNotes = await noteManager.GetAll();
+        // allNotes = await noteManager.GetAll();
 
-        if (allNotes == null) return;
+        // if (allNotes == null) return;
 
         filteredNotes = NotesCategory switch
         {
-            "story" => allNotes.Where(note => note is NoteStory),
-            "people" => allNotes.Where(note => note is NotePerson),
-            "locations" => allNotes.Where(note => note is NoteLocation),
-            "quest" => allNotes.Where(note => note is NoteQuest),
-            "hints" => allNotes.Where(note => note is NoteHint),
-            _ => allNotes
+            "story" => appState.Notes.Where(note => note is NoteStory),
+            "people" => appState.Notes.Where(note => note is NotePerson),
+            "locations" => appState.Notes.Where(note => note is NoteLocation),
+            "quest" => appState.Notes.Where(note => note is NoteQuest),
+            "hints" => appState.Notes.Where(note => note is NoteHint),
+            _ => appState.Notes
         };
         if (ViewTypeIsDM){
             filteredNotes = filteredNotes.Where(c => c.CampaignId == CampaignId);
