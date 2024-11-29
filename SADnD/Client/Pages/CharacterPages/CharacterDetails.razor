@@ -1,6 +1,7 @@
 ﻿@page "/character-details/{id}"
 @attribute [Authorize]
 @inject CharacterSyncManager characterManager
+@inject CampaignApiManager campaignManager
 @inject NoteApiManager noteManager
 @inject IJSRuntime js
 
@@ -29,6 +30,21 @@
                     else {
                         <p>Keine Klasse zugeordnet</p>
                     }
+                    
+                    <p>
+                        <strong>Kampagne: </strong>
+                        @if (campaign != null) {
+                            <a href="campaign-details/@Character.CampaignId" title="Kampagnen-Details öffnen">
+                                <span class="oi oi-eye me-2 pointer"></span>@campaign.Name
+                            </a>
+                        }
+                        else {
+                            <a class="btn btn-outline-primary" @onclick="ShowAddCampaign">
+                                Kampagne zuweisen
+                            </a>
+                        }
+                    </p>
+                    
                     @* TODO:
                     <p><strong>Trefferpunkte: </strong>@Character.Hitpoints </p>
                     <p><strong>Spellslots: </strong></p> *@
@@ -50,6 +66,12 @@
                             <strong>Alter: </strong>@(Character.Age != null ? Character.Age : "Unbekannt")<br />
                             <strong>Gewicht: </strong>@(Character.Weight != null ? Character.Weight : "Unbekannt")
                         </p>
+                    </div>
+                }
+                @if (showAddCampaign) {
+                    <div class="col-12 col-md-4 mt-3 mt-md-0">
+                        <AddCampaignToCharacter CharacterId="@Id"
+                                                OnClose="HideAddCampaign" />
                     </div>
                 }
             </div>
@@ -109,6 +131,10 @@
     public required string Id { get; set; }
     public Character Character = new Character();
 
+    private bool showAddCampaign;
+    private Campaign? campaign;
+    private List<(ApplicationUser User, Character Character)> playerCharacters;
+
     private bool showCharacterDetails;
     private string showDetailsText = "Details anzeigen";
     public string activeCategory = "inventory";
@@ -119,6 +145,7 @@
     protected override async Task OnInitializedAsync() {
         Character = await characterManager.GetByID(Id);
         await appState.GetNotes();
+        campaign = Character.CampaignId != null ? await campaignManager.GetByID(Character.CampaignId) : null;
     }
 
     private async Task DeleteCharacter() {
@@ -147,4 +174,14 @@
         StateHasChanged();
     }
 
+    private void ShowAddCampaign() {
+        showAddCampaign = true;
+        StateHasChanged();
+    }
+    private async Task HideAddCampaign() {
+        showAddCampaign = false;
+        Character = await characterManager.GetByID(Id);
+        campaign = Character.CampaignId != null ? await campaignManager.GetByID(Character.CampaignId) : null;
+        StateHasChanged();
+    }
 }
