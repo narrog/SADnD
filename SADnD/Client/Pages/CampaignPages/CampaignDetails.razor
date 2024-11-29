@@ -10,7 +10,7 @@
 
 <div class="container-fluid mt-3">
     <div class="row">
-        <div class="col-12 col-md-8">
+        <div class="col-12 col-xl-8">
             <strong>Dungeonmaster: </strong><br />
             @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any()) {
                 <p>
@@ -32,13 +32,13 @@
                 <strong>Zugangscode: </strong>@campaign.Id
                 <span class="oi oi-share-boxed ms-2" @onclick="ShareAccessCode" title="Zugangscode teilen" style="cursor: pointer;" aria-hidden="true"></span>
             </p>
-            <p>
+            <div class="table-responsive">
                 <strong>Mitspieler</strong>
-                <table class="table table-sm table-hover table-striped align-middle">
+                <table class="table table-borderless align-middle border-bottom">
                     @if (campaign.Players != null && campaign.Players.Any()) {
                         <tbody>
                             @foreach (var entry in playerCharacters) {
-                                <tr @onclick="() => ShowCharacterDetails(entry.User, entry.Character)" class="pointer">
+                                <tr class="border-top">
                                     @if (entry.User.UserName != null) {
                                         <td>@entry.User.UserName</td>
                                     }
@@ -49,7 +49,7 @@
                                         <td>
                                             @entry.Character.Race!.Name
                                         </td>
-                                        <td>
+                                        <td class="d-none d-md-table-cell">
                                             @if (entry.Character.Classes != null && entry.Character.Classes.Any()) {
                                                 <ul class="m-0">
                                                     @foreach (var charClass in entry.Character.Classes) {
@@ -62,17 +62,38 @@
                                     else {
                                         <td></td>
                                         <td></td>
-                                        <td></td>
+                                        <td class="d-none d-md-table-cell"></td>
                                     }
-                                    <td>
+                                    <td class="d-none d-md-table-cell">
                                         @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
                                             <button class="btn btn-outline-danger me-2" @onclick="() => RemovePlayer(entry.User, true)">entfernen</button>
                                         }
                                         @if (entry.User.Id == currentUserId) {
                                             <button class="btn btn-outline-primary me-2" @onclick="() => ShowAddCharacter(entry.Character)">Zuweisung ändern</button>
                                             <button class="btn btn-outline-danger me-2" @onclick="() => RemovePlayer(entry.User, false)">austreten</button>
+                                            @if(entry.Character != null){
+                                                <button class="btn btn-outline-secondary me-2" @onclick="() => ShowCharacterDetails(entry.User, entry.Character)">Info</button>
+                                            }
                                         }
                                     </td>
+                                </tr>
+                                <tr class="d-md-none">
+                                    <td colspan="4">
+                                        @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId))
+                                        {
+                                            <button class="btn btn-outline-danger me-2" @onclick="() => RemovePlayer(entry.User, true)">entfernen</button>
+                                        }
+                                        @if (entry.User.Id == currentUserId)
+                                        {
+                                            <button class="btn btn-outline-primary me-2" @onclick="() => ShowAddCharacter(entry.Character)">Zuweisung ändern</button>
+                                            <button class="btn btn-outline-danger me-2" @onclick="() => RemovePlayer(entry.User, false)">austreten</button>
+                                            @if (entry.Character != null)
+                                            {
+                                                <button class="btn btn-outline-secondary me-2" @onclick="() => ShowCharacterDetails(entry.User, entry.Character)">Info</button>
+                                            }
+                                        }
+                                    </td>
+                                    
                                 </tr>
                             }
                         </tbody>
@@ -81,7 +102,7 @@
                         <tr><td>keine Mitspieler gefunden</td></tr>
                     }
                 </table>
-            </p>
+            </div>
             @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
                 <p>
                     <strong>Offene Anfragen</strong>
@@ -114,7 +135,7 @@
         </div>
         @if (showAddCharacter)
         {
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-xl-4 mt-3 mt-xl-0">
                 <AddCharacterToCampaign Campaign="campaign"
                 OriginalCharacter="selectedCharacter"
                 OnClose="HideAddCharacter" />

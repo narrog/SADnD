@@ -1,5 +1,6 @@
 ﻿@inject CharacterApiManager characterManager
 @inject CampaignApiManager campaignManager
+@inject IJSRuntime js
 
 <h3>Charakter zuweisen</h3>
 
@@ -15,22 +16,8 @@
             }
         </InputSelect>
     }
-    <br /><br />
-    <SubmitButton />
-    <button class="btn btn-outline-secondary me-2" type="button" @onclick="Close">Abbrechen</button>
-    <a href="/new-character/" class="btn btn-outline-primary me-2" titel="Neuen Charakter erstellen">Charakter erstellen</a>
 
-    <ValidationSummary class="mt-3" />
-    @if (!string.IsNullOrEmpty(UIMessage)) {
-        <ul class="mt-3">
-            <li class="validation-message">
-                @UIMessage
-            </li>
-        </ul>
-    }
-</EditForm>
-
-@if (selectedCharacter.Id != 0) {
+    @if (selectedCharacter.Id != 0) {
     <div class="mt-2">
         <p>
             <strong>Name:</strong> @selectedCharacter.Name <br />
@@ -43,10 +30,30 @@
                     }
                 </ul>
             }
-
+            @if (selectedCharacter.CampaignId != null) {
+                <strong>Kampagne: </strong> @selectedCharacter.CampaignId
+                @selectedCharacter.Campaign?.Name
+            }
         </p>
     </div>
 }
+
+    <div class="mt-3">
+        <SubmitButton />
+        <button class="btn btn-outline-secondary me-2" type="button" @onclick="Close">Abbrechen</button>
+        <a href="/new-character/" class="btn btn-outline-primary me-2" titel="Neuen Charakter erstellen">Charakter erstellen</a>
+    </div>
+    
+
+    <ValidationSummary class="mt-3" />
+    @if (!string.IsNullOrEmpty(UIMessage)) {
+        <ul class="mt-3">
+            <li class="validation-message">
+                @UIMessage
+            </li>
+        </ul>
+    }
+</EditForm>
 
 
 
@@ -60,6 +67,8 @@
 
     private IEnumerable<Character>? charactersFromUser;
     private Character selectedCharacter = new();
+    bool characterHasCampaign;
+    private Campaign campaign = new();
 
     private string UIMessage = "";
 
@@ -89,6 +98,13 @@
                 StateHasChanged();
                 return;
             }
+
+            await CheckForOtherCampaign();
+            if (characterHasCampaign) {
+                bool confirm = await js.InvokeAsync<bool>("confirm", "Charakter kann nur in einer Kampagne gleichzeitig sein.\r\nSoll die Kampagne geändert werden?");
+                if (!confirm) return;
+            }
+
             if (OriginalCharacter != null) {
                 Character characterToRemove = await characterManager.GetByID(OriginalCharacter.Id);
                 characterToRemove.CampaignId = null;
@@ -102,7 +118,11 @@
             Console.WriteLine($"{ex.Message}");
         }
     }
-
+    private async Task CheckForOtherCampaign(){
+        Character temp = await characterManager.GetByID(SelectedCharacterId);
+        characterHasCampaign = false;
+        characterHasCampaign = temp.CampaignId != null;
+    }
     private async void Close() {
         await OnClose.InvokeAsync();
     }
