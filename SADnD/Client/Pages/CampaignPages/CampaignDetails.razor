@@ -2,7 +2,6 @@
 @attribute [Authorize]
 @inject CampaignApiManager campaignManager
 @inject JoinRequestApiManager joinRequestManager
-@inject NoteApiManager noteManager
 @inject IJSRuntime js
 @using Newtonsoft.Json
 
@@ -97,25 +96,25 @@
             
                 <div class="col-2 my-1" id="notes-icons-container">
                 <NotesCategoryIcons @bind-ActiveCategory="activeCategory"
-                                    OnCategoryChanged="noteManager.HandleCategoryChanged"
+                                    OnCategoryChanged="HandleCategoryChanged"
                                     CampaignId="@Id"
                                     ViewTypeIsDM="true" />
             </div>
             <div class="col-10">
-                @if (!noteManager.ShowAddNotes)
+                @if (!ShowAddNotes)
                 {
                     <NotesView NotesCategory="@activeCategory"
                                CampaignId="@Id"
-                               OnEditNote="noteManager.ShowAddNotesAsync"
+                               OnEditNote="ShowAddNotesAsync"
                                ViewTypeIsDM="true" />
 
-                    <button class="btn btn-secondary mt-1" @onclick="() => noteManager.ShowAddNotesAsync(0)">Notiz hinzufügen</button>
+                    <button class="btn btn-secondary mt-1" @onclick="() => ShowAddNotesAsync(0)">Notiz hinzufügen</button>
                 }
                 else{
                     <NotesAdd NotesCategory="@activeCategory"
-                              SelectedNoteId="@noteManager.SelectedNoteId"
+                              SelectedNoteId="@SelectedNoteId"
                               CampaignId="@Id"
-                              OnClose="noteManager.HideAddNotesAsync" />
+                              OnClose="HideAddNotesAsync" />
                 }
 
             </div> 
@@ -151,6 +150,8 @@
     private string currentUserId = "";
 
     public string activeCategory = "story";
+    public bool ShowAddNotes { get; private set; } = false;
+    public int SelectedNoteId { get; private set; } = 0;
 
     protected override async Task OnInitializedAsync() {
         currentUserId = appState.UserId;
@@ -248,5 +249,21 @@
             UIMessage = $"Kampagne '{toDeleteName}' konnte nicht gelöscht werden.";
         }
     }
+    public void HandleCategoryChanged()
+    {
+        ShowAddNotes = false;
+    }
 
+    public Task ShowAddNotesAsync(int noteId)
+    {
+        SelectedNoteId = noteId;
+        ShowAddNotes = true;
+        return Task.CompletedTask;
+    }
+
+    public Task HideAddNotesAsync()
+    {
+        ShowAddNotes = false;
+        return Task.CompletedTask;
+    }
 }

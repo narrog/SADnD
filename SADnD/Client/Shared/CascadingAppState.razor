@@ -1,4 +1,6 @@
 ﻿@using System.Security.Claims
+@inject CampaignApiManager campaignManager
+@inject CharacterSyncManager characterManager
 @inject NoteApiManager noteManager
 
 <CascadingValue Value="this">
@@ -30,14 +32,25 @@
             return claims;
         }
     }
-    public IEnumerable<Note> Notes { get; set; }
+    public List<Campaign> Campaigns { get; set; }
+    public List<Character> Characters { get; set; }
+    public List<Note> Notes { get; set; }
+    public async Task GetCampaigns()
+    {
+        Campaigns = (await campaignManager.GetAll()).ToList();
+    }
+    public async Task GetCharacters()
+    {
+        Characters = (await characterManager.GetAll()).ToList();
+    }
     public async Task GetNotes()
     {
-        Notes = await noteManager.GetAll();
+        Notes = (await noteManager.GetAll()).ToList();
     }
     protected override async Task OnInitializedAsync()
     {
-
+        await GetCampaigns();
+        await GetCharacters();
         await GetNotes();
     }
 }

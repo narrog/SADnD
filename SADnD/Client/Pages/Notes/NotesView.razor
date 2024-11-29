@@ -107,6 +107,7 @@ else {
         if (!confirm) return;
 
         await noteManager.Delete(note);
+        appState.Notes.Remove(note);
         await GetNotesAndApplyFilter();
         //showAddNotes = false;
         StateHasChanged();

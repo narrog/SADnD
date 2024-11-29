@@ -43,7 +43,7 @@
     public string CampaignId { get; set; }
     [Parameter]
     public EventCallback OnClose { get; set; }
-    
+
     private Note? note;
 
 
@@ -78,10 +78,14 @@
 
             // Note result;
             if (SelectedNoteId == 0) {
-                await noteManager.Insert(note);
+                note = await noteManager.Insert(note);
+                appState.Notes.Add(note);
             }
-            else {
-                await noteManager.Update(note);
+            else
+            {
+                note = await noteManager.Update(note);
+                var index = appState.Notes.FindIndex(n => n.Id == SelectedNoteId);
+                appState.Notes[index] = note;
             }
 
             // if (result != null) {
