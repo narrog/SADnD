@@ -28,6 +28,8 @@
 
 
 @code {
+    [CascadingParameter]
+    public CascadingAppState appState {get; set; }
     private Campaign campaign = new Campaign();
     string UIMessage = "";
     string controllerName = "campaign";
@@ -38,7 +40,9 @@
 
         try {
             if (controllerName == "campaign") {
-                message = JsonConvert.SerializeObject(await campaignManager.Insert(campaign));
+                campaign = await campaignManager.Insert(campaign);
+                message = JsonConvert.SerializeObject(campaign);
+                appState.Campaigns.Add(campaign);
             }
             UIMessage = "Kampagne erfolgreich erstellt";
             navManager.NavigateTo("all-campaigns");

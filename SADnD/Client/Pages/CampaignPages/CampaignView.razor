@@ -102,18 +102,21 @@
     private string UIMessage = "";
 
     protected override async Task OnInitializedAsync() {
-        await GetAllCampaigns();
+        await appState.EnsureCampaigns();
         await GetOpenJoinRequests();
-        if (campaigns != null) {
-            if (!ShowAll) {
-                campaigns = campaigns.Count() < 3 ? campaigns.Take(campaigns.Count()) : campaigns.Take(3);
+        if (appState.Campaigns != null) {
+            if (!ShowAll)
+            {
+                campaigns = appState.Campaigns.Count() < 3 ? appState.Campaigns.Take(appState.Campaigns.Count()) : appState.Campaigns.Take(3);
             }
+            else
+                campaigns = appState.Campaigns;
         }
     }
 
-    private async Task GetAllCampaigns() {
-        campaigns = (await campaignManager.GetAll()).OrderBy(x => x.Name);
-    }
+    // private async Task GetAllCampaigns() {
+    //     campaigns = (await campaignManager.GetAll()).OrderBy(x => x.Name);
+    // }
 
     private async Task GetOpenJoinRequests() {
         joinRequests = (await joinRequestManager.GetAll()).OrderBy(x => x.CampaignId);
@@ -139,6 +142,7 @@
             joinRequest.Accepted = DateTime.UtcNow;
             joinRequest.User = null;
             await joinRequestManager.Update(joinRequest);
+            await appState.GetCampaigns();
             UIMessage = "Beitrittsanfrage akzeptiert";
             await GetOpenJoinRequests();
         }

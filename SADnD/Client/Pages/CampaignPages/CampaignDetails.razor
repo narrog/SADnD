@@ -155,7 +155,7 @@
 
     protected override async Task OnInitializedAsync() {
         currentUserId = appState.UserId;
-        campaign = await campaignManager.GetByID(Id);
+        campaign = appState.Campaigns.FirstOrDefault(c => c.Id == Id);
         await GetOpenJoinRequests();
     }
 
@@ -179,7 +179,8 @@
             await joinRequestManager.Update(joinRequest);
             UIMessage = $"Beitrittsanfrage akzeptiert";
             await GetOpenJoinRequests();
-            campaign = await campaignManager.GetByID(Id);
+            await appState.GetCampaigns();
+            campaign = appState.Campaigns.FirstOrDefault(c => c.Id == Id);
         }
         StateHasChanged();
     }
@@ -219,7 +220,8 @@
 
             if (campaign.Players != null) {
                 campaign.Players.Remove(playerToDelete);
-                await campaignManager.Update(campaign);
+                campaign = await campaignManager.Update(campaign);
+                appState.Campaigns[appState.Campaigns.FindIndex(c => c.Id == Id)] = campaign;
                 UIMessage = uiMessage;
                 if (!isKicked) {
                     await js.InvokeVoidAsync("history.back");
@@ -242,6 +244,7 @@
         bool success = await campaignManager.Delete(campaign.Id);
 
         if (success) {
+            appState.Campaigns.Remove(campaign);
             UIMessage = $"Kampagne '{toDeleteName}' erfolgreich gelöscht.";
             await js.InvokeVoidAsync("history.back");
         }
