@@ -49,6 +49,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await appState.EnsureCharacters();
         // await GetAllCharacters();
         if (appState.Characters != null) {
             if (!ShowAll)

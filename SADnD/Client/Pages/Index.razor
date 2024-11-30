@@ -17,12 +17,4 @@
 </div>
 
 @code{
-    [CascadingParameter]
-    private CascadingAppState appState { get; set; }
-    protected override async Task OnInitializedAsync()
-    {
-        await appState.EnsureCampaigns();
-        await appState.EnsureCharacters();
-        StateHasChanged();
-    }
 }
