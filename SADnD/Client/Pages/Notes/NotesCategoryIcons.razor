@@ -1,23 +1,23 @@
 ﻿@if (!ViewTypeIsDM) {
     <div class="@GetCategoryClass("inventory")" @onclick='() => ChangeView("inventory")'>
-        <i class="bi bi-backpack3"></i> <span class="hide-on-mobile">Inventar</span>
+        <i class="bi bi-backpack3"></i> <span class="d-none d-md-block">Inventar</span>
     </div>
 }
 <div class="@GetCategoryClass("story")" @onclick='() => ChangeView("story")'>
-    <i class="bi bi-journal-text"></i> <span class="hide-on-mobile">Story</span>
+    <i class="bi bi-journal-text"></i> <span class="d-none d-md-block">Story</span>
 </div>
 <div class="@GetCategoryClass("people")" @onclick='() => ChangeView("people")'>
-    <i class="bi bi-people"></i> <span class="hide-on-mobile">Personen</span>
+    <i class="bi bi-people"></i> <span class="d-none d-md-block">Personen</span>
 </div>
 <div class="@GetCategoryClass("locations")" @onclick='() => ChangeView("locations")'>
-    <i class="bi bi-pin-map-fill"></i> <span class="hide-on-mobile">Orte</span>
+    <i class="bi bi-pin-map-fill"></i> <span class="d-none d-md-block">Orte</span>
 </div>
 @if (!ViewTypeIsDM) {
     <div class="@GetCategoryClass("quest")" @onclick='() => ChangeView("quest")'>
-        <i class="bi bi-chat-square-dots"></i> <span class="hide-on-mobile">Quests</span>
+        <i class="bi bi-chat-square-dots"></i> <span class="d-none d-md-block">Quests</span>
     </div>
     <div class="@GetCategoryClass("hints")" @onclick='() => ChangeView("hints")'>
-        <i class="bi bi-lightbulb"></i> <span class="hide-on-mobile">Hinweise</span>
+        <i class="bi bi-lightbulb"></i> <span class="d-none d-md-block">Hinweise</span>
     </div>
 }
 

@@ -11,7 +11,7 @@
 
         <div class="container-fluid mt-3">
             <div class="row">
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-md-6 col-xl-4">
                     <p><strong>Rasse: </strong>@(Character.Race != null ? Character.Race.Name : "Unbekannt")</p>
                     @if (Character.Classes != null && Character.Classes.Any()) {
                         <p>
@@ -30,7 +30,7 @@
                     else {
                         <p>Keine Klasse zugeordnet</p>
                     }
-                    
+
                     <p>
                         <strong>Kampagne: </strong>
                         @if (campaign != null) {
@@ -44,20 +44,15 @@
                             </a>
                         }
                     </p>
-                    
+
                     @* TODO:
                     <p><strong>Trefferpunkte: </strong>@Character.Hitpoints </p>
                     <p><strong>Spellslots: </strong></p> *@
-                    <button class="btn btn-outline-secondary mt-md-5" @onclick="ShowCharacterDetails">
-                        <span class="oi oi-eye me-2"></span> @showDetailsText
-                    </button>
-                    <a class="btn btn-outline-primary mt-md-5" href="/new-character/@Id">
-                        <span class="oi oi-pencil me-2"></span> bearbeiten
-                    </a>
+
 
                 </div>
                 @if (showCharacterDetails) {
-                    <div class="col-12 col-md-4 mt-3 mt-md-0">
+                    <div class="col-12 col-md-4">
                         <p>
                             <strong>Grösse-Kategorie: </strong>@(Character.SizeCategory != null ? Character.SizeCategory : "Unbekannt")<br />
                             <strong>Grösse: </strong>@(Character.Size != null ? Character.Size : "Unbekannt")<br />
@@ -71,46 +66,58 @@
                 @if (showAddCampaign) {
                     <div class="col-12 col-md-4 mt-3 mt-md-0">
                         <AddCampaignToCharacter CharacterId="@Id"
-                                                OnClose="HideAddCampaign" />
+                        OnClose="HideAddCampaign" />
                     </div>
                 }
             </div>
+            @if (!showAddCampaign) {
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <button class="btn btn-outline-secondary" @onclick="ShowCharacterDetails">
+                            <span class="oi oi-eye me-2"></span> @showDetailsText
+                        </button>
+                        <a class="btn btn-outline-primary" href="/new-character/@Id">
+                            <span class="oi oi-pencil me-2"></span> bearbeiten
+                        </a>
+                    </div>
+                </div>
+            }
 
             <div class="row mt-3">
-                    <div class="col-2 my-1" id="notes-icons-container">
+                <div class="col-2 my-1" id="notes-icons-container">
                     <NotesCategoryIcons @bind-ActiveCategory="activeCategory"
-                                         CharacterId="@Character.Id"
-                                         OnCategoryChanged="noteManager.HandleCategoryChanged" />
+                    CharacterId="@Character.Id"
+                    OnCategoryChanged="noteManager.HandleCategoryChanged" />
                 </div>
 
                 <div class="col-10">
                     @if(activeCategory == "inventory") {
                         @if (!showAddItems) {
                             <InventoryView CharacterId="@Id"
-                                           UnitOfWeight="@unitOfWeight" />
+                            UnitOfWeight="@unitOfWeight" />
                             <button class="btn btn-secondary mt-1" @onclick="ShowAddItems">Item hinzufügen</button>
                         }
                         else {
                             <InventoryItemAdd OnClose="HideAddItems"
-                                              UnitOfWeight="@unitOfWeight" />
+                            UnitOfWeight="@unitOfWeight" />
                         }
-                        
+
                     }
                     else {
                         @if (!noteManager.ShowAddNotes)
                         {
                             <NotesView NotesCategory="@activeCategory"
-                                       CharacterId="@Character.Id"
-                                       OnEditNote="noteManager.ShowAddNotesAsync" />
+                            CharacterId="@Character.Id"
+                            OnEditNote="noteManager.ShowAddNotesAsync" />
                             <button class="btn btn-secondary mt-1" @onclick="() => noteManager.ShowAddNotesAsync(0)">Notiz hinzufügen</button>
                         }
                         else {
                             <NotesAdd NotesCategory="@activeCategory"
-                                      SelectedNoteId="@noteManager.SelectedNoteId"
-                                      CharacterId="@Character.Id"
-                                      OnClose="noteManager.HideAddNotesAsync" />
+                            SelectedNoteId="@noteManager.SelectedNoteId"
+                            CharacterId="@Character.Id"
+                            OnClose="noteManager.HideAddNotesAsync" />
                         }
-                        
+
                     }
                 </div>
             </div>
@@ -175,6 +182,7 @@
     }
 
     private void ShowAddCampaign() {
+        ShowCharacterDetails();
         showAddCampaign = true;
         StateHasChanged();
     }

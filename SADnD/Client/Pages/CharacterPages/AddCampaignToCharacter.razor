@@ -3,7 +3,7 @@
 @inject IJSRuntime js
 @using Newtonsoft.Json
 
-<h3>Kampagne zuweisen</h3>
+<h4>Kampagne zuweisen</h4>
 
 <EditForm Model="@selectedCampaign" OnValidSubmit="Post" class="w-100">
     <label for="campaign">Name:</label>
@@ -15,10 +15,11 @@
             }
         </InputSelect>
     }
-
-    <br /><br />
-    <SubmitButton />
-    <button class="btn btn-outline-secondary me-2" type="button" @onclick="Close">Abbrechen</button>
+    <div class="mt-3">
+        <SubmitButton />
+        <button class="btn btn-outline-secondary me-2" type="button" @onclick="Close">Abbrechen</button>
+    </div>
+    
 
     <ValidationSummary class="mt-3" />
     @if (!string.IsNullOrEmpty(UIMessage)) {

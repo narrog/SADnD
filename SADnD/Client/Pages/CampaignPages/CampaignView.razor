@@ -10,40 +10,41 @@
                     <div class="p-2 bg-dark text-light w-100" @onclick="() => OpenCampaignDetails(campaign.Id)">
                         <h4>@campaign.Name</h4>
                         <p>Zugangscode: @campaign.Id</p>
-                        @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any()) {
-                            <p>
-                                DungeonMaster
-                                <ul>
-                                    @foreach (var master in campaign.DungeonMasters) {
-                                        @if (master.UserName != null) {
-                                            <li>
-                                                @master.UserName
-                                            </li>
+                        <div class="d-none d-md-block">
+                            @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any()) {
+                                <p>
+                                    DungeonMaster
+                                    <ul>
+                                        @foreach (var master in campaign.DungeonMasters) {
+                                            @if (master.UserName != null) {
+                                                <li>
+                                                    @master.UserName
+                                                </li>
+                                            }
                                         }
-                                    }
-                                </ul>
-                            </p>
-                        }
-                        else {
-                            <p>Kein DungeonMaster</p>
-                        }
-                        @if (campaign.Players != null && campaign.Players.Any())
-                        {
-                            <p>
-                                Spieler
-                                <ul>
-                                    @foreach (var player in campaign.Players)
-                                    {
-                                        @if (player.UserName != null)
+                                    </ul>
+                                </p>
+                            }
+                            else {
+                                <p>Kein DungeonMaster</p>
+                            }
+                            @if (campaign.Players != null && campaign.Players.Any()) {
+                                <p>
+                                    Spieler
+                                    <ul>
+                                        @foreach (var player in campaign.Players)
                                         {
-                                            <li>
-                                                @player.UserName
-                                            </li>
+                                            @if (player.UserName != null)
+                                            {
+                                                <li>
+                                                    @player.UserName
+                                                </li>
+                                            }
                                         }
-                                    }
-                                </ul>
-                            </p>
-                        }
+                                    </ul>
+                                </p>
+                            }
+                        </div>
                     </div>
                 </div>
             }
