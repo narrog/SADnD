@@ -62,6 +62,7 @@
     private float weightTotal;
 
     protected override async Task OnInitializedAsync() {
+        await appState.EnsureCharacters();
         character = appState.Characters.FirstOrDefault(c => c.Id == CharacterId);
         GetWeightSum();
     }

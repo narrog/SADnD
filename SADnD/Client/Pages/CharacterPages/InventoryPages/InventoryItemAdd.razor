@@ -87,6 +87,7 @@
     private int count = 1;
 
     protected override async Task OnInitializedAsync() {
+        await appState.EnsureCharacters();
         character = appState.Characters.FirstOrDefault(c => c.Id == CharacterId);
         item.UserId = appState.UserId;
         allItems = await inventoryItemManager.GetAll();

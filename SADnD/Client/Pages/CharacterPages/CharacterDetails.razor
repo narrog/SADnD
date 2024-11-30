@@ -2,6 +2,7 @@
 @attribute [Authorize]
 @inject CharacterSyncManager characterManager
 @inject IJSRuntime js
+@inherits NotesCategoryParent 
 
 <CascadingValue Value="@this" IsFixed="true">
     @if (Character != null) {
@@ -104,7 +105,7 @@
 
 @code {
     [CascadingParameter]
-    public CascadingAppState appState { get; set; }
+    private CascadingAppState appState { get; set; }
     [Parameter] 
     public required string Id { get; set; }
     public Character Character = new Character();
@@ -115,10 +116,12 @@
 
     private bool showAddItems;
     private string unitOfWeight = "kg";
-    public bool ShowAddNotes { get; private set; } = false;
-    public int SelectedNoteId { get; private set; } = 0;
+    // public bool ShowAddNotes { get; private set; } = false;
+    // public int SelectedNoteId { get; private set; } = 0;
 
     protected override async Task OnInitializedAsync() {
+        await appState.EnsureCharacters();
+        await appState.EnsureNotes();
         Character = appState.Characters.FirstOrDefault(c => c.Id == Int32.Parse(Id));
         // Character = await characterManager.GetByID(Id);
         // await appState.GetNotes();
@@ -151,21 +154,21 @@
         StateHasChanged();
     }
 
-    public void HandleCategoryChanged()
-    {
-        ShowAddNotes = false;
-    }
+    // public void HandleCategoryChanged()
+    // {
+    //     ShowAddNotes = false;
+    // }
 
-    public Task ShowAddNotesAsync(int noteId)
-    {
-        SelectedNoteId = noteId;
-        ShowAddNotes = true;
-        return Task.CompletedTask;
-    }
+    // public Task ShowAddNotesAsync(int noteId)
+    // {
+    //     SelectedNoteId = noteId;
+    //     ShowAddNotes = true;
+    //     return Task.CompletedTask;
+    // }
 
-    public Task HideAddNotesAsync()
-    {
-        ShowAddNotes = false;
-        return Task.CompletedTask;
-    }
+    // public Task HideAddNotesAsync()
+    // {
+    //     ShowAddNotes = false;
+    //     return Task.CompletedTask;
+    // }
 }

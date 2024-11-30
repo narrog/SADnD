@@ -187,10 +187,10 @@
     protected override async Task OnInitializedAsync() {
         allClasses = await classManager.GetAll();
         allRaces = await raceManager.GetAll();
-
+        await appState.EnsureCharacters();
         character.UserId = appState.UserId;
         if (!string.IsNullOrEmpty(CharacterId)){
-            character = await characterManager.GetByID(CharacterId);
+            character = appState.Characters.FirstOrDefault(c => c.Id == Int32.Parse(CharacterId));
         }
     }
 

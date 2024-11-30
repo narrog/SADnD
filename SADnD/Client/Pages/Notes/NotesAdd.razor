@@ -49,6 +49,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await appState.EnsureNotes();
         if(SelectedNoteId == 0){
             note = NotesCategory switch
             {

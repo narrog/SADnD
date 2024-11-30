@@ -35,6 +35,12 @@
     public List<Campaign> Campaigns { get; set; }
     public List<Character> Characters { get; set; }
     public List<Note> Notes { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        await GetCampaigns();
+        await GetCharacters();
+        await GetNotes();
+    }
     public async Task EnsureCampaigns()
     {
         if (Campaigns == null)
@@ -61,11 +67,5 @@
     public async Task GetNotes()
     {
         Notes = (await noteManager.GetAll()).ToList();
-    }
-    protected override async Task OnInitializedAsync()
-    {
-        await GetCampaigns();
-        await GetCharacters();
-        await GetNotes();
     }
 }

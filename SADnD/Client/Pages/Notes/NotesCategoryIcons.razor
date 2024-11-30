@@ -1,4 +1,6 @@
-﻿@if (!ViewTypeIsDM) {
+﻿@using SADnD.Client.Pages.CharacterPages
+
+@if (!ViewTypeIsDM) {
     <div class="@GetCategoryClass("inventory")" @onclick='() => ChangeView("inventory")'>
         <i class="bi bi-backpack3"></i> <span class="hide-on-mobile">Inventar</span>
     </div>
@@ -23,7 +25,9 @@
 
 @code {
     [CascadingParameter]
-    public CascadingAppState appState { get; set; }
+    private CascadingAppState appState { get; set; }
+    [CascadingParameter]
+    public NotesCategoryParent Context { get; set; }
     [Parameter]
     public required string ActiveCategory { get; set; }
     [Parameter]
@@ -43,7 +47,8 @@
         await ActiveCategoryChanged.InvokeAsync(category);
         await OnCategoryChanged.InvokeAsync();
     }
-    private string GetCategoryClass(string category) {
+    private string GetCategoryClass(string category)
+    {
         bool Matches(Note note) =>
             ViewTypeIsDM ? note.CampaignId == CampaignId : note.CharacterId == CharacterId;
 

@@ -57,6 +57,7 @@ else {
     // private int selectedNoteId;
 
     protected override async Task OnInitializedAsync() {
+        await appState.EnsureNotes();
         await GetNotesAndApplyFilter();
     }
     protected override async Task OnParametersSetAsync() {

@@ -36,6 +36,11 @@
     string message = "";
     string name = "";
 
+
+    protected override async Task OnInitializedAsync() {
+        await appState.EnsureCampaigns();
+    }
+
     private async void Post() {
 
         try {
