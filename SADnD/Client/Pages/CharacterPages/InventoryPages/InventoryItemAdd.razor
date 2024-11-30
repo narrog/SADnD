@@ -1,6 +1,6 @@
 ﻿@using Newtonsoft.Json
-@inject InventoryItemSyncManager inventoryItemManager
-@inject CharacterSyncManager characterManager
+@inject InventoryItemApiManager inventoryItemManager
+@inject CharacterApiManager characterManager
 @inject IJSRuntime js
 
 <EditForm Model="@item" OnValidSubmit="@Post" class="w-100">
