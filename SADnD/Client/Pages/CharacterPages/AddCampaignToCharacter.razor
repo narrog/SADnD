@@ -90,7 +90,7 @@
     }
 
     private async Task CheckForExistingCharacter() {
-        selectedCampaign = await campaignManager.GetByID(selectedCampaignId);
+        selectedCampaign = appState.Campaigns.FirstOrDefault(c => c.Id == selectedCampaignId);
         charactersFromCampaign = selectedCampaign.Characters;
         if (charactersFromCampaign != null) {
             if (charactersFromCampaign.Any(x => x.UserId == appState.UserId)) {
