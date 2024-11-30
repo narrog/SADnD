@@ -206,13 +206,17 @@
                         bool confirm = await js.InvokeAsync<bool>("confirm", "Speichern & zurück zur Übersicht?");
                         if (confirm) {
                             if (string.IsNullOrEmpty(CharacterId)) {
-                                message = JsonConvert.SerializeObject(await characterManager.Insert(character));
-                                
+                                character = await characterManager.Insert(character);
+                                appState.Characters.Add(character);
+                                message = JsonConvert.SerializeObject(character);
+
                             }
                             else {
-                                message = JsonConvert.SerializeObject(await characterManager.Update(character));
+                                character = await characterManager.Update(character);
+                                appState.Characters[appState.Characters.FindIndex(c => c.Id == character.Id)] = character;
+                                message = JsonConvert.SerializeObject(character);
                             }
-                            Console.WriteLine($"message: {message}");
+                            // Console.WriteLine($"message: {message}");
                             await js.InvokeVoidAsync("history.back");
                         }
                         else

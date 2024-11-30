@@ -41,23 +41,28 @@
 
 
 @code {
+    [CascadingParameter]
+    CascadingAppState appState { get; set; }
     [Parameter] public bool ShowAll { get; set; }
     string controllerName = "character";
-    private IEnumerable<Character>? characters;
+    private IEnumerable<Character> characters;
 
     protected override async Task OnInitializedAsync()
     {
-        await GetAllCharacters();
-        if (characters != null) {
-            if (!ShowAll) {
-                characters = characters.Count() < 3 ? characters.Take(characters.Count()) : characters.Take(3);
+        // await GetAllCharacters();
+        if (appState.Characters != null) {
+            if (!ShowAll)
+            {
+                characters = appState.Characters.Count() < 3 ? appState.Characters.Take(appState.Characters.Count()) : appState.Characters.Take(3);
             }
+            else
+                characters = appState.Characters;
         }
     }
 
-    private async Task GetAllCharacters() {
-        characters = await characterManager.GetAll();
-    }
+    // private async Task GetAllCharacters() {
+    //     characters = await characterManager.GetAll();
+    // }
 
     private void OpenCharacterDetails(int id) {
         navManager.NavigateTo($"character-details/{id}");

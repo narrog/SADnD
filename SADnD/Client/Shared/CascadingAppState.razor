@@ -35,6 +35,21 @@
     public List<Campaign> Campaigns { get; set; }
     public List<Character> Characters { get; set; }
     public List<Note> Notes { get; set; }
+    public async Task EnsureCampaigns()
+    {
+        if (Campaigns == null)
+            await GetCampaigns();
+    }
+    public async Task EnsureCharacters()
+    {
+        if (Characters == null)
+            await GetCharacters();
+    }
+    public async Task EnsureNotes()
+    {
+        if (Notes == null)
+            await GetNotes();
+    }
     public async Task GetCampaigns()
     {
         Campaigns = (await campaignManager.GetAll()).ToList();

@@ -63,12 +63,13 @@
                 <div class="col-10">
                     @if(activeCategory == "inventory") {
                         @if (!showAddItems) {
-                            <InventoryView Character="@Character"
+                            <InventoryView CharacterId="@Character.Id"
                                            UnitOfWeight="@unitOfWeight" />
                             <button class="btn btn-secondary mt-1" @onclick="ShowAddItems">Item hinzufügen</button>
                         }
                         else {
-                            <InventoryItemAdd OnClose="HideAddItems"
+                            <InventoryItemAdd CharacterId="@Character.Id"
+                                              OnClose="HideAddItems"
                                               UnitOfWeight="@unitOfWeight" />
                         }
                         
@@ -102,8 +103,8 @@
 
 
 @code {
-    // [CascadingParameter]
-    // public CascadingAppState appState { get; set; }
+    [CascadingParameter]
+    public CascadingAppState appState { get; set; }
     [Parameter] 
     public required string Id { get; set; }
     public Character Character = new Character();
@@ -118,7 +119,8 @@
     public int SelectedNoteId { get; private set; } = 0;
 
     protected override async Task OnInitializedAsync() {
-        Character = await characterManager.GetByID(Id);
+        Character = appState.Characters.FirstOrDefault(c => c.Id == Int32.Parse(Id));
+        // Character = await characterManager.GetByID(Id);
         // await appState.GetNotes();
     }
 
@@ -128,6 +130,7 @@
         if (!confirm) return;
 
         await characterManager.Delete(Character.Id);
+        appState.Characters.Remove(Character);
         await js.InvokeVoidAsync("history.back");
     }
 
@@ -139,11 +142,11 @@
 
     private async void ShowAddItems() {
         showAddItems = true;
-        Character = await characterManager.GetByID(Character.Id);
+        // Character = await characterManager.GetByID(Character.Id);
         StateHasChanged();
     }
     private async void HideAddItems() {
-        Character = await characterManager.GetByID(Character.Id);
+        // Character = await characterManager.GetByID(Character.Id);
         showAddItems = false;
         StateHasChanged();
     }

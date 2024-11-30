@@ -1,10 +1,10 @@
-﻿@inject CharacterApiManager characterManager
-
+﻿@using Newtonsoft.Json
+@inject CharacterApiManager characterManager
 
 <table class="table table-striped">
     <tbody>
-        @if (Character.Inventory != null && Character.Inventory.Any() != false) {
-            @foreach (var inventoryItem in Character.Inventory) {
+        @if (character.Inventory != null && character.Inventory.Any() != false) {
+            @foreach (var inventoryItem in character.Inventory) {
                 <tr>
                     <td width="8%" class="align-middle">
                         @inventoryItem.Count
@@ -49,25 +49,29 @@
 }
 
 @code {
+    [CascadingParameter]
+    CascadingAppState appState { get; set; }
     [Parameter]
-    public required Character Character { get; set; }
+    public required int CharacterId { get; set; }
     [Parameter]
     public string? UnitOfWeight { get; set; }
 
+    private Character character;
     private bool showUIMessage;
     private string UIMessage = string.Empty;
-    
+
     private float weightTotal;
 
     protected override async Task OnInitializedAsync() {
+        character = appState.Characters.FirstOrDefault(c => c.Id == CharacterId);
         GetWeightSum();
     }
 
     private void GetWeightSum() {
         weightTotal = 0;
         float weightProduct;
-        if (Character.Inventory != null && Character.Inventory.Any()) {
-            foreach (var inventoryItem in Character.Inventory) {
+        if (character.Inventory != null && character.Inventory.Any()) {
+            foreach (var inventoryItem in character.Inventory) {
                 @if (inventoryItem.Item != null) {
                     @if (inventoryItem.Item.Weight != null) {
                         weightProduct = inventoryItem.Item.Weight.Value * inventoryItem.Count;
@@ -95,26 +99,27 @@
         await UpdateItemCount();
     }
     private async Task UpdateItemCount() {
-        await characterManager.Update(Character);
+        character = await characterManager.Update(character);
+        appState.Characters[appState.Characters.FindIndex(c => c.Id == character.Id)] = character;
         GetWeightSum();
         StateHasChanged();
     }
 
     private async Task DeleteItemFromInventory(Inventory inventoryItem) {
         try {
-            if (Character.Inventory != null && Character.Inventory.Any()) {
-                var itemToRemove = Character.Inventory.FirstOrDefault(i => i.Item.Id == inventoryItem.Item.Id);
+            if (character.Inventory != null && character.Inventory.Any()) {
+                var itemToRemove = character.Inventory.FirstOrDefault(i => i.Item.Id == inventoryItem.Item.Id);
 
                 if (itemToRemove != null) {
 
                     string itemName = itemToRemove.Item!.Name;
-                    Character.Inventory!.Remove(itemToRemove);
+                    character.Inventory!.Remove(itemToRemove);
                     UIMessage = $"Item '{itemName}' wurde aus dem Inventar entfernt";
                     showUIMessage = true;
                 }
             }
-            Character = await characterManager.Update(Character);
-
+            character = await characterManager.Update(character);
+            appState.Characters[appState.Characters.FindIndex(c => c.Id == character.Id)] = character;
         }
         catch (Exception ex) {
             Console.WriteLine($"{ex.Message}");
