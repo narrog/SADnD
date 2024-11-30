@@ -43,7 +43,6 @@
 
     private async Task ChangeView(string category)
     {
-        ActiveCategory = category;
         await ActiveCategoryChanged.InvokeAsync(category);
         await OnCategoryChanged.InvokeAsync();
     }

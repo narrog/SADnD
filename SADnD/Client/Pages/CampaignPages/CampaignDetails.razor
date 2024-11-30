@@ -97,15 +97,16 @@
             @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
             
                     <div class="col-2 my-1" id="notes-icons-container">
-                    <NotesCategoryIcons @bind-ActiveCategory="activeCategory"
-                                        OnCategoryChanged="HandleCategoryChanged"
+                    <NotesCategoryIcons @bind-ActiveCategory="ActiveCategory"
                                         CampaignId="@Id"
+                                        OnCategoryChanged="HandleCategoryChanged"
                                         ViewTypeIsDM="true" />
+                    
                 </div>
                 <div class="col-10">
                     @if (!ShowAddNotes)
                     {
-                        <NotesView NotesCategory="@activeCategory"
+                        <NotesView NotesCategory="@ActiveCategory"
                                    CampaignId="@Id"
                                    OnEditNote="ShowAddNotesAsync"
                                    ViewTypeIsDM="true" />
@@ -113,7 +114,7 @@
                         <button class="btn btn-secondary mt-1" @onclick="() => ShowAddNotesAsync(0)">Notiz hinzufügen</button>
                     }
                     else{
-                        <NotesAdd NotesCategory="@activeCategory"
+                        <NotesAdd NotesCategory="@ActiveCategory"
                                   SelectedNoteId="@SelectedNoteId"
                                   CampaignId="@Id"
                                   OnClose="HideAddNotesAsync" />
@@ -152,7 +153,7 @@
     private string UIMessage = "";
     private string currentUserId = "";
 
-    public string activeCategory = "story";
+    public new string ActiveCategory = "story";
     // public bool ShowAddNotes { get; private set; } = false;
     // public int SelectedNoteId { get; private set; } = 0;
 

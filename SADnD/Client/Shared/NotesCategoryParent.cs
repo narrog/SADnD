@@ -4,6 +4,7 @@ namespace SADnD.Client.Shared
 {
     public abstract class NotesCategoryParent : ComponentBase
     {
+        public virtual string ActiveCategory { get; set; } = "";
         public bool ShowAddNotes { get; private set; } = false;
         public int SelectedNoteId { get; private set; } = 0;
         public void HandleCategoryChanged()

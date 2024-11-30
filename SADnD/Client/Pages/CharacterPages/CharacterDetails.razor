@@ -56,13 +56,14 @@
 
             <div class="row mt-3">
                     <div class="col-2 my-1" id="notes-icons-container">
-                    <NotesCategoryIcons @bind-ActiveCategory="activeCategory"
-                                         CharacterId="@Character.Id"
-                                         OnCategoryChanged="HandleCategoryChanged" />
+                    <NotesCategoryIcons @bind-ActiveCategory="ActiveCategory"
+                                        OnCategoryChanged="HandleCategoryChanged"
+                                        CharacterId="@Character.Id"/>
+                                        
                 </div>
 
                 <div class="col-10">
-                    @if(activeCategory == "inventory") {
+                    @if(ActiveCategory == "inventory") {
                         @if (!showAddItems) {
                             <InventoryView CharacterId="@Character.Id"
                                            UnitOfWeight="@unitOfWeight" />
@@ -78,13 +79,13 @@
                     else {
                         @if (!ShowAddNotes)
                         {
-                            <NotesView NotesCategory="@activeCategory"
+                            <NotesView NotesCategory="@ActiveCategory"
                                        CharacterId="@Character.Id"
                                        OnEditNote="ShowAddNotesAsync" />
                             <button class="btn btn-secondary mt-1" @onclick="() => ShowAddNotesAsync(0)">Notiz hinzufügen</button>
                         }
                         else {
-                            <NotesAdd NotesCategory="@activeCategory"
+                            <NotesAdd NotesCategory="@ActiveCategory"
                                       SelectedNoteId="@SelectedNoteId"
                                       CharacterId="@Character.Id"
                                       OnClose="HideAddNotesAsync" />
@@ -112,7 +113,7 @@
 
     private bool showCharacterDetails;
     private string showDetailsText = "Details anzeigen";
-    public string activeCategory = "inventory";
+    public new string ActiveCategory = "inventory";
 
     private bool showAddItems;
     private string unitOfWeight = "kg";
