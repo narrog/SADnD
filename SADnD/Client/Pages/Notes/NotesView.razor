@@ -68,21 +68,29 @@ else {
         // allNotes = await noteManager.GetAll();
 
         // if (allNotes == null) return;
-
-        filteredNotes = NotesCategory switch
+        try
         {
-            "story" => appState.Notes.Where(note => note is NoteStory),
-            "people" => appState.Notes.Where(note => note is NotePerson),
-            "locations" => appState.Notes.Where(note => note is NoteLocation),
-            "quest" => appState.Notes.Where(note => note is NoteQuest),
-            "hints" => appState.Notes.Where(note => note is NoteHint),
-            _ => appState.Notes
-        };
-        if (ViewTypeIsDM){
-            filteredNotes = filteredNotes.Where(c => c.CampaignId == CampaignId);
+            filteredNotes = NotesCategory switch
+            {
+                "story" => appState.Notes.Where(note => note is NoteStory),
+                "people" => appState.Notes.Where(note => note is NotePerson),
+                "locations" => appState.Notes.Where(note => note is NoteLocation),
+                "quest" => appState.Notes.Where(note => note is NoteQuest),
+                "hints" => appState.Notes.Where(note => note is NoteHint),
+                _ => appState.Notes
+            };
+            if (ViewTypeIsDM)
+            {
+                filteredNotes = filteredNotes.Where(c => c.CampaignId == CampaignId);
+            }
+            else
+            {
+                filteredNotes = filteredNotes.Where(c => c.CharacterId == CharacterId);
+            }
         }
-        else {
-            filteredNotes = filteredNotes.Where(c => c.CharacterId == CharacterId);
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
         }
     }
     // private async void ShowAddNotes(int noteId) {
