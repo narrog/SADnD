@@ -48,23 +48,31 @@
     }
     private string GetCategoryClass(string category)
     {
-        bool Matches(Note note) =>
-            ViewTypeIsDM ? note.CampaignId == CampaignId : note.CharacterId == CharacterId;
-
-        bool categoryHasNotes = category switch
+        try
         {
-            "inventory" => true, 
-            "story" => appState.Notes.Any(note => note is NoteStory && Matches(note)),
-            "people" => appState.Notes.Any(note => note is NotePerson && Matches(note)),
-            "locations" => appState.Notes.Any(note => note is NoteLocation && Matches(note)),
-            "quest" => appState.Notes.Any(note => note is NoteQuest && Matches(note)),
-            "hints" => appState.Notes.Any(note => note is NoteHint && Matches(note)),
-            _ => false 
-        };
+            bool Matches(Note note) =>
+                    ViewTypeIsDM ? note.CampaignId == CampaignId : note.CharacterId == CharacterId;
 
-        return ActiveCategory == category
-            ? "ps-2 my-1 bg-light text-dark border"
-            : $"ps-2 my-1 bg-dark text-light {categoryHasNotes}";
+            bool categoryHasNotes = category switch
+            {
+                "inventory" => true,
+                "story" => appState.Notes.Any(note => note is NoteStory && Matches(note)),
+                "people" => appState.Notes.Any(note => note is NotePerson && Matches(note)),
+                "locations" => appState.Notes.Any(note => note is NoteLocation && Matches(note)),
+                "quest" => appState.Notes.Any(note => note is NoteQuest && Matches(note)),
+                "hints" => appState.Notes.Any(note => note is NoteHint && Matches(note)),
+                _ => false
+            };
+
+            return ActiveCategory == category
+                ? "ps-2 my-1 bg-light text-dark border"
+                : $"ps-2 my-1 bg-dark text-light {categoryHasNotes}";
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return "ps-2 my-1 bg-dark text-light";
+        }
     }
 
 }
