@@ -206,7 +206,6 @@
                                 character = await characterManager.Insert(character);
                                 appState.Characters.Add(character);
                                 message = JsonConvert.SerializeObject(character);
-
                             }
                             else {
                                 character = await characterManager.Update(character);

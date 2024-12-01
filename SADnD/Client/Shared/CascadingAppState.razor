@@ -37,9 +37,13 @@
     public List<Note> Notes { get; set; }
     protected override async Task OnInitializedAsync()
     {
-        await GetCampaigns();
-        await GetCharacters();
-        await GetNotes();
+        var authState = await authenticationStateTask;
+        if (authState.User.Identity?.IsAuthenticated ?? false)
+        {
+            await GetCampaigns();
+            await GetCharacters();
+            await GetNotes();
+        }
     }
     public async Task EnsureCampaigns()
     {

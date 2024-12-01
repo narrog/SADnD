@@ -191,7 +191,8 @@
     }
 
     private void ShowAddCampaign() {
-        ShowCharacterDetails();
+        if (showCharacterDetails)
+            ShowCharacterDetails();
         showAddCampaign = true;
         StateHasChanged();
     }
