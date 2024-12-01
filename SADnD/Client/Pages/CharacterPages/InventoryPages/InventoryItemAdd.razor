@@ -54,8 +54,8 @@
 @code {
     [CascadingParameter] 
     public CascadingAppState appState { get; set; }
-    // [CascadingParameter]
-    // protected CharacterDetails Context { get; set; }
+    [CascadingParameter]
+    protected CharacterDetails Context { get; set; }
     [Parameter]
     public int CharacterId { get; set; }
     [Parameter] 
@@ -66,7 +66,7 @@
     [Parameter] 
     public required string UnitOfWeight { get; set; }
 
-    private Character character;
+    // private Character character;
     private InventoryItem item = new InventoryItem();
     private InventoryItem savedItem = new InventoryItem();
     private bool isItemSelected = false;
@@ -87,8 +87,8 @@
     private int count = 1;
 
     protected override async Task OnInitializedAsync() {
-        await appState.EnsureCharacters();
-        character = appState.Characters.FirstOrDefault(c => c.Id == CharacterId);
+        // await appState.EnsureCharacters();
+        // Context.Character = appState.Characters.FirstOrDefault(c => c.Id == Context.Character.Id);
         item.UserId = appState.UserId;
         allItems = await inventoryItemManager.GetAll();
         allItems = allItems.OrderBy(item => item.Name);
@@ -102,9 +102,11 @@
                 return;
             }
             bool itemExists = false;
-            if (character.Inventory != null) {
-                if (character.Inventory.Count > 0) {
-                    itemExists = character.Inventory.Any(i => i.Item!.Id == item.Id);
+            if (Context.Character.Inventory != null)
+            {
+                if (Context.Character.Inventory.Count > 0)
+                {
+                    itemExists = Context.Character.Inventory.Any(i => i.Item!.Id == item.Id);
                 }
             }
             if (itemExists) {
@@ -114,9 +116,9 @@
                 return;
             }
             else {
-                character.Inventory.Add(new Inventory() { CharacterId = character.Id, Item = item, Count = count });
-                character = await characterManager.Update(character);
-                appState.Characters[appState.Characters.FindIndex(c => c.Id == character.Id)] = character;
+                Context.Character.Inventory.Add(new Inventory() { CharacterId = Context.Character.Id, Item = item, Count = count });
+                Context.Character = await characterManager.Update(Context.Character);
+                appState.Characters[appState.Characters.FindIndex(c => c.Id == Context.Character.Id)] = Context.Character;
                 await OnClose.InvokeAsync();
             }
             StateHasChanged();
