@@ -23,6 +23,8 @@ namespace SADnD.Server.Data
         public DbSet<Inventory> Inventories { get; set; }
         public DbSet<InventoryItem> InventoryItems { get; set; }
         public DbSet<Note> Notes { get; set; }
+        public DbSet<Appointment> Appointments { get; set; }
+        public DbSet<AppointmentVote> AppointmentVotes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

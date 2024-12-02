@@ -6,19 +6,19 @@
 @inherits NotesCategoryParent
 @using Newtonsoft.Json
 
-<h3>@campaign.Name</h3>
+<h3>@Campaign.Name</h3>
 
 <CascadingValue Value="this" IsFixed="false">
-    @if(campaign != null){
+    @if(Campaign != null){
         <div class="container-fluid mt-3">
             <div class="row">
                 <div class="col-12 col-xl-8">
                     <strong>Dungeonmaster: </strong><br />
-                    @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any())
+                    @if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any())
                     {
                         <p>
                             <ul>
-                                @foreach (var master in campaign.DungeonMasters)
+                                @foreach (var master in Campaign.DungeonMasters)
                                 {
                                     @if (master.UserName != null)
                                     {
@@ -35,16 +35,16 @@
                         <p>Kein DungeonMaster gefunden</p>
                     }
                     <p>
-                        <strong>Zugangscode: </strong>@campaign.Id
+                        <strong>Zugangscode: </strong>@Campaign.Id
                         <span class="oi oi-share-boxed ms-2" @onclick="ShareAccessCode" title="Zugangscode teilen" style="cursor: pointer;" aria-hidden="true"></span>
                     </p>
                     <div class="table-responsive">
                         <strong>Mitspieler</strong>
                         <table class="table table-borderless align-middle border-bottom">
-                            @if (campaign.Players != null && campaign.Players.Any())
+                            @if (Campaign.Players != null && Campaign.Players.Any())
                             {
                                 <tbody>
-                                    @foreach (var entry in playerCharacters)
+                                    @foreach (var entry in PlayerCharacters)
                                     {
                                         <tr class="border-top">
                                             @if (entry.User.UserName != null)
@@ -79,7 +79,7 @@
                                                 <td class="d-none d-md-table-cell"></td>
                                             }
                                             <td class="d-none d-md-table-cell">
-                                                @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId))
+                                                @if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any(dm => dm.Id == currentUserId))
                                                 {
                                                     <button class="btn btn-outline-danger me-2" @onclick="() => RemovePlayer(entry.User, true)">entfernen</button>
                                                 }
@@ -96,7 +96,7 @@
                                         </tr>
                                         <tr class="d-md-none">
                                             <td colspan="4">
-                                                @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId))
+                                                @if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any(dm => dm.Id == currentUserId))
                                                 {
                                                     <button class="btn btn-outline-danger me-2" @onclick="() => RemovePlayer(entry.User, true)">entfernen</button>
                                                 }
@@ -121,7 +121,7 @@
                             }
                         </table>
                     </div>
-                    @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId))
+                    @if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any(dm => dm.Id == currentUserId))
                     {
                         <p>
                             <strong>Offene Anfragen</strong>
@@ -159,14 +159,13 @@
                 @if (showAddCharacter)
                 {
                     <div class="col-12 col-xl-4 mt-3 mt-xl-0">
-                        <AddCharacterToCampaign Campaign="campaign"
-                                                OriginalCharacter="selectedCharacter"
+                        <AddCharacterToCampaign OriginalCharacter="selectedCharacter"
                                                 OnClose="HideAddCharacter" />
                     </div>
                 }
             </div>
             <div class="row">
-                @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId))
+                @if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any(dm => dm.Id == currentUserId))
                 {
 
                     <div class="col-2 my-1" id="notes-icons-container">
@@ -200,7 +199,7 @@
         <div class="row my-4 pt-4 border-top">
             <div>
                 <a class="btn btn-secondary me-2" onclick="history.back();">Zurück</a>
-                @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId))
+                @if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any(dm => dm.Id == currentUserId))
                 {
                     <button class="btn btn-danger" @onclick="DeleteCampaign">Löschen</button>
                 }
@@ -222,8 +221,8 @@
     public CascadingAppState appState { get; set; }
     [Parameter]
     public required string Id { get; set; }
-    private Campaign campaign = new Campaign();
-    private List<(ApplicationUser User, Character Character)> playerCharacters = new List<(ApplicationUser User, Character Character)>();
+    public Campaign Campaign { get; set; } = new Campaign();
+    public List<(ApplicationUser User, Character Character)> PlayerCharacters = new List<(ApplicationUser User, Character Character)>();
     private Character playerCharacter = new Character();
     private Character? selectedCharacter;
     private IEnumerable<JoinRequest>? joinRequests;
@@ -238,15 +237,15 @@
     protected override async Task OnInitializedAsync() {
         await appState.EnsureCampaigns();
         currentUserId = appState.UserId;
-        campaign = appState.Campaigns.FirstOrDefault(c => c.Id == Id);
-        if(campaign != null){
+        Campaign = appState.Campaigns.FirstOrDefault(c => c.Id == Id);
+        if(Campaign != null){
             await GetOpenJoinRequests();
             await AllocatePlayersNCharacters();
         }
         else {
             navManager.NavigateTo("/access-denied");
         }
-        
+
     }
 
     private async Task GetOpenJoinRequests() {
@@ -270,29 +269,28 @@
             UIMessage = $"Beitrittsanfrage akzeptiert";
             await GetOpenJoinRequests();
             await appState.GetCampaigns();
-            campaign = appState.Campaigns.FirstOrDefault(c => c.Id == Id);
+            Campaign = appState.Campaigns.FirstOrDefault(c => c.Id == Id);
         }
         StateHasChanged();
     }
-    private async Task AllocatePlayersNCharacters()
+    public async Task AllocatePlayersNCharacters()
     {
-        campaign = appState.Campaigns.FirstOrDefault(c => c.Id == Id);
-        playerCharacters.Clear();
+        Campaign = appState.Campaigns.FirstOrDefault(c => c.Id == Id);
+        PlayerCharacters.Clear();
 
-        if (campaign.Players != null && campaign.Players.Any()) {
-            foreach (var player in campaign.Players) {
-                Character character = campaign.Characters.FirstOrDefault(c => c.UserId == player.Id);
-                playerCharacters.Add((player, character));
+        if (Campaign.Players != null && Campaign.Players.Any()) {
+            foreach (var player in Campaign.Players) {
+                Character character = Campaign.Characters.FirstOrDefault(c => c.UserId == player.Id);
+                PlayerCharacters.Add((player, character));
             }
         }
-
     }
     private async Task ShareAccessCode() {
         try {
             if (await js.InvokeAsync<bool>("navigator.canShare", new { text = "Test" })) {
                 await js.InvokeVoidAsync("navigator.share", new {
                     title = "Dungeon Kampagne",
-                    text = $"Hier ist der Zugangscode: {campaign.Id}"
+                    text = $"Hier ist der Zugangscode: {Campaign.Id}"
                 });
             }
             else {
@@ -309,7 +307,7 @@
         showAddCharacter = true;
     }
     private async void HideAddCharacter() {
-        await AllocatePlayersNCharacters();
+        // await AllocatePlayersNCharacters();
         showAddCharacter = false;
         StateHasChanged();
     }
@@ -340,10 +338,10 @@
             bool confirm = await js.InvokeAsync<bool>("confirm", $"{confirmMessage}");
             if (!confirm) return;
 
-            if (campaign.Players != null) {
-                campaign.Players.Remove(playerToDelete);
-                campaign = await campaignManager.Update(campaign);
-                appState.Campaigns[appState.Campaigns.FindIndex(c => c.Id == Id)] = campaign;
+            if (Campaign.Players != null) {
+                Campaign.Players.Remove(playerToDelete);
+                Campaign = await campaignManager.Update(Campaign);
+                appState.Campaigns[appState.Campaigns.FindIndex(c => c.Id == Id)] = Campaign;
                 UIMessage = uiMessage;
                 if (!isKicked) {
                     await js.InvokeVoidAsync("history.back");
@@ -360,14 +358,14 @@
     }
 
     private async Task DeleteCampaign() {
-        string toDeleteName = campaign.Name;
+        string toDeleteName = Campaign.Name;
         bool confirm = await js.InvokeAsync<bool>("confirm", $"Soll der Eintrag '{toDeleteName}' wirklich gelöscht werden?");
         if (!confirm) return;
 
-        bool success = await campaignManager.Delete(campaign.Id);
+        bool success = await campaignManager.Delete(Campaign.Id);
 
         if (success) {
-            appState.Campaigns.Remove(campaign);
+            appState.Campaigns.Remove(Campaign);
             UIMessage = $"Kampagne '{toDeleteName}' erfolgreich gelöscht.";
             await js.InvokeVoidAsync("history.back");
         }
