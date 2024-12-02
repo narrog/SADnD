@@ -5,6 +5,7 @@
 @inject NoteApiManager noteManager
 @inject IJSRuntime js
 @inherits NotesCategoryParent 
+@using Newtonsoft.Json
 
 <CascadingValue Value="@this" IsFixed="true">
     @if (Character != null) {
@@ -85,24 +86,24 @@
             }
 
             <div class="row mt-3">
-                    <div class="col-2 my-1" id="notes-icons-container">
+                <div class="col-2 my-1" id="notes-icons-container">
                     <NotesCategoryIcons @bind-ActiveCategory="ActiveCategory"
-                                        OnCategoryChanged="HandleCategoryChanged"
-                                        CharacterId="@Character.Id"/>
-                                        
+                    OnCategoryChanged="HandleCategoryChanged"
+                    CharacterId="@Character.Id"/>
+
                 </div>
 
                 <div class="col-10">
                     @if(ActiveCategory == "inventory") {
                         @if (!showAddItems) {
                             <InventoryView CharacterId="@Character.Id"
-                                           UnitOfWeight="@unitOfWeight" />
+                            UnitOfWeight="@unitOfWeight" />
                             <button class="btn btn-secondary mt-1" @onclick="ShowAddItems">Item hinzufügen</button>
                         }
                         else {
                             <InventoryItemAdd CharacterId="@Character.Id"
-                                              OnClose="HideAddItems"
-                                              UnitOfWeight="@unitOfWeight" />
+                            OnClose="HideAddItems"
+                            UnitOfWeight="@unitOfWeight" />
                         }
 
                     }
@@ -110,15 +111,15 @@
                         @if (!ShowAddNotes)
                         {
                             <NotesView NotesCategory="@ActiveCategory"
-                                       CharacterId="@Character.Id"
-                                       OnEditNote="ShowAddNotesAsync" />
+                            CharacterId="@Character.Id"
+                            OnEditNote="ShowAddNotesAsync" />
                             <button class="btn btn-secondary mt-1" @onclick="() => ShowAddNotesAsync(0)">Notiz hinzufügen</button>
                         }
                         else {
                             <NotesAdd NotesCategory="@ActiveCategory"
-                                      SelectedNoteId="@SelectedNoteId"
-                                      CharacterId="@Character.Id"
-                                      OnClose="HideAddNotesAsync" />
+                            SelectedNoteId="@SelectedNoteId"
+                            CharacterId="@Character.Id"
+                            OnClose="HideAddNotesAsync" />
                         }
 
                     }
@@ -151,16 +152,16 @@
 
     private bool showAddItems;
     private string unitOfWeight = "kg";
-    // public bool ShowAddNotes { get; private set; } = false;
-    // public int SelectedNoteId { get; private set; } = 0;
+
 
     protected override async Task OnInitializedAsync() {
         await appState.EnsureCharacters();
         await appState.EnsureNotes();
         Character = appState.Characters.FirstOrDefault(c => c.Id == Int32.Parse(Id));
-        // Character = await characterManager.GetByID(Id);
-        // await appState.GetNotes();
-        campaign = Character.CampaignId != null ? appState.Campaigns.FirstOrDefault(c => c.Id == Character.CampaignId) : null;
+        if (Character != null)
+            campaign = Character.CampaignId != null ? appState.Campaigns.FirstOrDefault(c => c.Id == Character.CampaignId) : null;
+        else
+            navManager.NavigateTo("/access-denied");
     }
 
     private async Task DeleteCharacter() {
@@ -181,11 +182,9 @@
 
     private async void ShowAddItems() {
         showAddItems = true;
-        // Character = await characterManager.GetByID(Character.Id);
         StateHasChanged();
     }
     private async void HideAddItems() {
-        // Character = await characterManager.GetByID(Character.Id);
         showAddItems = false;
         StateHasChanged();
     }
@@ -202,21 +201,5 @@
         campaign = Character.CampaignId != null ? await campaignManager.GetByID(Character.CampaignId) : null;
         StateHasChanged();
     }
-    // public void HandleCategoryChanged()
-    // {
-    //     ShowAddNotes = false;
-    // }
 
-    // public Task ShowAddNotesAsync(int noteId)
-    // {
-    //     SelectedNoteId = noteId;
-    //     ShowAddNotes = true;
-    //     return Task.CompletedTask;
-    // }
-
-    // public Task HideAddNotesAsync()
-    // {
-    //     ShowAddNotes = false;
-    //     return Task.CompletedTask;
-    // }
 }
