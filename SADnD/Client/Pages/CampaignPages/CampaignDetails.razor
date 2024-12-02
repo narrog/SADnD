@@ -9,7 +9,7 @@
 <h3>@Campaign.Name</h3>
 
 <CascadingValue Value="this" IsFixed="false">
-    @if(campaign != null){
+    @if(Campaign != null){
         <div class="container-fluid mt-3">
             <div class="row">
                 <div class="col-12 col-xl-8">
@@ -44,7 +44,7 @@
                             @if (Campaign.Players != null && Campaign.Players.Any())
                             {
                                 <tbody>
-                                    @foreach (var entry in playerCharacters)
+                                    @foreach (var entry in PlayerCharacters)
                                     {
                                         <tr class="border-top">
                                             @if (entry.User.UserName != null)
@@ -238,7 +238,7 @@
         await appState.EnsureCampaigns();
         currentUserId = appState.UserId;
         Campaign = appState.Campaigns.FirstOrDefault(c => c.Id == Id);
-        if(campaign != null){
+        if(Campaign != null){
             await GetOpenJoinRequests();
             await AllocatePlayersNCharacters();
         }
