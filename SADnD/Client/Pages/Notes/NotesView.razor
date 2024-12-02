@@ -1,0 +1,124 @@
+﻿@inject NoteApiManager noteManager
+@inject CharacterApiManager characterManager
+@inject IJSRuntime js
+
+@if (filteredNotes != null && filteredNotes.Any() != false) {
+    @foreach (var note in filteredNotes) {
+        <div class="border border-1 my-2 p-2">
+            <h5>@note.Name</h5>
+            <p>@note.Content</p>
+            @if (note is NotePerson notePerson) {
+                <p><strong>Ort: </strong>@notePerson.Location</p>
+                <p><strong>Zugehörigkeit: </strong>@notePerson.Affiliation</p>
+            }
+            <button class="pointer me-2 btn btn-outline-secondary" @onclick="() => OnEditNote.InvokeAsync(note.Id)">
+                <i class="oi oi-pencil me-1"></i> bearbeiten
+            </button>
+            <button class="pointer me-2 btn btn-outline-secondary" @onclick="() => DeleteNote(note)">
+                <i class="oi oi-trash text-danger me-1"></i> löschen
+            </button>
+        </div>
+    }
+}
+else {
+    <div class="border border-1 my-2 p-2">
+        <p>Keine Notizen gefunden</p>
+    </div>
+}
+
+@if (showUIMessage) {
+    <ul class="mt-3">
+        <li class="validation-message">
+            @UIMessage
+        </li>
+    </ul>
+}
+
+@code {
+    [CascadingParameter]
+    CascadingAppState appState { get; set; }
+    [Parameter]
+    public required string NotesCategory { get; set; }
+    [Parameter]
+    public int CharacterId { get; set; }
+    [Parameter]
+    public string? CampaignId { get; set; }
+    [Parameter]
+    public bool ViewTypeIsDM { get; set; }
+    [Parameter] 
+    public EventCallback<int> OnEditNote { get; set; }
+
+    // private IEnumerable<Note>? allNotes;
+    private IEnumerable<Note>? filteredNotes;
+
+    private bool showAddNotes;
+    private bool showUIMessage;
+    private string UIMessage = string.Empty;
+    // private int selectedNoteId;
+
+    protected override async Task OnInitializedAsync() {
+        await appState.EnsureNotes();
+        await GetNotesAndApplyFilter();
+    }
+    protected override async Task OnParametersSetAsync() {
+        await GetNotesAndApplyFilter();
+    }
+
+    private async Task GetNotesAndApplyFilter() {
+        // allNotes = await noteManager.GetAll();
+
+        // if (allNotes == null) return;
+        try
+        {
+            filteredNotes = NotesCategory switch
+            {
+                "story" => appState.Notes.Where(note => note is NoteStory),
+                "people" => appState.Notes.Where(note => note is NotePerson),
+                "locations" => appState.Notes.Where(note => note is NoteLocation),
+                "quest" => appState.Notes.Where(note => note is NoteQuest),
+                "hints" => appState.Notes.Where(note => note is NoteHint),
+                _ => appState.Notes
+            };
+            if (ViewTypeIsDM)
+            {
+                filteredNotes = filteredNotes.Where(c => c.CampaignId == CampaignId);
+            }
+            else
+            {
+                filteredNotes = filteredNotes.Where(c => c.CharacterId == CharacterId);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+    // private async void ShowAddNotes(int noteId) {
+    //     selectedNoteId = noteId;
+    //     UIMessage = "";
+    //     showAddNotes = true;
+    //     await OnParametersSetAsync();
+    //     StateHasChanged();
+    // }
+    // private async void HideAddNotes() {
+    //     await OnParametersSetAsync();
+    //     showAddNotes = false;
+    //     StateHasChanged();
+    // }
+    // public void ResetAddNotes() {
+    //     showAddNotes = false;
+    //     StateHasChanged();
+    // }
+
+    public async void DeleteNote(Note note) {
+        string toDeleteName = note.Name;
+        bool confirm = await js.InvokeAsync<bool>("confirm", $"Soll die Notiz '{toDeleteName}' wirklich gelöscht werden?");
+        if (!confirm) return;
+
+        await noteManager.Delete(note);
+        appState.Notes.Remove(note);
+        await GetNotesAndApplyFilter();
+        //showAddNotes = false;
+        StateHasChanged();
+    }
+}

@@ -1,18 +1,19 @@
 ﻿@page "/character-details/{id}"
-@using SADnD.Client.Pages.CharacterPages.InventoryPages
-@using Newtonsoft.Json
 @attribute [Authorize]
-@inject CharacterSyncManager characterManager
+@inject CharacterApiManager characterManager
+@inject CampaignApiManager campaignManager
+@inject NoteApiManager noteManager
 @inject IJSRuntime js
+@inherits NotesCategoryParent 
+@using Newtonsoft.Json
 
 <CascadingValue Value="@this" IsFixed="true">
     @if (Character != null) {
-        <h3>Charakter "@Character.Name"</h3>
+        <h3>"@Character.Name"</h3>
 
         <div class="container-fluid mt-3">
             <div class="row">
-                <div class="col-12 col-md-4">
-                    <h4>Details</h4>
+                <div class="col-12 col-md-6 col-xl-4">
                     <p><strong>Rasse: </strong>@(Character.Race != null ? Character.Race.Name : "Unbekannt")</p>
                     @if (Character.Classes != null && Character.Classes.Any()) {
                         <p>
@@ -31,72 +32,98 @@
                     else {
                         <p>Keine Klasse zugeordnet</p>
                     }
-                    <p><strong>Grösse-Kategorie: </strong>@(Character.SizeCategory != null ? Character.SizeCategory : "Unbekannt")</p>
-                    <p><strong>Grösse: </strong>@(Character.Size != null ? Character.Size : "Unbekannt")</p>
-                    <p><strong>Geschlecht: </strong>@(Character.Sex != null ? Character.Sex : "Unbekannt")</p>
-                    <p><strong>Gesinnung: </strong>@(Character.Alignment != null ? Character.Alignment : "Unbekannt")</p>
-                    <p><strong>Alter: </strong>@(Character.Age != null ? Character.Age : "Unbekannt")</p>
-                    <p><strong>Gewicht: </strong>@(Character.Weight != null ? Character.Weight : "Unbekannt")</p>
+
+                    <p>
+                        <strong>Kampagne: </strong>
+                        @if (campaign != null) {
+                            <a href="campaign-details/@Character.CampaignId" title="Kampagnen-Details öffnen">
+                                <span class="oi oi-eye me-2 pointer"></span>@campaign.Name
+                            </a>
+                        }
+                        else {
+                            <a class="btn btn-outline-primary" @onclick="ShowAddCampaign">
+                                Kampagne zuweisen
+                            </a>
+                        }
+                    </p>
+
+                    @* TODO:
+                    <p><strong>Trefferpunkte: </strong>@Character.Hitpoints </p>
+                    <p><strong>Spellslots: </strong></p> *@
+
+
                 </div>
-                <div class="col-12 col-md-4">
-                    <h4>Inventar</h4>
-                    <table class="table table-striped">
-                        <tbody>
-                            @if (Character.Inventory != null && Character.Inventory.Any() != false) {
-                                @foreach (var inventoryItem in Character.Inventory) {
-                                    <tr>
-                                        <td>
-                                            @inventoryItem.Count
-                                        </td>
-                                        <td>
-                                            <button @onclick="() => IncreaseItemCount(inventoryItem)" title="Anzahl erhöhen">+</button>
-                                            <button @onclick="() => DecreaseItemCount(inventoryItem)" title="Anzahl verringern">-</button>
-                                        </td>
-                                        @if (inventoryItem.Item != null) {
-                                            <td>@inventoryItem.Item.Name</td>
-                                            @if (inventoryItem.Item.Weight != null) {
-                                                <td>
-                                                    @inventoryItem.Item.Weight @unitOfWeight
-                                                </td>
-                                            }
-                                            else {
-                                                <td></td>
-                                            }
-                                        }
-                                    </tr>
-                                }
-                                <tr>
-                                    <td></td>
-                                    <td></td>
-                                    <td class="text-end">Gewicht Total</td>
-                                    <td>@weightTotal @unitOfWeight</td>
-                                </tr>
-                            }
-                            else {
-                                <tr><td>Keine Items gefunden</td></tr>
-                            }
-                        </tbody>
-                    </table>
-                    @if (showUIMessage) {
-                        <ul class="mt-3">
-                            <li class="validation-message">
-                                @UIMessage
-                            </li>
-                        </ul>
-                    }
-                    <a class="btn btn-primary me-2" href="all-items">deine Items bearbeiten</a>
+                @if (showCharacterDetails) {
+                    <div class="col-12 col-md-6">
+                        <p>
+                            <strong>Grösse-Kategorie: </strong>@(Character.SizeCategory != null ? Character.SizeCategory : "Unbekannt")<br />
+                            <strong>Grösse: </strong>@(Character.Size != null ? Character.Size : "Unbekannt")<br />
+                            <strong>Geschlecht: </strong>@(Character.Sex != null ? Character.Sex : "Unbekannt")<br />
+                            <strong>Gesinnung: </strong>@(Character.Alignment != null ? Character.Alignment : "Unbekannt")<br />
+                            <strong>Alter: </strong>@(Character.Age != null ? Character.Age : "Unbekannt")<br />
+                            <strong>Gewicht: </strong>@(Character.Weight != null ? Character.Weight : "Unbekannt")
+                        </p>
+                    </div>
+                }
+                @if (showAddCampaign) {
+                    <div class="col-12 col-md-4 mt-3 mt-md-0">
+                        <AddCampaignToCharacter CharacterId="@Id"
+                        OnClose="HideAddCampaign" />
+                    </div>
+                }
+            </div>
+            @if (!showAddCampaign) {
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <button class="btn btn-outline-secondary" @onclick="ShowCharacterDetails">
+                            <span class="oi oi-eye me-2"></span> @showDetailsText
+                        </button>
+                        <a class="btn btn-outline-primary" href="/new-character/@Id">
+                            <span class="oi oi-pencil me-2"></span> bearbeiten
+                        </a>
+                    </div>
                 </div>
-                <div class="col-12 col-md-4">
-                    @if (!showAddItems) {
-                        <button class="btn btn-secondary" @onclick="ShowAddItems">Item hinzufügen</button>
-                    }
-                    else {
-                        <InventoryItemAdd ShowAddItems="@showAddItems"
-                                          OnClose="HideAddItems"
-                                          UnitOfWeight="@unitOfWeight" />
-                    }
+            }
+
+            <div class="row mt-3">
+                <div class="col-2 my-1" id="notes-icons-container">
+                    <NotesCategoryIcons @bind-ActiveCategory="ActiveCategory"
+                    OnCategoryChanged="HandleCategoryChanged"
+                    CharacterId="@Character.Id"/>
+
                 </div>
 
+                <div class="col-10">
+                    @if(ActiveCategory == "inventory") {
+                        @if (!showAddItems) {
+                            <InventoryView CharacterId="@Character.Id"
+                            UnitOfWeight="@unitOfWeight" />
+                            <button class="btn btn-secondary mt-1" @onclick="ShowAddItems">Item hinzufügen</button>
+                        }
+                        else {
+                            <InventoryItemAdd CharacterId="@Character.Id"
+                            OnClose="HideAddItems"
+                            UnitOfWeight="@unitOfWeight" />
+                        }
+
+                    }
+                    else {
+                        @if (!ShowAddNotes)
+                        {
+                            <NotesView NotesCategory="@ActiveCategory"
+                            CharacterId="@Character.Id"
+                            OnEditNote="ShowAddNotesAsync" />
+                            <button class="btn btn-secondary mt-1" @onclick="() => ShowAddNotesAsync(0)">Notiz hinzufügen</button>
+                        }
+                        else {
+                            <NotesAdd NotesCategory="@ActiveCategory"
+                            SelectedNoteId="@SelectedNoteId"
+                            CharacterId="@Character.Id"
+                            OnClose="HideAddNotesAsync" />
+                        }
+
+                    }
+                </div>
             </div>
         </div>
         <div class="container-fluid mt-3">
@@ -109,102 +136,70 @@
 
 
 @code {
+    [CascadingParameter]
+    private CascadingAppState appState { get; set; }
     [Parameter] 
     public required string Id { get; set; }
     public Character Character = new Character();
 
+    private bool showAddCampaign;
+    private Campaign? campaign;
+    private List<(ApplicationUser User, Character Character)> playerCharacters;
+
+    private bool showCharacterDetails;
+    private string showDetailsText = "Details anzeigen";
+    public new string ActiveCategory = "inventory";
+
     private bool showAddItems;
-    private bool showUIMessage;
-    private string UIMessage = string.Empty;
     private string unitOfWeight = "kg";
-    private float weightTotal;
+
 
     protected override async Task OnInitializedAsync() {
-        Character = await characterManager.GetByID(Id);
-
-        GetWeightSum();
+        await appState.EnsureCharacters();
+        await appState.EnsureNotes();
+        Character = appState.Characters.FirstOrDefault(c => c.Id == Int32.Parse(Id));
+        if (Character != null)
+            campaign = Character.CampaignId != null ? appState.Campaigns.FirstOrDefault(c => c.Id == Character.CampaignId) : null;
+        else
+            navManager.NavigateTo("/access-denied");
     }
 
-
     private async Task DeleteCharacter() {
-        // string toDeleteName = character.Name;
-        // bool confirm = await js.InvokeAsync<bool>("confirm", $"Soll der Eintrag '{toDeleteName}' wirklich gelöscht werden?");
-        // if (!confirm) return;
+        string toDeleteName = Character.Name;
+        bool confirm = await js.InvokeAsync<bool>("confirm", $"Soll der Eintrag '{toDeleteName}' wirklich gelöscht werden?\r\nAlle Notizen werden ebenfalls gelöscht.\r\nDas Löschen kann nicht Rückgängig gemacht werden");
+        if (!confirm) return;
 
-        await js.InvokeVoidAsync("alert", "Funktion wird später implementiert");
-        //await characterManager.Delete(character.Id);
+        await characterManager.Delete(Character.Id);
+        appState.Characters.Remove(Character);
+        await js.InvokeVoidAsync("history.back");
+    }
+
+    private void ShowCharacterDetails() {
+        showCharacterDetails = !showCharacterDetails;
+        showDetailsText = showCharacterDetails ? "Details ausblenden" : "Details anzeigen";
+        StateHasChanged();
     }
 
     private async void ShowAddItems() {
         showAddItems = true;
-        Character = await characterManager.GetByID(Id);
         StateHasChanged();
     }
-    private void HideAddItems() {
+    private async void HideAddItems() {
         showAddItems = false;
         StateHasChanged();
-        GetWeightSum();
     }
 
-    private void GetWeightSum() {
-        weightTotal = 0;
-        float weightProduct;
-        if (Character.Inventory != null && Character.Inventory.Any()) {
-            foreach (var inventoryItem in Character.Inventory) {
-                @if (inventoryItem.Item != null) {
-                    @if (inventoryItem.Item.Weight != null) {
-                        weightProduct = inventoryItem.Item.Weight.Value * inventoryItem.Count;
-                        weightTotal += weightProduct;
-                    }
-                }
-            }
-        }
+    private void ShowAddCampaign() {
+        if (showCharacterDetails)
+            ShowCharacterDetails();
+        showAddCampaign = true;
+        StateHasChanged();
     }
-
-    private async Task IncreaseItemCount(Inventory inventoryItem) {
-        showUIMessage = false;
-        inventoryItem.Count++;
-        await UpdateItemCount();
-    }
-    private async Task DecreaseItemCount(Inventory inventoryItem) {
-        showUIMessage = false;
-        if (inventoryItem.Count == 1) {
-
-            await DeleteItemFromInventory(inventoryItem);
-            return;
-        }
-
-        inventoryItem.Count--;
-        await UpdateItemCount();
-    }
-    private async Task UpdateItemCount() {
-        await characterManager.Update(Character);
-        GetWeightSum();
+    private async Task HideAddCampaign() {
+        showAddCampaign = false;
+        Character = appState.Characters.FirstOrDefault(c => c.Id == Int32.Parse(Id));
+        campaign = Character.CampaignId != null ? appState.Campaigns.FirstOrDefault(c => c.Id == Character.CampaignId) : null;
         StateHasChanged();
     }
 
-    private async Task DeleteItemFromInventory(Inventory inventoryItem) {
-        try
-        {
-            if (Character.Inventory != null && Character.Inventory.Any())
-            {
-                var itemToRemove = Character.Inventory.FirstOrDefault(i => i.Item.Id == inventoryItem.Item.Id);
-
-                if (itemToRemove != null)
-                {
-
-                    string itemName = itemToRemove.Item!.Name;
-                    Character.Inventory!.Remove(itemToRemove);
-                    UIMessage = $"Item '{itemName}' wurde aus dem Inventar entfernt";
-                    showUIMessage = true;
-                }
-            }
-            Character = await characterManager.Update(Character);
-
-        }
-        catch (Exception ex) {
-            Console.WriteLine($"{ex.Message}");
-        }
-
-    }
 }

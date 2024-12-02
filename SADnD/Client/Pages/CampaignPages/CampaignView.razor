@@ -1,61 +1,62 @@
-﻿@inject CampaignManager campaignManager
-@inject JoinRequestManager joinRequestManager
+﻿@inject CampaignApiManager campaignManager
+@inject JoinRequestApiManager joinRequestManager
 @inject IJSRuntime js
 
 <div class="container-fluid mt-3">
     <div class="row">
         @if (campaigns != null) {
             @foreach (Campaign campaign in campaigns) {
-                <div class="col-12 col-md-4 p-1 d-flex">
+                <div class="col-12 col-md-4 p-1 d-flex" style="cursor: pointer;">
                     <div class="p-2 bg-dark text-light w-100" @onclick="() => OpenCampaignDetails(campaign.Id)">
                         <h4>@campaign.Name</h4>
                         <p>Zugangscode: @campaign.Id</p>
-                        @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any()) {
-                            <p>
-                                DungeonMaster
-                                <ul>
-                                    @foreach (var master in campaign.DungeonMasters) {
-                                        @if (master.UserName != null) {
-                                            <li>
-                                                @master.UserName
-                                            </li>
+                        <div class="d-none d-md-block">
+                            @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any()) {
+                                <p>
+                                    DungeonMaster
+                                    <ul>
+                                        @foreach (var master in campaign.DungeonMasters) {
+                                            @if (master.UserName != null) {
+                                                <li>
+                                                    @master.UserName
+                                                </li>
+                                            }
                                         }
-                                    }
-                                </ul>
-                            </p>
-                        }
-                        else {
-                            <p>Kein DungeonMaster</p>
-                        }
-                        @if (campaign.Players != null && campaign.Players.Any())
-                        {
-                            <p>
-                                Spieler
-                                <ul>
-                                    @foreach (var player in campaign.Players)
-                                    {
-                                        @if (player.UserName != null)
+                                    </ul>
+                                </p>
+                            }
+                            else {
+                                <p>Kein DungeonMaster</p>
+                            }
+                            @if (campaign.Players != null && campaign.Players.Any()) {
+                                <p>
+                                    Spieler
+                                    <ul>
+                                        @foreach (var player in campaign.Players)
                                         {
-                                            <li>
-                                                @player.UserName
-                                            </li>
+                                            @if (player.UserName != null)
+                                            {
+                                                <li>
+                                                    @player.UserName
+                                                </li>
+                                            }
                                         }
-                                    }
-                                </ul>
-                            </p>
-                        }
-                        <button class="btn btn-secondary" @onclick="() => OpenCampaignDetails(campaign.Id)">Details</button>
+                                    </ul>
+                                </p>
+                            }
+                        </div>
                     </div>
                 </div>
             }
-            <div class="mt-2 p-1">
-                <a class="btn btn-primary me-2" href="new-campaign">hinzufügen</a>
-                <a class="btn btn-primary me-2" href="join-campaign">beitreten</a>
-                @if (!ShowAll) {
-                    <a href="/all-campaigns" class="btn btn-primary">Alle anzeigen</a>
-                }
-            </div>
+            
         }
+        <div class="mt-2 p-1">
+            <a class="btn btn-primary me-2" href="new-campaign">hinzufügen</a>
+            <a class="btn btn-primary me-2" href="join-campaign">beitreten</a>
+            @if (!ShowAll) {
+                <a href="/all-campaigns" class="btn btn-primary">Alle anzeigen</a>
+            }
+        </div>
     </div>
 </div>
 <div class="container-fluid mt-3">
@@ -84,8 +85,10 @@
                     }
                 </tbody>
             </table>
-
         </div>
+    }
+    @if (!string.IsNullOrEmpty(UIMessage)) {
+        <p>@UIMessage</p>
     }
 </div>
 
@@ -97,20 +100,24 @@
     string controllerName = "campaign";
     private IEnumerable<Campaign>? campaigns;
     public IEnumerable<JoinRequest>? joinRequests;
+    private string UIMessage = "";
 
     protected override async Task OnInitializedAsync() {
-        await GetAllCampaigns();
+        await appState.EnsureCampaigns();
         await GetOpenJoinRequests();
-        if (campaigns != null) {
-            if (!ShowAll) {
-                campaigns = campaigns.Count() < 3 ? campaigns.Take(campaigns.Count()) : campaigns.Take(3);
+        if (appState.Campaigns != null) {
+            if (!ShowAll)
+            {
+                campaigns = appState.Campaigns.Count() < 3 ? appState.Campaigns.Take(appState.Campaigns.Count()) : appState.Campaigns.Take(3);
             }
+            else
+                campaigns = appState.Campaigns;
         }
     }
 
-    private async Task GetAllCampaigns() {
-        campaigns = (await campaignManager.GetAll()).OrderBy(x => x.Name);
-    }
+    // private async Task GetAllCampaigns() {
+    //     campaigns = (await campaignManager.GetAll()).OrderBy(x => x.Name);
+    // }
 
     private async Task GetOpenJoinRequests() {
         joinRequests = (await joinRequestManager.GetAll()).OrderBy(x => x.CampaignId);
@@ -120,11 +127,11 @@
         if (joinRequest != null) {
             if (appState.UserId.Equals(joinRequest.UserId)) {
                 await joinRequestManager.Delete(joinRequest.Id);
-                await js.InvokeVoidAsync("alert", "Beitrittsanfrage entfernt");
+                UIMessage = "Beitrittsanfrage entfernt";
             }
             else {
                 await joinRequestManager.Delete(joinRequest.Id);
-                await js.InvokeVoidAsync("alert", "Beitrittsanfrage abgelehnt");
+                UIMessage = "Beitrittsanfrage abgelehnt";
             }
             await GetOpenJoinRequests();
         }
@@ -136,7 +143,8 @@
             joinRequest.Accepted = DateTime.UtcNow;
             joinRequest.User = null;
             await joinRequestManager.Update(joinRequest);
-            await js.InvokeVoidAsync("alert", "Beitrittsanfrage akzeptiert");
+            await appState.GetCampaigns();
+            UIMessage = "Beitrittsanfrage akzeptiert";
             await GetOpenJoinRequests();
         }
         StateHasChanged();

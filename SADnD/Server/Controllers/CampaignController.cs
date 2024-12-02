@@ -35,7 +35,7 @@ namespace SADnD.Server.Controllers
             {
                 var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
                 var user = await _userManager.FindByIdAsync(id);
-                var result = await _campaignManager.Get(x => x.DungeonMasters.Any(dm  => dm.Id == user.Id) || x.Players.Any(p => p.Id == user.Id),null,"DungeonMasters,Players");
+                var result = await _campaignManager.Get(x => x.DungeonMasters.Any(dm  => dm.Id == user.Id) || x.Players.Any(p => p.Id == user.Id),null,"DungeonMasters,Players,Characters.Race,Characters.Classes.Class");
                 return Ok(new APIListOfEntityResponse<Campaign>()
                 {
                     Success = true,
@@ -54,7 +54,7 @@ namespace SADnD.Server.Controllers
         {
             try
             {
-                var result = (await _campaignManager.Get(x => x.Id == id.ToUpper(), null, "DungeonMasters,Players")).FirstOrDefault();
+                var result = (await _campaignManager.Get(x => x.Id == id.ToUpper(), null, "DungeonMasters,Players,Characters.Race,Characters.Classes.Class")).FirstOrDefault();
                 if (result != null)
                 {
                     return Ok(new APIEntityResponse<Campaign>()
@@ -129,8 +129,15 @@ namespace SADnD.Server.Controllers
         {
             try
             {
-                await _campaignManager.Update(campaign);
-                var result = (await _campaignManager.Get(x => x.Id == campaign.Id)).FirstOrDefault();
+                var oldCampaign = (await _campaignManager.Get(x => x.Id == campaign.Id,null,"DungeonMasters,Players")).FirstOrDefault();
+                foreach (var player in oldCampaign.Players)
+                {
+                    if (!campaign.Players.Any(p => p.Id == player.Id))
+                        oldCampaign.Players.Remove(player);
+                }
+                oldCampaign.Name = campaign.Name;
+                await _campaignManager.Update(oldCampaign);
+                var result = (await _campaignManager.Get(x => x.Id == campaign.Id,null,"DungeonMasters,Players,Characters.Race,Characters.Classes.Class")).FirstOrDefault();
                 if (result != null)
                 {
                     return Ok(new APIEntityResponse<Campaign>()

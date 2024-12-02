@@ -150,20 +150,43 @@ builder.Services.AddBlazorDB(options =>
             PrimaryKey = "Id",
             PrimaryKeyAuto = true,
             UniqueIndexes = new List<string> {"Id"}
+        },
+        new StoreSchema()
+        {
+            Name = "Note",
+            PrimaryKey = "Id",
+            PrimaryKeyAuto = true,
+            UniqueIndexes = new List<string> {"Id"}
+        },
+        new StoreSchema()
+        {
+            Name = $"Note{Globals.LocalTransactionsSuffix}",
+            PrimaryKey = "Id",
+            PrimaryKeyAuto = true,
+            UniqueIndexes = new List<string> {"Id"}
+        },
+        new StoreSchema()
+        {
+            Name = $"Note{Globals.KeysSuffix}",
+            PrimaryKey = "Id",
+            PrimaryKeyAuto = true,
+            UniqueIndexes = new List<string> {"Id"}
         }
     };
 });
-builder.Services.AddScoped<CampaignManager>();
+builder.Services.AddScoped<CampaignApiManager>();
 //builder.Services.AddScoped<CampaignSyncManager>();
-builder.Services.AddScoped<CharacterManager>();
-builder.Services.AddScoped<CharacterSyncManager>();
-builder.Services.AddScoped<ClassManager>();
-builder.Services.AddScoped<ClassSyncManager>();
-builder.Services.AddScoped<RaceManager>();
-builder.Services.AddScoped<RaceSyncManager>();
-builder.Services.AddScoped<JoinRequestManager>();
+builder.Services.AddScoped<CharacterApiManager>();
+//builder.Services.AddScoped<CharacterSyncManager>();
+builder.Services.AddScoped<ClassApiManager>();
+//builder.Services.AddScoped<ClassSyncManager>();
+builder.Services.AddScoped<RaceApiManager>();
+//builder.Services.AddScoped<RaceSyncManager>();
+builder.Services.AddScoped<JoinRequestApiManager>();
 //builder.Services.AddScoped<JoinRequestSyncManager>();
-builder.Services.AddScoped<InventoryItemManager>();
-builder.Services.AddScoped<InventoryItemSyncManager>();
+builder.Services.AddScoped<InventoryItemApiManager>();
+//builder.Services.AddScoped<InventoryItemSyncManager>();
+builder.Services.AddScoped<NoteApiManager>();
+//builder.Services.AddScoped<NoteSyncManager>();
 
 await builder.Build().RunAsync();

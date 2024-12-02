@@ -1,4 +1,7 @@
 ﻿@using System.Security.Claims
+@inject CampaignApiManager campaignManager
+@inject CharacterApiManager characterManager
+@inject NoteApiManager noteManager
 
 <CascadingValue Value="this">
     @ChildContent
@@ -13,22 +16,60 @@
     private string userId;
     private IEnumerable<Claim> claims;
 
-    public string UserId 
-    { 
+    public string UserId
+    {
         get
         {
             userId = authenticationStateTask.Result.User.Claims.Where(x => x.Type == "sub").FirstOrDefault().Value;
             return userId;
-        } 
-        private set {}
+        }
     }
-    public IEnumerable<Claim> Claims 
+    public IEnumerable<Claim> Claims
     {
         get
         {
             claims = authenticationStateTask.Result.User.Claims;
             return claims;
         }
-        private set {}
+    }
+    public List<Campaign> Campaigns { get; set; }
+    public List<Character> Characters { get; set; }
+    public List<Note> Notes { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authenticationStateTask;
+        if (authState.User.Identity?.IsAuthenticated ?? false)
+        {
+            await GetCampaigns();
+            await GetCharacters();
+            await GetNotes();
+        }
+    }
+    public async Task EnsureCampaigns()
+    {
+        if (Campaigns == null)
+            await GetCampaigns();
+    }
+    public async Task EnsureCharacters()
+    {
+        if (Characters == null)
+            await GetCharacters();
+    }
+    public async Task EnsureNotes()
+    {
+        if (Notes == null)
+            await GetNotes();
+    }
+    public async Task GetCampaigns()
+    {
+        Campaigns = (await campaignManager.GetAll()).ToList();
+    }
+    public async Task GetCharacters()
+    {
+        Characters = (await characterManager.GetAll()).ToList();
+    }
+    public async Task GetNotes()
+    {
+        Notes = (await noteManager.GetAll()).ToList();
     }
 }

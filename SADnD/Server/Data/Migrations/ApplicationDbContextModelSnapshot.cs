@@ -22,6 +22,8 @@ namespace SADnD.Server.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.HasSequence("NoteSequence");
+
             modelBuilder.Entity("ApplicationUserCampaign", b =>
                 {
                     b.Property<string>("DungeonMasterCampaignsId")
@@ -329,6 +331,21 @@ namespace SADnD.Server.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("NoteNote", b =>
+                {
+                    b.Property<int>("NoteMentionsId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("NotesId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("NoteMentionsId", "NotesId");
+
+                    b.HasIndex("NotesId");
+
+                    b.ToTable("NoteMentions", (string)null);
+                });
+
             modelBuilder.Entity("SADnD.Shared.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -424,6 +441,9 @@ namespace SADnD.Server.Migrations
 
                     b.Property<string>("Alignment")
                         .HasColumnType("text");
+
+                    b.Property<int?>("ArmorClass")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Background")
                         .HasColumnType("text");
@@ -615,7 +635,8 @@ namespace SADnD.Server.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -658,6 +679,51 @@ namespace SADnD.Server.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("JoinRequests");
+                });
+
+            modelBuilder.Entity("SADnD.Shared.Models.Note", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValueSql("nextval('\"NoteSequence\"')");
+
+                    NpgsqlPropertyBuilderExtensions.UseSequence(b.Property<int>("Id"));
+
+                    b.Property<string>("CampaignId")
+                        .HasColumnType("text");
+
+                    b.Property<int?>("CharacterId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CampaignId");
+
+                    b.HasIndex("CharacterId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable((string)null);
+
+                    b.UseTpcMappingStrategy();
                 });
 
             modelBuilder.Entity("SADnD.Shared.Models.Race", b =>
@@ -727,6 +793,47 @@ namespace SADnD.Server.Migrations
                             Id = 10,
                             Name = "Tiefling"
                         });
+                });
+
+            modelBuilder.Entity("SADnD.Shared.Models.NoteHint", b =>
+                {
+                    b.HasBaseType("SADnD.Shared.Models.Note");
+
+                    b.ToTable("NoteHint", (string)null);
+                });
+
+            modelBuilder.Entity("SADnD.Shared.Models.NoteLocation", b =>
+                {
+                    b.HasBaseType("SADnD.Shared.Models.Note");
+
+                    b.ToTable("NoteLocation", (string)null);
+                });
+
+            modelBuilder.Entity("SADnD.Shared.Models.NotePerson", b =>
+                {
+                    b.HasBaseType("SADnD.Shared.Models.Note");
+
+                    b.Property<string>("Affiliation")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Location")
+                        .HasColumnType("text");
+
+                    b.ToTable("NotePerson", (string)null);
+                });
+
+            modelBuilder.Entity("SADnD.Shared.Models.NoteQuest", b =>
+                {
+                    b.HasBaseType("SADnD.Shared.Models.Note");
+
+                    b.ToTable("NoteQuest", (string)null);
+                });
+
+            modelBuilder.Entity("SADnD.Shared.Models.NoteStory", b =>
+                {
+                    b.HasBaseType("SADnD.Shared.Models.Note");
+
+                    b.ToTable("NoteStory", (string)null);
                 });
 
             modelBuilder.Entity("ApplicationUserCampaign", b =>
@@ -806,6 +913,21 @@ namespace SADnD.Server.Migrations
                     b.HasOne("SADnD.Shared.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("NoteNote", b =>
+                {
+                    b.HasOne("SADnD.Shared.Models.Note", null)
+                        .WithMany()
+                        .HasForeignKey("NoteMentionsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SADnD.Shared.Models.Note", null)
+                        .WithMany()
+                        .HasForeignKey("NotesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -901,6 +1023,31 @@ namespace SADnD.Server.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("SADnD.Shared.Models.Note", b =>
+                {
+                    b.HasOne("SADnD.Shared.Models.Campaign", "Campaign")
+                        .WithMany("Notes")
+                        .HasForeignKey("CampaignId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("SADnD.Shared.Models.Character", "Character")
+                        .WithMany("Notes")
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("SADnD.Shared.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Campaign");
+
+                    b.Navigation("Character");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SADnD.Shared.Models.ApplicationUser", b =>
                 {
                     b.Navigation("Characters");
@@ -911,6 +1058,8 @@ namespace SADnD.Server.Migrations
             modelBuilder.Entity("SADnD.Shared.Models.Campaign", b =>
                 {
                     b.Navigation("JoinRequests");
+
+                    b.Navigation("Notes");
                 });
 
             modelBuilder.Entity("SADnD.Shared.Models.Character", b =>
@@ -918,6 +1067,8 @@ namespace SADnD.Server.Migrations
                     b.Navigation("Classes");
 
                     b.Navigation("Inventory");
+
+                    b.Navigation("Notes");
                 });
 #pragma warning restore 612, 618
         }

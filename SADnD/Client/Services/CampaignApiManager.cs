@@ -2,14 +2,13 @@
 using SADnD.Shared.Models;
 using System.Diagnostics;
 using System.Net;
-using System.Net.Http.Json;
 
 namespace SADnD.Client.Services
 {
-    public class CampaignManager : APIRepository<Campaign>
+    public class CampaignApiManager : APIRepository<Campaign>
     {
         HttpClient _httpClient;
-        public CampaignManager(HttpClient httpClient)
+        public CampaignApiManager(HttpClient httpClient)
             : base(httpClient, "campaign")
         {
             _httpClient = httpClient;
