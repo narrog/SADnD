@@ -188,5 +188,7 @@ builder.Services.AddScoped<InventoryItemApiManager>();
 //builder.Services.AddScoped<InventoryItemSyncManager>();
 builder.Services.AddScoped<NoteApiManager>();
 //builder.Services.AddScoped<NoteSyncManager>();
+builder.Services.AddScoped<AppointmentApiManager>();
+//builder.Services.AddScoped<NoteSyncManager>();
 
 await builder.Build().RunAsync();
