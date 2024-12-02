@@ -1,0 +1,94 @@
+﻿@inject CharacterApiManager characterManager
+@using Newtonsoft.Json
+
+<p>Markiere die Mitspieler, mit denen du deine Charakterinformationen teilen willst</p>
+
+<EditForm Model="@character" OnValidSubmit="Post" class="w-100">
+
+    @foreach (var coPlayer in coPlayers) {
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id='@($"checkbox-{coPlayer.Id}")' />
+            <label class="form-check-label" for='@($"checkbox-{coPlayer.Id}")'>
+                @coPlayer.UserName
+            </label>
+        </div>
+    }
+    
+    <div class="mt-3">
+        <SubmitButton />
+        <button class="btn btn-outline-secondary me-2" type="button" @onclick="Close">Abbrechen</button>
+    </div>
+
+    <ValidationSummary class="mt-3" />
+    @if (!string.IsNullOrEmpty(UIMessage)) {
+        <ul class="mt-3">
+            <li class="validation-message">
+                @UIMessage
+            </li>
+        </ul>
+    }
+</EditForm>
+
+
+
+
+@code {
+    [CascadingParameter]
+    private CascadingAppState appState { get; set; }
+    [CascadingParameter]
+    private CharacterDetails context { get; set; }
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    private string? characterId;
+    private string? campaignId;
+    private Campaign campaign = new Campaign();
+    private Character character = new Character();
+    private List<ApplicationUser> coPlayers = new List<ApplicationUser>();
+
+    private string UIMessage = "";
+
+    protected override async Task OnInitializedAsync() {
+        await appState.EnsureCampaigns();
+        campaignId = context.Character.CampaignId;
+        character = context.Character;
+
+        if (!string.IsNullOrEmpty(campaignId)) {
+            GetCoPlayers();
+        }
+
+    }
+
+    private void GetCoPlayers() {
+        if (context.campaign != null)
+            campaign = context.campaign;
+
+        coPlayers.Clear();
+        if (campaign != null) {
+            if (campaign.Players != null && campaign.Players.Any()) {
+                foreach (var player in campaign.Players) {
+                    if(player.Id != appState.UserId){
+                        coPlayers.Add((player));
+                    }
+                }
+            }
+        }
+    }
+
+    private async void Post() {
+        try
+        {
+            // Hier Logik für speichern der AccessPlayer
+            // await characterManager.Update(character);
+            // Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private async void Close() {
+        await OnClose.InvokeAsync();
+    }
+}
