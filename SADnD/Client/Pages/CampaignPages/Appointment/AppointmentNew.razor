@@ -1,0 +1,113 @@
+﻿@page "/new-appointments/{CampaignId}"
+@using Newtonsoft.Json
+
+<h3>Terminvorschläge erstellen</h3>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12 col-xl-4 mt-3">
+            @if (campaign != null){
+                @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == appState.UserId)){
+                    <EditForm Model="NewAppointment" OnValidSubmit="Post">
+                        <DataAnnotationsValidator />
+                        <div class="form-group date-container mt-2">
+                            <div class="form-group">
+                                <label>Datum:</label>
+                                <InputDate @bind-Value="NewAppointment.Date" min="@DateTime.Today.ToString("yyyy-MM-dd")" class="form-control" />
+                            </div>
+                            <div>
+                                <label>Start-Zeit:</label>
+                                <InputText @bind-Value="timeStartInput" class="form-control" />
+                            </div>
+                            <div>
+                                <label>Ende:</label>
+                                <InputText @bind-Value="timeEndInput" class="form-control" />
+                            </div>
+                        </div>
+
+                        <FormButtons />
+
+                        <ValidationSummary class="mt-3" />
+                    </EditForm>
+                }
+                else {
+                    <p>Keine Berechtigung</p>
+                }
+            }
+        </div>
+        <div class="mt-3">
+            @UIMessage
+        </div>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter]
+    private CascadingAppState appState { get; set; }
+    // [CascadingParameter]
+    // private CampaignDetails context { get; set; }
+    [Parameter]
+    public required string CampaignId { get; set; }
+
+    private Appointment NewAppointment = new();
+    private List<Appointment> listOfAppointments = new();
+    private string timeStartInput = "";
+    private string timeEndInput = "";
+    private bool dateIsValid;
+
+    private Campaign? campaign;
+
+    private string UIMessage = "";
+
+    protected override async Task OnInitializedAsync() {
+        await appState.EnsureCampaigns();
+
+        campaign = appState.Campaigns.FirstOrDefault(x => x.Id == CampaignId);
+
+        NewAppointment.Date = DateOnly.FromDateTime(DateTime.Today);
+    }
+    protected override void OnParametersSet()
+    {
+        timeStartInput = NewAppointment.StartTime.ToString(@"hh\:mm");
+        timeEndInput = NewAppointment.EndTime.ToString(@"hh\:mm");
+    }
+    private void UpdateTime() {
+        dateIsValid = false;
+        UIMessage = "";
+        if (TimeSpan.TryParse(timeStartInput, out var parsedTime)) {
+            NewAppointment.StartTime = TimeOnly.FromTimeSpan(parsedTime);
+        }
+        else {
+            UIMessage = "Bitte Start-Zeit überprüfen";
+            return;
+        }
+        if (TimeSpan.TryParse(timeEndInput, out parsedTime)) {
+            NewAppointment.EndTime = TimeOnly.FromTimeSpan(parsedTime);
+        }
+        else {
+            UIMessage = "Bitte Ende-Zeit überprüfen";
+            return;
+        }
+
+        if (NewAppointment.StartTime > NewAppointment.EndTime){
+            UIMessage = "Start-Zeit darf nicht kleiner sein als Ende-Zeit";
+            return;
+        }
+        else {
+            dateIsValid = true;
+        }
+    }
+    private async void Post() {
+
+        try {
+            UpdateTime();
+            if (dateIsValid){
+                Console.WriteLine($"NewAppointment: {JsonConvert.SerializeObject(NewAppointment)}");
+            }
+        }
+        catch (Exception ex) {
+            UIMessage = ex.Message;
+            StateHasChanged();
+        }
+    }
+}
