@@ -40,7 +40,7 @@
                                 <span class="oi oi-eye me-2 pointer"></span>@campaign.Name
                             </a>
                         }
-                        else {
+                        else if (Character.UserId == appState.UserId) {
                             <a class="btn btn-outline-primary" @onclick="ShowAddCampaign">
                                 Kampagne zuweisen
                             </a>
@@ -83,13 +83,15 @@
                         <button class="btn btn-outline-secondary" @onclick="ShowCharacterDetails">
                             <span class="oi oi-eye me-2"></span> @showDetailsText
                         </button>
-                        <a class="btn btn-outline-primary" href="/new-character/@Id">
-                            <span class="oi oi-pencil me-2"></span> bearbeiten
-                        </a>
-                        @if (campaign != null) {
-                            <button class="btn btn-outline-secondary" @onclick="ShowShareDetails">
-                                <span class="oi oi-eye me-2"></span> Details teilen
-                            </button>
+                        @if (Character.UserId == appState.UserId) {
+                            <a class="btn btn-outline-primary" href="/new-character/@Id">
+                                <span class="oi oi-pencil me-2"></span> bearbeiten
+                            </a>
+                            @if (campaign != null) {
+                                <button class="btn btn-outline-secondary" @onclick="ShowShareDetails">
+                                    <span class="oi oi-eye me-2"></span> Details teilen
+                                </button>
+                            }
                         }
                     </div>
                 </div>
@@ -108,7 +110,9 @@
                         @if (!showAddItems) {
                             <InventoryView CharacterId="@Character.Id"
                             UnitOfWeight="@unitOfWeight" />
-                            <button class="btn btn-secondary mt-1" @onclick="ShowAddItems">Item hinzufügen</button>
+                            @if(Character.UserId == appState.UserId) {
+                                <button class="btn btn-secondary mt-1" @onclick="ShowAddItems">Item hinzufügen</button>
+                            }
                         }
                         else {
                             <InventoryItemAdd CharacterId="@Character.Id"
@@ -123,7 +127,9 @@
                             <NotesView NotesCategory="@ActiveCategory"
                             CharacterId="@Character.Id"
                             OnEditNote="ShowAddNotesAsync" />
-                            <button class="btn btn-secondary mt-1" @onclick="() => ShowAddNotesAsync(0)">Notiz hinzufügen</button>
+                            @if (Character.UserId == appState.UserId) {
+                                <button class="btn btn-secondary mt-1" @onclick="() => ShowAddNotesAsync(0)">Notiz hinzufügen</button>
+                            }
                         }
                         else {
                             <NotesAdd NotesCategory="@ActiveCategory"
@@ -138,7 +144,9 @@
         </div>
         <div class="container-fluid mt-3">
             <a class="btn btn-outline-primary me-2" onclick="history.back();">Zurück</a>
-            <button class="btn btn-outline-danger" @onclick="DeleteCharacter">Löschen</button>
+            @if (Character.UserId == appState.UserId) {
+                <button class="btn btn-outline-danger" @onclick="DeleteCharacter">Löschen</button>
+            }
         </div>
     }
 </CascadingValue>
@@ -187,11 +195,14 @@
     }
 
     private void ShowCharacterDetails() {
+        showShareDetails = false;
         showCharacterDetails = !showCharacterDetails;
         showDetailsText = showCharacterDetails ? "Details ausblenden" : "Details anzeigen";
         StateHasChanged();
     }
     private void ShowShareDetails() {
+        if (showCharacterDetails)
+            ShowCharacterDetails();
         showShareDetails = !showShareDetails;
         StateHasChanged();
     }
