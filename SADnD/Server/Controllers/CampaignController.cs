@@ -137,7 +137,7 @@ namespace SADnD.Server.Controllers
                 }
                 oldCampaign.Name = campaign.Name;
                 await _campaignManager.Update(oldCampaign);
-                var result = (await _campaignManager.Get(x => x.Id == campaign.Id)).FirstOrDefault();
+                var result = (await _campaignManager.Get(x => x.Id == campaign.Id,null,"DungeonMasters,Players,Characters.Race,Characters.Classes.Class")).FirstOrDefault();
                 if (result != null)
                 {
                     return Ok(new APIEntityResponse<Campaign>()

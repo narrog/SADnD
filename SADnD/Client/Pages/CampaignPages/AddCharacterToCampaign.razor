@@ -120,6 +120,7 @@
             selectedCharacter.CampaignId = context.Campaign.Id;
             selectedCharacter = await characterManager.Update(selectedCharacter);
             appState.Characters[appState.Characters.FindIndex(c => c.Id == selectedCharacter.Id)] = selectedCharacter;
+            await appState.GetCampaigns();
             await context.AllocatePlayersNCharacters();
             Close();
         }

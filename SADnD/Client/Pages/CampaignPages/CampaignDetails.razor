@@ -245,7 +245,7 @@
         else {
             navManager.NavigateTo("/access-denied");
         }
-        
+
     }
 
     private async Task GetOpenJoinRequests() {
@@ -280,7 +280,7 @@
 
         if (Campaign.Players != null && Campaign.Players.Any()) {
             foreach (var player in Campaign.Players) {
-                Character character = appState.Characters.FirstOrDefault(c => c.CampaignId == Campaign.Id);
+                Character character = Campaign.Characters.FirstOrDefault(c => c.UserId == player.Id);
                 PlayerCharacters.Add((player, character));
             }
         }

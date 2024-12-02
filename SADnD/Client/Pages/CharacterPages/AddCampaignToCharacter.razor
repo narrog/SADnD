@@ -85,6 +85,7 @@
 
             characterToAdd = await characterManager.Update(characterToAdd);
             appState.Characters[appState.Characters.FindIndex(c => c.Id == characterToAdd.Id)] = characterToAdd;
+            await appState.GetCampaigns();
             Close();
         }
         catch (Exception ex) {
