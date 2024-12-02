@@ -58,8 +58,12 @@
 
 
 @code {
-    [Parameter]
-    public required Campaign Campaign { get; set; }
+    [CascadingParameter]
+    private CascadingAppState appState { get; set; }
+    [CascadingParameter]
+    private CampaignDetails context { get; set; }
+    // [Parameter]
+    // public required Campaign Campaign { get; set; }
     [Parameter]
     public Character? OriginalCharacter { get; set; }
     [Parameter]
@@ -68,7 +72,7 @@
     private IEnumerable<Character>? charactersFromUser;
     private Character selectedCharacter = new();
     bool characterHasCampaign;
-    private Campaign campaign = new();
+    // private Campaign campaign = new();
 
     private string UIMessage = "";
 
@@ -83,7 +87,9 @@
     }
 
     protected override async Task OnInitializedAsync() {
-        charactersFromUser = await characterManager.GetAll();
+        await appState.EnsureCampaigns();
+        await appState.EnsureCharacters();
+        charactersFromUser = appState.Characters;
 
         if (charactersFromUser != null && !charactersFromUser.Any(c => c.Id == selectedCharacterId)) {
             selectedCharacter = new Character();
@@ -106,12 +112,15 @@
             }
 
             if (OriginalCharacter != null) {
-                Character characterToRemove = await characterManager.GetByID(OriginalCharacter.Id);
+                Character characterToRemove = appState.Characters.FirstOrDefault(c => c.Id == OriginalCharacter.Id);
                 characterToRemove.CampaignId = null;
-                await characterManager.Update(characterToRemove);
+                characterToRemove = await characterManager.Update(characterToRemove);
+                appState.Characters[appState.Characters.FindIndex(c => c.Id == characterToRemove.Id)] = characterToRemove;
             }
-            selectedCharacter.CampaignId = Campaign.Id;
-            await characterManager.Update(selectedCharacter);
+            selectedCharacter.CampaignId = context.Campaign.Id;
+            selectedCharacter = await characterManager.Update(selectedCharacter);
+            appState.Characters[appState.Characters.FindIndex(c => c.Id == selectedCharacter.Id)] = selectedCharacter;
+            await context.AllocatePlayersNCharacters();
             Close();
         }
         catch (Exception ex) {
@@ -119,7 +128,7 @@
         }
     }
     private async Task CheckForOtherCampaign(){
-        Character temp = await characterManager.GetByID(SelectedCharacterId);
+        Character temp = appState.Characters.FirstOrDefault(c => c.Id == SelectedCharacterId);
         characterHasCampaign = false;
         characterHasCampaign = temp.CampaignId != null;
     }

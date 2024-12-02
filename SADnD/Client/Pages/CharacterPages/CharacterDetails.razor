@@ -198,8 +198,8 @@
     }
     private async Task HideAddCampaign() {
         showAddCampaign = false;
-        Character = await characterManager.GetByID(Id);
-        campaign = Character.CampaignId != null ? await campaignManager.GetByID(Character.CampaignId) : null;
+        Character = appState.Characters.FirstOrDefault(c => c.Id == Int32.Parse(Id));
+        campaign = Character.CampaignId != null ? appState.Campaigns.FirstOrDefault(c => c.Id == Character.CampaignId) : null;
         StateHasChanged();
     }
     // public void HandleCategoryChanged()
