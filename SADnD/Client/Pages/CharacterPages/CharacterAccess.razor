@@ -1,13 +1,16 @@
-﻿@inject CharacterApiManager characterManager
+﻿
+@inject CharacterApiManager characterManager
 @using Newtonsoft.Json
 
 <p>Markiere die Mitspieler, mit denen du deine Charakterinformationen teilen willst</p>
 
-<EditForm Model="@character" OnValidSubmit="Post" class="w-100">
+<EditForm Model="@acceptedCoPlayers" OnValidSubmit="Post" class="w-100">
 
     @foreach (var coPlayer in coPlayers) {
         <div class="form-check">
-            <input class="form-check-input" type="checkbox" id='@($"checkbox-{coPlayer.Id}")' />
+            <input class="form-check-input" type="checkbox" id='@($"checkbox-{coPlayer.Id}")' 
+                @onchange="e => ToggleCoPlayerSelection(coPlayer, e.Value)"
+                checked="@acceptedCoPlayers.Contains(coPlayer)" />
             <label class="form-check-label" for='@($"checkbox-{coPlayer.Id}")'>
                 @coPlayer.UserName
             </label>
@@ -45,6 +48,7 @@
     private Campaign campaign = new Campaign();
     private Character character = new Character();
     private List<ApplicationUser> coPlayers = new List<ApplicationUser>();
+    private List<ApplicationUser> acceptedCoPlayers = new List<ApplicationUser>();
 
     private string UIMessage = "";
 
@@ -52,6 +56,9 @@
         await appState.EnsureCampaigns();
         campaignId = context.Character.CampaignId;
         character = context.Character;
+
+        // ToDo: Liste acceptedCoPlayers mit Einträgen füllen.
+        // acceptedCoPlayers = character.PlayerAcces oder so ähnlich
 
         if (!string.IsNullOrEmpty(campaignId)) {
             GetCoPlayers();
@@ -72,13 +79,32 @@
                     }
                 }
             }
+            if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any()) {
+                foreach (var dm in campaign.DungeonMasters) {
+                    if(dm.Id != appState.UserId){
+                        coPlayers.Add((dm));
+                    }
+                }
+            }
         }
     }
-
+    private void ToggleCoPlayerSelection(ApplicationUser coPlayer, object isChecked) {
+        bool isSelected = (bool)isChecked;
+        if (isSelected) {
+            if (!acceptedCoPlayers.Contains(coPlayer)) {
+                acceptedCoPlayers.Add(coPlayer);
+            }
+        }
+        else {
+            acceptedCoPlayers.Remove(coPlayer);
+        }
+    }
     private async void Post() {
         try
         {
-            // Hier Logik für speichern der AccessPlayer
+            // ToDo: Logik für speichern der AccessPlayer
+            Console.WriteLine($"acceptedCoPlayers: {JsonConvert.SerializeObject(acceptedCoPlayers)}");
+            
             // await characterManager.Update(character);
             // Close();
         }
