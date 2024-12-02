@@ -12,5 +12,7 @@ namespace SADnD.Shared.Models
         [JsonIgnore]
         public ICollection<JoinRequest>? JoinRequests { get; set; }
         public ICollection<Character>? Characters { get; set; }
+        [JsonIgnore]
+        public ICollection<Character>? CharacterAccess { get; set; }
     }
 }
