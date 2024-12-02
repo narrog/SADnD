@@ -1,4 +1,5 @@
 ﻿@page "/new-appointments/{CampaignId}"
+@inject AppointmentApiManager appointmentManager
 @using Newtonsoft.Json
 
 <h3>Terminvorschläge erstellen</h3>
@@ -11,7 +12,7 @@
                     <EditForm Model="NewAppointment" OnValidSubmit="Post">
                         <DataAnnotationsValidator />
                         <div class="form-group date-container mt-2">
-                            <div class="form-group">
+                            <div>
                                 <label>Datum:</label>
                                 <InputDate @bind-Value="NewAppointment.Date" min="@DateTime.Today.ToString("yyyy-MM-dd")" class="form-control" />
                             </div>
@@ -44,8 +45,6 @@
 @code {
     [CascadingParameter]
     private CascadingAppState appState { get; set; }
-    // [CascadingParameter]
-    // private CampaignDetails context { get; set; }
     [Parameter]
     public required string CampaignId { get; set; }
 
@@ -65,12 +64,15 @@
         campaign = appState.Campaigns.FirstOrDefault(x => x.Id == CampaignId);
 
         NewAppointment.Date = DateOnly.FromDateTime(DateTime.Today);
+        NewAppointment.CampaignId = CampaignId;
     }
+
     protected override void OnParametersSet()
     {
         timeStartInput = NewAppointment.StartTime.ToString(@"hh\:mm");
         timeEndInput = NewAppointment.EndTime.ToString(@"hh\:mm");
     }
+
     private void UpdateTime() {
         dateIsValid = false;
         UIMessage = "";
@@ -97,12 +99,14 @@
             dateIsValid = true;
         }
     }
+
     private async void Post() {
 
         try {
             UpdateTime();
             if (dateIsValid){
                 Console.WriteLine($"NewAppointment: {JsonConvert.SerializeObject(NewAppointment)}");
+                await appointmentManager.Insert(NewAppointment);
             }
         }
         catch (Exception ex) {
