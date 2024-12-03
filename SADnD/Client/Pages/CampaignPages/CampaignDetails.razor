@@ -144,8 +144,10 @@
                         }
                     </div>
                     <div class="appointments">
+                        <p><strong>Termine</strong></p>
                         @if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
-                            <a href="new-appointments/@Campaign.Id" class="btn btn-outline-primary" title="Neue Terminvorschläge">Neue Terminvorschläge</a>
+                            <a href="new-appointments/@Campaign.Id/1" class="btn btn-outline-primary" title="Termine eintragen">Termine eintragen</a>
+                            <a href="new-appointments/@Campaign.Id/0" class="btn btn-outline-primary" title="Neue Terminvorschläge">Umfrage erstellen</a>
                         }
                     </div>
                     

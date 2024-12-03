@@ -1,4 +1,4 @@
-﻿@page "/new-appointments/{CampaignId}"
+﻿@page "/new-appointments/{CampaignId}/{AppointmentFix}"
 @inject AppointmentApiManager appointmentManager
 @inject IJSRuntime js
 @using Newtonsoft.Json
@@ -52,6 +52,9 @@
     private CascadingAppState appState { get; set; }
     [Parameter]
     public required string CampaignId { get; set; }
+    [Parameter]
+    public required string AppointmentFix { get; set; }
+    private bool appointmentFix;
 
     private List<Appointment> listOfAppointments = new();
     private List<Appointment> appointmentsToAdd = new();
@@ -64,6 +67,9 @@
     protected override async Task OnInitializedAsync() {
         await appState.EnsureCampaigns();
         campaign = appState.Campaigns.FirstOrDefault(x => x.Id == CampaignId);
+
+        appointmentFix = AppointmentFix == "1" ? true : false;
+
         AddAppointment(); 
     }
 
@@ -72,7 +78,9 @@
                 Date = DateOnly.FromDateTime(DateTime.Today),
                 CampaignId = CampaignId
             };
-        if(listOfAppointments.Count > 0){
+        newAppointment.Accepted = appointmentFix;
+
+        if (listOfAppointments.Count > 0) {
             newAppointment.StartTimeInput = listOfAppointments[0].StartTimeInput;
             newAppointment.EndTimeInput = listOfAppointments[0].EndTimeInput;
         }
