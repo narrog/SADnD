@@ -35,7 +35,7 @@
                         </p>
                     </div>     
                     <div class="table-responsive co-players">
-                        <strong>Mitspieler</strong>
+                        <strong>Mitspieler:</strong>
                         <table class="table table-borderless align-middle border-bottom">
                             @if (Campaign.Players != null && Campaign.Players.Any())
                             {
@@ -115,7 +115,7 @@
                     <div class="join-requests">
                         @if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
                             <p>
-                                <strong>Offene Anfragen</strong>
+                                <strong>Offene Anfragen:</strong>
                                 <table class="table table-sm table-hover table-striped align-middle">
                                     @if (joinRequests != null && joinRequests.Any()) {
                                         <tbody>
@@ -144,48 +144,59 @@
                         }
                     </div>
                     <div class="appointments">
-                        <p><strong>Termine</strong></p>
+                        <p><strong>Termine: </strong>
+                            @if (nextAppointments != null) {
+                                <ul>
+                                    @foreach (var appointment in nextAppointments) {
+                                        <li>@appointment.Date.ToLongDateString(), @appointment.StartTime.ToShortTimeString() -  @appointment.EndTime.ToShortTimeString() Uhr</li>
+                                    }
+                                </ul>
+                            }
+                            else {
+                                <span>keine geplanten Termine vorhanden</span>
+                            }
+                        </p>
                         @if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
                             <a href="new-appointments/@Campaign.Id/1" class="btn btn-outline-primary" title="Termine eintragen">Termine eintragen</a>
                             <a href="new-appointments/@Campaign.Id/0" class="btn btn-outline-primary" title="Neue Terminvorschläge">Umfrage erstellen</a>
                         }
                     </div>
-                    
+
                 </div>
                 @if (showAddCharacter)
                 {
                     <div class="col-12 col-xl-4 mt-3 mt-xl-0">
                         <AddCharacterToCampaign OriginalCharacter="selectedCharacter"
-                                                OnClose="HideAddCharacter" />
+                        OnClose="HideAddCharacter" />
                     </div>
                 }
             </div>
-            <div class="row notes">
+            <div class="row notes mt-3">
                 @if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any(dm => dm.Id == currentUserId))
                 {
 
                     <div class="col-2 my-1" id="notes-icons-container">
                         <NotesCategoryIcons @bind-ActiveCategory="ActiveCategory"
-                                            OnCategoryChanged="HandleCategoryChanged"
-                                            CampaignId="@Id"
-                                            ViewTypeIsDM="true" />
+                        OnCategoryChanged="HandleCategoryChanged"
+                        CampaignId="@Id"
+                        ViewTypeIsDM="true" />
                     </div>
                     <div class="col-10">
                         @if (!ShowAddNotes)
                         {
                             <NotesView NotesCategory="@ActiveCategory"
-                                       CampaignId="@Id"
-                                       OnEditNote="ShowAddNotesAsync"
-                                       ViewTypeIsDM="true" />
+                            CampaignId="@Id"
+                            OnEditNote="ShowAddNotesAsync"
+                            ViewTypeIsDM="true" />
 
                             <button class="btn btn-secondary mt-1" @onclick="() => ShowAddNotesAsync(0)">Notiz hinzufügen</button>
                         }
                         else
                         {
                             <NotesAdd NotesCategory="@ActiveCategory"
-                                      SelectedNoteId="@SelectedNoteId"
-                                      CampaignId="@Id"
-                                      OnClose="HideAddNotesAsync" />
+                            SelectedNoteId="@SelectedNoteId"
+                            CampaignId="@Id"
+                            OnClose="HideAddNotesAsync" />
                         }
 
                     </div>
@@ -209,7 +220,7 @@
             </div>
         }
     }
-    
+
 </CascadingValue>
 
 @code {
@@ -227,6 +238,8 @@
 
     public new string ActiveCategory = "story";
 
+    private IEnumerable<Appointment>? nextAppointments;
+
     private string currentUserId = "";
     private bool showAddCharacter;
 
@@ -236,12 +249,12 @@
         Campaign = appState.Campaigns.FirstOrDefault(c => c.Id == Id);
         if(Campaign != null){
             await GetOpenJoinRequests();
+            GetNextAppointments();
             await AllocatePlayersNCharacters();
         }
         else {
             navManager.NavigateTo("/access-denied");
         }
-
     }
 
     private async Task GetOpenJoinRequests() {
@@ -351,6 +364,16 @@
             Console.WriteLine($"Exception RemovePlayer: {ex.Message}");
         }
 
+    }
+
+    private void GetNextAppointments(){
+        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+
+        if (Campaign.Appointments != null && Campaign.Appointments.Any(x => x.Accepted == true)) {
+            nextAppointments = Campaign.Appointments
+                .Where(x => x.Accepted && x.Date >= today) 
+                .OrderBy(x => x.Date);
+        }
     }
 
     private async Task DeleteCampaign() {
