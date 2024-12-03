@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SADnD.Shared.Models
 {
@@ -18,5 +19,11 @@ namespace SADnD.Shared.Models
         [JsonIgnore]
         public Campaign? Campaign { get; set; }
         public ICollection<AppointmentVote>? AppointmentVotes { get; set; }
+
+        [NotMapped] 
+        public string StartTimeInput { get; set; } = string.Empty;
+
+        [NotMapped]
+        public string EndTimeInput { get; set; } = string.Empty;
     }
 }

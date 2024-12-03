@@ -87,9 +87,9 @@ namespace SADnD.Server.Controllers
         {
             try
             {
-                var campaignRoles = User.Claims.Where(c => c.Type == "CampaignRole").Select(c => c.Value);
-                if (!campaignRoles.Contains($"{appointment.CampaignId}:DungeonMaster"))
-                    return StatusCode(403);
+                //var campaignRoles = User.Claims.Where(c => c.Type == "CampaignRole").Select(c => c.Value);
+                //if (!campaignRoles.Contains($"{appointment.CampaignId}:DungeonMaster"))
+                //    return StatusCode(403);
                 await _appointmentManager.Insert(appointment);
                 var result = (await _appointmentManager.Get(x => x.Id == appointment.Id,null,"AppointmentVotes")).FirstOrDefault();
                 if (result != null)
