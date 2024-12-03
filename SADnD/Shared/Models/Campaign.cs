@@ -18,6 +18,7 @@ namespace SADnD.Shared.Models
         public ICollection<JoinRequest>? JoinRequests { get; set; }
         public ICollection<Note>? Notes { get; set; }
         public ICollection<Character>? Characters { get; set; }
+        public ICollection<Appointment>? Appointments { get; set; }
         private static string GenerateId(int length = 8)
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";

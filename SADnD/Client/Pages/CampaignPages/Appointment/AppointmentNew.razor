@@ -1,0 +1,140 @@
+﻿@page "/new-appointments/{CampaignId}"
+@inject AppointmentApiManager appointmentManager
+@inject IJSRuntime js
+@using Newtonsoft.Json
+
+<h3>Terminvorschläge erstellen</h3>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12 col-xl-4 mt-3 p-0">
+            @if (campaign != null) {
+                @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == appState.UserId)) {
+                    <EditForm Model="listOfAppointments" OnValidSubmit=" Post">
+                        <DataAnnotationsValidator />
+                        @foreach (var appointment in listOfAppointments) {
+                            <div class="form-group date-container mt-2">
+                                <div>
+                                    <label>Datum:</label>
+                                    <InputDate @bind-Value="appointment.Date" min="@DateTime.Today.ToString("yyyy-MM-dd")" class="form-control" />
+                                </div>
+                                <div>
+                                    <label>Start:</label>
+                                    <InputText @bind-Value="appointment.StartTimeInput" class="form-control" />
+                                </div>
+                                <div>
+                                    <label>Ende:</label>
+                                    <InputText @bind-Value="appointment.EndTimeInput" class="form-control" />
+                                </div>
+                                <div class="d-flex align-items-end">
+                                    <button type="button" class="btn btn-danger" @onclick="() => RemoveAppointment(appointment)">Entfernen</button>
+                                </div>
+                            </div>
+                        }
+                        <button type="button" class="btn btn-primary mt-3" @onclick="AddAppointment">Neuen Termin hinzufügen</button>
+                        <FormButtons />
+                        <ValidationSummary class="mt-3" />
+                    </EditForm>
+                }
+                else {
+                    <p>Keine Berechtigung</p>
+                }
+            }
+        </div>
+        <div class="mt-3">
+            @UIMessage
+        </div>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter]
+    private CascadingAppState appState { get; set; }
+    [Parameter]
+    public required string CampaignId { get; set; }
+
+    private List<Appointment> listOfAppointments = new();
+    private List<Appointment> appointmentsToAdd = new();
+    private string timeStartInput = "";
+    private string timeEndInput = "";
+
+    private Campaign? campaign;
+    private string UIMessage = "";
+
+    protected override async Task OnInitializedAsync() {
+        await appState.EnsureCampaigns();
+        campaign = appState.Campaigns.FirstOrDefault(x => x.Id == CampaignId);
+        AddAppointment(); 
+    }
+
+    private void AddAppointment() {
+        var newAppointment = new Appointment {
+                Date = DateOnly.FromDateTime(DateTime.Today),
+                CampaignId = CampaignId
+            };
+        if(listOfAppointments.Count > 0){
+            newAppointment.StartTimeInput = listOfAppointments[0].StartTimeInput;
+            newAppointment.EndTimeInput = listOfAppointments[0].EndTimeInput;
+        }
+        listOfAppointments.Add(newAppointment);
+    }
+
+    private void RemoveAppointment(Appointment appointment) {
+        listOfAppointments.Remove(appointment);
+    }
+
+    private async void Post() {
+        try {
+            foreach (var appointment in listOfAppointments) {
+                if (!ValidateAppointment(appointment, out string validationMessage)) {
+                    UIMessage = validationMessage;
+                    return;
+                }
+                await appointmentManager.Insert(appointment);
+            }
+            UIMessage = "Alle Termine wurden erfolgreich gespeichert.";
+            listOfAppointments.Clear();
+            AddAppointment();
+            StateHasChanged();
+            await Task.Delay(5000);
+            await js.InvokeVoidAsync("history.back");
+        }
+        catch (Exception) {
+            UIMessage = "Bitte eingabe überprüfen.";
+            StateHasChanged();
+        }
+    }
+
+    private bool ValidateAppointment(Appointment appointment, out string validationMessage) {
+        validationMessage = "";
+
+        if (!IsValidTime(appointment.StartTimeInput) || !IsValidTime(appointment.StartTimeInput)) {
+            validationMessage = "Bitte Zeit-Format überprüfen (HH:MM).";
+            return false;
+        }
+
+        if (!TimeSpan.TryParse(appointment.StartTimeInput, out var parsedStartTime)) {
+            validationMessage = "Bitte Start-Zeit überprüfen.";
+            return false;
+        }
+
+        if (!TimeSpan.TryParse(appointment.EndTimeInput, out var parsedEndTime)) {
+            validationMessage = "Bitte Ende-Zeit überprüfen.";
+            return false;
+        }
+
+        appointment.StartTime = TimeOnly.FromTimeSpan(parsedStartTime);
+        appointment.EndTime = TimeOnly.FromTimeSpan(parsedEndTime);
+
+        if (appointment.StartTime > appointment.EndTime) {
+            validationMessage = "Start-Zeit darf nicht grösser sein als Ende-Zeit.";
+            return false;
+        }
+
+        return true;
+    }
+
+    private bool IsValidTime(string time) {
+        return DateTime.TryParseExact(time, "H:mm", null, System.Globalization.DateTimeStyles.None, out _);
+    }
+}

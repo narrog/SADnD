@@ -13,32 +13,28 @@
         <div class="container-fluid mt-3">
             <div class="row">
                 <div class="col-12 col-xl-8">
-                    <strong>Dungeonmaster: </strong><br />
-                    @if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any())
-                    {
-                        <p>
-                            <ul>
-                                @foreach (var master in Campaign.DungeonMasters)
-                                {
-                                    @if (master.UserName != null)
-                                    {
-                                        <li>
-                                            @master.UserName
-                                        </li>
+                    <div class="campaign-infos">
+                        <strong>Dungeonmaster: </strong><br />
+                        @if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any()) {
+                            <p>
+                                <ul>
+                                    @foreach (var master in Campaign.DungeonMasters) {
+                                        @if (master.UserName != null) {
+                                            <li>@master.UserName</li>
+                                        }
                                     }
-                                }
-                            </ul>
+                                </ul>
+                            </p>
+                        }
+                        else {
+                            <p>Kein DungeonMaster gefunden</p>
+                        }
+                        <p>
+                            <strong>Zugangscode: </strong>@Campaign.Id
+                            <span class="oi oi-share-boxed ms-2" @onclick="ShareAccessCode" title="Zugangscode teilen" style="cursor: pointer;" aria-hidden="true"></span>
                         </p>
-                    }
-                    else
-                    {
-                        <p>Kein DungeonMaster gefunden</p>
-                    }
-                    <p>
-                        <strong>Zugangscode: </strong>@Campaign.Id
-                        <span class="oi oi-share-boxed ms-2" @onclick="ShareAccessCode" title="Zugangscode teilen" style="cursor: pointer;" aria-hidden="true"></span>
-                    </p>
-                    <div class="table-responsive">
+                    </div>     
+                    <div class="table-responsive co-players">
                         <strong>Mitspieler</strong>
                         <table class="table table-borderless align-middle border-bottom">
                             @if (Campaign.Players != null && Campaign.Players.Any())
@@ -53,13 +49,8 @@
                                             }
                                             @if (entry.Character != null)
                                             {
-                                                @if (entry.Character.Name != null)
-                                                {
-                                                    <td>@entry.Character.Name</td>
-                                                }
-                                                <td>
-                                                    @entry.Character.Race!.Name
-                                                </td>
+                                                <td>@entry.Character.Name</td>
+                                                <td>@entry.Character.Race!.Name</td>
                                                 <td class="d-none d-md-table-cell">
                                                     @if (entry.Character.Classes != null && entry.Character.Classes.Any())
                                                     {
@@ -121,40 +112,43 @@
                             }
                         </table>
                     </div>
-                    @if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any(dm => dm.Id == currentUserId))
-                    {
-                        <p>
-                            <strong>Offene Anfragen</strong>
-                            <table class="table table-sm table-hover table-striped align-middle">
-                                @if (joinRequests != null && joinRequests.Any())
-                                {
-                                    <tbody>
-                                        @foreach (var request in joinRequests)
-                                        {
-                                            <tr>
-                                                @if (request.User != null)
-                                                {
-                                                    <td>@request.User.UserName</td>
-                                                }
-                                                <td>
-                                                    <button class="btn btn-outline-primary me-2" @onclick="() => JoinRequestAccept(request)">Annehmen</button>
-                                                    <button class="btn btn-outline-danger me-2" @onclick="() => JoinRequestReject(request)">Ablehnen</button>
-                                                </td>
-                                                <td>
-                                                    @requestMessage
-                                                </td>
+                    <div class="join-requests">
+                        @if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
+                            <p>
+                                <strong>Offene Anfragen</strong>
+                                <table class="table table-sm table-hover table-striped align-middle">
+                                    @if (joinRequests != null && joinRequests.Any()) {
+                                        <tbody>
+                                            @foreach (var request in joinRequests) {
+                                                <tr>
+                                                    @if (request.User != null) {
+                                                        <td>@request.User.UserName</td>
+                                                    }
+                                                    <td>
+                                                        <button class="btn btn-outline-primary me-2" @onclick="() => JoinRequestAccept(request)">Annehmen</button>
+                                                        <button class="btn btn-outline-danger me-2" @onclick="() => JoinRequestReject(request)">Ablehnen</button>
+                                                    </td>
+                                                    <td>
+                                                        @requestMessage
+                                                    </td>
 
-                                            </tr>
-                                        }
-                                    </tbody>
-                                }
-                                else
-                                {
-                                    <tr><td>keine offenen Anfragen</td></tr>
-                                }
-                            </table>
-                        </p>
-                    }
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    }
+                                    else {
+                                        <tr><td>keine offenen Anfragen</td></tr>
+                                    }
+                                </table>
+                            </p>
+                        }
+                    </div>
+                    <div class="appointments">
+                        @if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
+                            <a href="new-appointments/@Campaign.Id" class="btn btn-outline-primary" title="Neue Terminvorschläge">Neue Terminvorschläge</a>
+                        }
+                    </div>
+                    
                 </div>
                 @if (showAddCharacter)
                 {
@@ -164,7 +158,7 @@
                     </div>
                 }
             </div>
-            <div class="row">
+            <div class="row notes">
                 @if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any(dm => dm.Id == currentUserId))
                 {
 
