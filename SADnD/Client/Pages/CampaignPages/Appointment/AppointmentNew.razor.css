@@ -1,0 +1,9 @@
+﻿.date-container {
+    display: flex;
+    gap: 1rem; /* Abstand zwischen den Feldern */
+}
+
+.date-container div {
+    flex: 1; /* Beide Felder sollen gleich breit sein */
+}
+
