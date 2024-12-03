@@ -7,7 +7,7 @@
 
 <div class="container-fluid">
     <div class="row">
-        <div class="col-12 col-xl-4 mt-3">
+        <div class="col-12 col-xl-4 mt-3 p-0">
             @if (campaign != null) {
                 @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == appState.UserId)) {
                     <EditForm Model="listOfAppointments" OnValidSubmit=" Post">
@@ -19,7 +19,7 @@
                                     <InputDate @bind-Value="appointment.Date" min="@DateTime.Today.ToString("yyyy-MM-dd")" class="form-control" />
                                 </div>
                                 <div>
-                                    <label>Start-Zeit:</label>
+                                    <label>Start:</label>
                                     <InputText @bind-Value="appointment.StartTimeInput" class="form-control" />
                                 </div>
                                 <div>
