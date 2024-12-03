@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.Extensions.Configuration.UserSecrets;
 using SADnD.Server.Areas.Identity;
 using SADnD.Server.Data;
 using SADnD.Shared;
@@ -33,7 +34,9 @@ namespace SADnD.Server.Controllers
         {
             try
             {
-                var campaignIds = User.Claims.Where(c => c.Type == "Campaign").Select(c => c.Value);
+                var userId = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
+                var campaignIds = (await _campaignManager.Get(c => c.Players.Any(u => u.Id == userId) || c.DungeonMasters.Any(u => u.Id == userId))).Select(c => c.Id);
+                //var campaignIds = User.Claims.Where(c => c.Type == "Campaign").Select(c => c.Value);
                 var result = await _appointmentManager.Get(a => campaignIds.Contains(a.CampaignId),null,"AppointmentVotes");
                 return Ok(new APIListOfEntityResponse<Appointment>()
                 {
@@ -54,7 +57,9 @@ namespace SADnD.Server.Controllers
             try
             {
                 var result = (await _appointmentManager.Get(x => x.Id == id,null,"AppointmentVotes")).FirstOrDefault();
-                var campaignIds = User.Claims.Where(c => c.Type == "Campaign").Select(c => c.Value);
+                var userId = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
+                var campaignIds = (await _campaignManager.Get(c => c.Players.Any(u => u.Id == userId) || c.DungeonMasters.Any(u => u.Id == userId))).Select(c => c.Id);
+                //var campaignIds = User.Claims.Where(c => c.Type == "Campaign").Select(c => c.Value);
                 if (!campaignIds.Contains(result.CampaignId))
                     return StatusCode(403);
                 if (result != null)
@@ -87,9 +92,11 @@ namespace SADnD.Server.Controllers
         {
             try
             {
+                var userId = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
+                var dmCampaignIds = (await _campaignManager.Get(c => c.DungeonMasters.Any(u => u.Id == userId))).Select(c => c.Id);
                 //var campaignRoles = User.Claims.Where(c => c.Type == "CampaignRole").Select(c => c.Value);
-                //if (!campaignRoles.Contains($"{appointment.CampaignId}:DungeonMaster"))
-                //    return StatusCode(403);
+                if (!dmCampaignIds.Contains(appointment.CampaignId))
+                    return StatusCode(403);
                 await _appointmentManager.Insert(appointment);
                 var result = (await _appointmentManager.Get(x => x.Id == appointment.Id,null,"AppointmentVotes")).FirstOrDefault();
                 if (result != null)
@@ -122,9 +129,13 @@ namespace SADnD.Server.Controllers
         {
             try
             {
-                var campaignIds = User.Claims.Where(c => c.Type == "Campaign").Select(c => c.Value);
-                var campaignRoles = User.Claims.Where(c => c.Type == "CampaignRole").Select(c => c.Value);
-                if (!campaignIds.Contains(appointment.CampaignId) || (appointment.Accepted && !campaignRoles.Contains($"{appointment.CampaignId}:DungeonMaster")))
+                var userId = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
+                var campaigns = await _campaignManager.Get(c => c.Players.Any(u => u.Id == userId) || c.DungeonMasters.Any(u => u.Id == userId));
+                var campaignIds = campaigns.Select(c => c.Id);
+                var dmCampaignIds = campaigns.Where(c => c.DungeonMasters.Any(u => u.Id == userId)).Select(c => c.Id);
+                //var campaignIds = User.Claims.Where(c => c.Type == "Campaign").Select(c => c.Value);
+                //var campaignRoles = User.Claims.Where(c => c.Type == "CampaignRole").Select(c => c.Value);
+                if (!campaignIds.Contains(appointment.CampaignId) || (appointment.Accepted && !dmCampaignIds.Contains(appointment.CampaignId)))
                     return StatusCode(403);
                 await _appointmentManager.Update(appointment);
                 var result = (await _appointmentManager.Get(x => x.Id == appointment.Id,null,"AppointmentVotes")).FirstOrDefault();
@@ -161,8 +172,10 @@ namespace SADnD.Server.Controllers
                 var appointment = await _appointmentManager.GetByID(id);
                 if (appointment != null)
                 {
-                    var campaignRoles = User.Claims.Where(c => c.Type == "CampaignRole").Select(c => c.Value);
-                    if (!campaignRoles.Contains($"{appointment.CampaignId}:DungeonMaster"))
+                    var userId = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
+                    var dmCampaignIds = (await _campaignManager.Get(c => c.DungeonMasters.Any(u => u.Id == userId))).Select(c => c.Id);
+                    //var campaignRoles = User.Claims.Where(c => c.Type == "CampaignRole").Select(c => c.Value);
+                    if (!dmCampaignIds.Contains(appointment.CampaignId))
                         return StatusCode(403);
                     var success = await _appointmentManager.Delete(id);
                     if (success)
