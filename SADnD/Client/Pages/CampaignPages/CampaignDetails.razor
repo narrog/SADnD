@@ -153,7 +153,7 @@
                                 </ul>
                             }
                             else {
-                                <span>keine geplanten Termine vorhanden</span>
+                                <span>keine fixierten Termine vorhanden</span>
                             }
                         </p>
                         @if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
@@ -162,7 +162,8 @@
                         }
                         else {
                             if (hasAppointmentsToVote) {
-                                <a href="vote-appointments/@Campaign.Id" class="btn btn-outline-primary" title="Verfügbarkeiten mitteilen">Verfügbarkeiten mitteilen</a>
+                                <p>Neue Terminvorschläge vorhanden <a href="vote-appointments/@Campaign.Id" class="btn btn-outline-primary ms-2" title="Verfügbarkeiten mitteilen">Jetzt abstimmen</a></p>
+                                
                             }
                         }
                     </div>

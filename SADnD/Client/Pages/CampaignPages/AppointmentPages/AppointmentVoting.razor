@@ -1,5 +1,5 @@
 ﻿@page "/vote-appointments/{CampaignId}"
-@using Newtonsoft.Json
+@inject AppointmentApiManager appointmentManager
 
 <h3>Terminplanung</h3>
 
@@ -7,10 +7,10 @@
     <div class="row">
         <div class="col-12 col-xl-8">
             <div class="table-responsive">
-                <EditForm Model="appointmentVotes" OnValidSubmit="Post">
+                <EditForm Model="listOfAppointmentVotes" OnValidSubmit="Post">
                     <DataAnnotationsValidator />
                     <table class="table table-borderless align-middle border-bottom">
-                        @if (listOfAppointments != null && listOfAppointments.Any()) {
+                        @if (campaignAppointments != null && campaignAppointments.Any()) {
                             <thead>
                                 <tr>
                                     <td>Datum</td>
@@ -20,10 +20,10 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @if (listOfAppointments != null && listOfAppointments.Any()) {
-                                    @for (int i = 0; i < listOfAppointments.Count(); i++) {
-                                        var appointment = listOfAppointments.ElementAt(i);
-                                        var userVote = appointmentVotes.FirstOrDefault(v => v.AppointmentId == appointment.Id);
+                                @if (campaignAppointments != null && campaignAppointments.Any()) {
+                                    @for (int i = 0; i < campaignAppointments.Count(); i++) {
+                                        var appointment = campaignAppointments.ElementAt(i);
+                                        var userVote = listOfAppointmentVotes.FirstOrDefault(v => v.AppointmentId == appointment.Id);
 
                                         <tr class="border-top">
                                             <td>@appointment.Date.ToShortDateString()</td>
@@ -92,57 +92,93 @@
 
     private Campaign campaign = new();
 
-    public IEnumerable<Appointment>? listOfAppointments;
-    public List<AppointmentVote> appointmentVotes = new();
+    public IEnumerable<Appointment>? campaignAppointments;
+    public IEnumerable<Appointment>? allAppointments;
+    public List<AppointmentVote> listOfAppointmentVotes = new();
 
     private string UIMessage = "";
 
     protected override async Task OnInitializedAsync() {
-        Console.WriteLine($"CampaignId: {CampaignId}");
         await appState.EnsureCampaigns();
 
-        
-        campaign = appState.Campaigns.FirstOrDefault(c => c.Id == CampaignId); // Kampagne abrufen
+        allAppointments = await appointmentManager.GetAll();
 
-        GetAppointmentsToVote();    // Offene Termine abrufen
-        Console.WriteLine($"listOfAppointments: {JsonConvert.SerializeObject(listOfAppointments)}");
-        Console.WriteLine($"listOfAppointments.Count(): {listOfAppointments.Count()}");
-        AppointmentVoteInital();    // Initialisieren der Abstimmungsliste
-        Console.WriteLine($"appointmentVotes: {JsonConvert.SerializeObject(appointmentVotes)}");
+        GetAppointmentsToVote();
+        GetUserVotes();
     }
 
     private void GetAppointmentsToVote(){
         DateOnly today = DateOnly.FromDateTime(DateTime.Today);
 
-        if (campaign.Appointments != null && campaign.Appointments.Any(x => !x.Accepted)) {
-            listOfAppointments = campaign.Appointments
-                .Where(x => !x.Accepted && x.Date >= today)
+        if (allAppointments != null && allAppointments.Any(x => x.CampaignId == CampaignId) && allAppointments.Any(x => !x.Accepted)) {
+            campaignAppointments = allAppointments
+                .Where(x => !x.Accepted && x.Date >= today && x.CampaignId == CampaignId)
                 .OrderBy(x => x.Date);
         }
     }
 
-    private void AppointmentVoteInital (){
+    private void GetUserVotes (){
 
         var currentUserId = appState.UserId;
 
-        appointmentVotes = listOfAppointments?.Select(appointment => new AppointmentVote {
-            AppointmentId = appointment.Id,
-            UserId = currentUserId,
-            Reaction = "", // Standardwert
-            Comment = ""   // Standardwert
+        listOfAppointmentVotes = campaignAppointments?.Select(appointment =>
+        {
+            var existingVote = appointment.AppointmentVotes?.FirstOrDefault(v => v.UserId == currentUserId);
+
+            return existingVote ?? new AppointmentVote
+                {
+                    AppointmentId = appointment.Id,
+                    UserId = currentUserId,
+                    Reaction = "",
+                    Comment = ""
+                };
         }).ToList() ?? new List<AppointmentVote>();
+
     }
 
     private async void Post() { 
         try {
-            // hier sollen die resultate gespeichert werden
-            foreach (var vote in appointmentVotes){
-                Console.WriteLine($"speichern von: {JsonConvert.SerializeObject(vote)}");
+            if (CheckValidity()) {
+                foreach (var vote in listOfAppointmentVotes) {
+                    var appointment = campaignAppointments?.FirstOrDefault(a => a.Id == vote.AppointmentId);
+                    if (appointment != null) {
+
+                        if (appointment.AppointmentVotes == null) {
+                            appointment.AppointmentVotes = new List<AppointmentVote>();
+                        }
+
+                        var existingVote = appointment.AppointmentVotes
+                            .FirstOrDefault(v => v.UserId == vote.UserId && v.AppointmentId == vote.AppointmentId);
+
+                        if (existingVote != null) {
+                            existingVote.Reaction = vote.Reaction;
+                            existingVote.Comment = vote.Comment;
+                        }
+                        else {
+                            appointment.AppointmentVotes.Add(vote);
+                        }
+                        await appointmentManager.Update(appointment);
+                        navManager.NavigateTo($"/campaign-details/{CampaignId}");
+                    }
+                }
+            }
+            else {
+                UIMessage = "Bitte alle Votes ausfüllen.";
+            }
+
+        }
+        catch (Exception) {
+            UIMessage = "Fehler beim speichern";
+        }
+    }
+
+    private bool CheckValidity() {
+        bool votesAreValid = true;
+        foreach (var vote in listOfAppointmentVotes) {
+            if (string.IsNullOrEmpty(vote.Reaction)) {
+                votesAreValid = false;
             }
         }
-        catch (Exception ex) {
-            
-            UIMessage = ex.Message;
-        }
+        return votesAreValid;
     }
 }
