@@ -158,13 +158,11 @@
                         </p>
                         @if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
                             <a href="new-appointments/@Campaign.Id/1" class="btn btn-outline-primary" title="Termine eintragen">Termine eintragen</a>
-                            <a href="new-appointments/@Campaign.Id/0" class="btn btn-outline-primary" title="Neue Terminvorschläge">Umfrage erstellen</a>
+                            <a href="new-appointments/@Campaign.Id/0" class="btn btn-outline-primary ms-2" title="Neue Terminvorschläge">Umfrage erstellen</a>
                         }
-                        else {
-                            if (hasAppointmentsToVote) {
-                                <p>Neue Terminvorschläge vorhanden <a href="vote-appointments/@Campaign.Id" class="btn btn-outline-primary ms-2" title="Verfügbarkeiten mitteilen">Jetzt abstimmen</a></p>
-                                
-                            }
+                        @if (hasAppointmentsToVote) {
+                            <a href="open-appointments/@Campaign.Id" class="btn btn-outline-primary ms-2" title="Verfügbarkeiten mitteilen">Umfrage ansehen</a>
+
                         }
                     </div>
 

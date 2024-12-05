@@ -11,7 +11,6 @@ namespace SADnD.Shared.Models
     {
         public int Id { get; set; }
         public string UserId { get; set; }
-        [JsonIgnore]
         public ApplicationUser? User {  get; set; }
         public int AppointmentId { get; set; }
         [JsonIgnore]

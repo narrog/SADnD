@@ -37,7 +37,7 @@ namespace SADnD.Server.Controllers
                 var userId = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
                 var campaignIds = (await _campaignManager.Get(c => c.Players.Any(u => u.Id == userId) || c.DungeonMasters.Any(u => u.Id == userId))).Select(c => c.Id);
                 //var campaignIds = User.Claims.Where(c => c.Type == "Campaign").Select(c => c.Value);
-                var result = await _appointmentManager.Get(a => campaignIds.Contains(a.CampaignId),null,"AppointmentVotes");
+                var result = await _appointmentManager.Get(a => campaignIds.Contains(a.CampaignId),null, "AppointmentVotes.User");
                 return Ok(new APIListOfEntityResponse<Appointment>()
                 {
                     Success = true,

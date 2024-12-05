@@ -1,0 +1,106 @@
+﻿@page "/open-appointments/{CampaignId}"
+@inject AppointmentApiManager appointmentManager
+@using Newtonsoft.Json
+
+<h3>Terminplanung</h3>
+
+<div class="container-fluid mt-3">
+    <div class="row">
+        @if (campaign != null && campaignAppointments != null && campaignAppointments.Any()) {
+            <table class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Datum</th>
+                        <th>Zeit</th>
+                        <th>Votes</th>
+                        <th>Kommentare</th>
+                        @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
+                            <th>Bestätigen</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                
+                    @foreach (var appointment in campaignAppointments) {
+                        <tr>
+                            <td>@appointment.Date</td>
+                            <td>@appointment.StartTime - @appointment.EndTime </td>
+                            <td>Hier kommt die Anzahl abstimmungen</td>
+                            <td>
+                                @if(appointment.AppointmentVotes != null) {
+                                    foreach (var vote in appointment.AppointmentVotes) {
+                                        @if (!string.IsNullOrEmpty(vote.Comment)) {
+                                            <strong>@vote.User?.UserName</strong><span>: </span>@vote.Comment<br />
+                                        }
+                                    }
+                                }
+                            </td>
+                            @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
+                                <td>
+                                    <InputCheckbox type="checkbox" @bind-Value="appointment.Accepted" />
+                                </td>
+                            }
+                            
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+    @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
+        <button class="btn btn-primary" @onclick="Confirm">Übernehmen</button>
+    }
+    else {
+        <a href="vote-appointments/@CampaignId" class="btn btn-outline-primary" title="Verfügbarkeiten mitteilen">Jetzt abstimmen</a>
+    }
+    <a class="btn btn-secondary ms-2" href="campaign-details/@CampaignId">Zurück</a>
+</div>
+
+
+@code {
+    [CascadingParameter]
+    private CascadingAppState appState { get; set; }
+    [Parameter]
+    public required string CampaignId { get; set; }
+
+    public Campaign? campaign;
+
+    private string currentUserId = "";
+
+    public IEnumerable<Appointment>? allAppointments;
+    public IEnumerable<Appointment>? campaignAppointments;
+
+
+    protected override async Task OnInitializedAsync() {
+        await appState.EnsureCampaigns();
+        currentUserId = appState.UserId;
+
+        campaign = appState.Campaigns.FirstOrDefault(x => x.Id == CampaignId);
+
+        allAppointments = await appointmentManager.GetAll();
+
+        GetAppointmentsToVote();
+        //GetUserVotes();
+    }
+
+    private void GetAppointmentsToVote() {
+        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+
+        if (allAppointments != null && allAppointments.Any(x => x.CampaignId == CampaignId) && allAppointments.Any()) {
+            campaignAppointments = allAppointments
+                .Where(x => x.Date >= today && x.CampaignId == CampaignId)
+                .OrderBy(x => x.Date);
+        }
+    }
+
+    private void Confirm() {
+        // Hier kannst du die Logik implementieren, z.B. welche Termine ausgewählt wurden
+        if (campaignAppointments != null && campaignAppointments.Any()) {
+            List<Appointment> fixedAppointments = campaignAppointments.Where(a => a.Accepted).ToList();
+            Console.WriteLine("Ausgewählte Termine:");
+            foreach (var appointment in fixedAppointments) {
+                Console.WriteLine($"{appointment.Date} / {appointment.StartTime} - {appointment.EndTime}");
+            }
+        }
+    }
+}
