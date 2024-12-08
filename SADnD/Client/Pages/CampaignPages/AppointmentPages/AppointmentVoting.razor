@@ -1,4 +1,5 @@
 ﻿@page "/vote-appointments/{CampaignId}"
+@attribute [Authorize]
 @inject AppointmentApiManager appointmentManager
 
 <h3>Terminplanung</h3>
@@ -168,7 +169,7 @@
 
         }
         catch (Exception) {
-            UIMessage = "Fehler beim speichern";
+            UIMessage = "Fehler beim Speichern";
         }
     }
 
