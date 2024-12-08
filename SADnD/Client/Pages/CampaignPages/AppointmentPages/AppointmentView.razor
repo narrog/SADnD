@@ -1,6 +1,7 @@
 ﻿@page "/open-appointments/{CampaignId}"
 @attribute [Authorize]
 @inject AppointmentApiManager appointmentManager
+@inject IJSRuntime js
 @using Newtonsoft.Json
 
 <h3>Terminplanung</h3>
@@ -82,6 +83,11 @@
         <a href="vote-appointments/@CampaignId" class="btn btn-outline-primary" title="Verfügbarkeiten mitteilen">Jetzt abstimmen</a>
     }
     <a class="btn btn-secondary ms-2" href="campaign-details/@CampaignId">Zurück</a>
+    @if (!string.IsNullOrEmpty(UIMessage)){
+        <div class="row mt-3">
+            <p>@UIMessage</p>
+        </div>
+    }
 </div>
 
 
@@ -98,11 +104,11 @@
     private IEnumerable<Appointment>? allAppointments;
     private IEnumerable<Appointment>? campaignAppointments;
     private List<Appointment> tempAppointments = new List<Appointment>();
-    private List<Appointment> changedAppointments = new List<Appointment>();
 
     private bool isUserDM;
     private bool showVotes;
     private string showVotesText = "Details anzeigen";
+    private string UIMessage = "";
 
     protected override async Task OnInitializedAsync() {
         await appState.EnsureCampaigns();
@@ -140,18 +146,35 @@
         showVotes = !showVotes;
         showVotesText = showVotes ? "Details ausblenden" : "Details anzeigen";
     }
-    private void Confirm() {
-        // Hier kannst du die Logik implementieren, z.B. welche Termine ausgewählt wurden
-        // if (campaignAppointments != null && campaignAppointments.Any()) {
-        //     //List<Appointment> changedAppointments = campaignAppointments.Where(a => a.Accepted).ToList();
-            
-        //     @for (int i = 0; i < campaignAppointments.Count(); i++) {
-        //         var orig = campaignAppointments.ElementAt(i);
-        //         var temp = tempAppointments.ElementAt(i);
-        //         if (orig.Accepted != temp.Accepted){
-        //             changedAppointments.Add(temp);
-        //         }
-        //     }
-        // }
+    private async void Confirm() {
+        try {
+            bool deleteDates = await js.InvokeAsync<bool>("confirm", "sollen nicht-bestätigte Termine gelöscht werden?");
+            if (tempAppointments != null && tempAppointments.Any()) {
+                foreach (var appointment in tempAppointments){
+                    if (appointment.Accepted){
+                        await appointmentManager.Update(appointment);
+                        Console.WriteLine($"Termin vom {appointment.Date} wurde fixiert");
+                    }
+                    else {
+                        if (deleteDates){
+                            await appointmentManager.Delete(appointment);
+                            Console.WriteLine($"Termin vom {appointment.Date} wurde gelöscht");
+                        }
+                        else {
+                            Console.WriteLine($"Termin vom {appointment.Date} bleibt offen");
+                        }
+                    }
+                }
+                UIMessage = "Termine gespeichert";
+            }
+            else {
+                UIMessage = "Keine Termine gefunden";
+            }
+        }
+        catch (Exception) {
+            UIMessage = "Fehler beim Speichern";
+            throw;
+        }
     }
+
 }
