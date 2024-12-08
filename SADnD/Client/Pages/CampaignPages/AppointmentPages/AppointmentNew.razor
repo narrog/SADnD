@@ -7,7 +7,7 @@
 
 <div class="container-fluid">
     <div class="row">
-        <div class="col-12 col-xl-4 mt-3 p-0">
+        <div class="col-12 col-xl-6 mt-3 p-0">
             @if (campaign != null) {
                 @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == appState.UserId)) {
                     <EditForm Model="listOfAppointments" OnValidSubmit=" Post">
@@ -106,7 +106,7 @@
             listOfAppointments.Clear();
             AddAppointment();
             StateHasChanged();
-            await Task.Delay(5000);
+            await Task.Delay(2500);
             await js.InvokeVoidAsync("history.back");
         }
         catch (Exception) {

@@ -8,7 +8,7 @@
 
 <h3>@Campaign.Name</h3>
 
-<CascadingValue Value="this" IsFixed="false">
+<CascadingValue Value="@this" IsFixed="true">
     @if(Campaign != null){
         <div class="container-fluid mt-3">
             <div class="row">
@@ -153,12 +153,16 @@
                                 </ul>
                             }
                             else {
-                                <span>keine geplanten Termine vorhanden</span>
+                                <span>keine fixierten Termine vorhanden</span>
                             }
                         </p>
                         @if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
                             <a href="new-appointments/@Campaign.Id/1" class="btn btn-outline-primary" title="Termine eintragen">Termine eintragen</a>
-                            <a href="new-appointments/@Campaign.Id/0" class="btn btn-outline-primary" title="Neue Terminvorschläge">Umfrage erstellen</a>
+                            <a href="new-appointments/@Campaign.Id/0" class="btn btn-outline-primary ms-2" title="Neue Terminvorschläge">Umfrage erstellen</a>
+                        }
+                        @if (hasAppointmentsToVote) {
+                            <a href="open-appointments/@Campaign.Id" class="btn btn-outline-primary ms-2" title="Verfügbarkeiten mitteilen">Umfrage ansehen</a>
+
                         }
                     </div>
 
@@ -239,6 +243,7 @@
     public new string ActiveCategory = "story";
 
     private IEnumerable<Appointment>? nextAppointments;
+    private bool hasAppointmentsToVote;
 
     private string currentUserId = "";
     private bool showAddCharacter;
@@ -316,7 +321,6 @@
         showAddCharacter = true;
     }
     private async void HideAddCharacter() {
-        // await AllocatePlayersNCharacters();
         showAddCharacter = false;
         StateHasChanged();
     }
@@ -369,11 +373,15 @@
     private void GetNextAppointments(){
         DateOnly today = DateOnly.FromDateTime(DateTime.Today);
 
-        if (Campaign.Appointments != null && Campaign.Appointments.Any(x => x.Accepted == true)) {
+        if (Campaign.Appointments != null && Campaign.Appointments.Any(x => x.Accepted)) {
             nextAppointments = Campaign.Appointments
                 .Where(x => x.Accepted && x.Date >= today) 
                 .OrderBy(x => x.Date);
         }
+        if (Campaign.Appointments != null && Campaign.Appointments.Any(x => !x.Accepted && x.Date >= today)) {
+            hasAppointmentsToVote = true;
+        }
+        
     }
 
     private async Task DeleteCampaign() {
