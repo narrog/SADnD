@@ -35,11 +35,12 @@
                                     }
                                 }
                             </td>
-                            @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
+                            @* ToDo: Checkbox für DM
+                                @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
                                 <td>
                                     <InputCheckbox type="checkbox" @bind-Value="appointment.Accepted" />
                                 </td>
-                            }
+                            } *@
                             
                         </tr>
                     }
@@ -48,7 +49,7 @@
         }
     </div>
     @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
-        <button class="btn btn-primary" @onclick="Confirm">Übernehmen</button>
+        @* <button class="btn btn-primary" @onclick="Confirm">Übernehmen</button> *@
     }
     else {
         <a href="vote-appointments/@CampaignId" class="btn btn-outline-primary" title="Verfügbarkeiten mitteilen">Jetzt abstimmen</a>
@@ -88,19 +89,20 @@
 
         if (allAppointments != null && allAppointments.Any(x => x.CampaignId == CampaignId) && allAppointments.Any()) {
             campaignAppointments = allAppointments
-                .Where(x => x.Date >= today && x.CampaignId == CampaignId)
+                .Where(x => x.Date >= today && !x.Accepted && x.CampaignId == CampaignId)
                 .OrderBy(x => x.Date);
         }
     }
 
-    private void Confirm() {
-        // Hier kannst du die Logik implementieren, z.B. welche Termine ausgewählt wurden
-        if (campaignAppointments != null && campaignAppointments.Any()) {
-            List<Appointment> fixedAppointments = campaignAppointments.Where(a => a.Accepted).ToList();
-            Console.WriteLine("Ausgewählte Termine:");
-            foreach (var appointment in fixedAppointments) {
-                Console.WriteLine($"{appointment.Date} / {appointment.StartTime} - {appointment.EndTime}");
-            }
-        }
-    }
+    // // Termine fixieren
+    // private void Confirm() {
+    //     // Hier kannst du die Logik implementieren, z.B. welche Termine ausgewählt wurden
+    //     if (campaignAppointments != null && campaignAppointments.Any()) {
+    //         List<Appointment> fixedAppointments = campaignAppointments.Where(a => a.Accepted).ToList();
+    //         Console.WriteLine("Ausgewählte Termine:");
+    //         foreach (var appointment in fixedAppointments) {
+    //             Console.WriteLine($"{appointment.Date} / {appointment.StartTime} - {appointment.EndTime}");
+    //         }
+    //     }
+    // }
 }
