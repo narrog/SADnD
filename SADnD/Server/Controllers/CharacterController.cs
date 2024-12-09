@@ -31,7 +31,7 @@ namespace SADnD.Server.Controllers
             try
             {
                 var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
-                var result = await _characterManager.Get(x => x.UserId == id,null,"Race,Classes.Class,Inventory.Item");
+                var result = await _characterManager.Get(x => x.UserId == id,null,"Race,Classes.Class,Inventory.Item,UserAccess");
                 return Ok(new APIListOfEntityResponse<Character>()
                 {
                     Success = true,
@@ -50,7 +50,7 @@ namespace SADnD.Server.Controllers
         {
             try
             {
-                var result = await _characterManager.Get(x => x.Id == id, null, "Race,Classes.Class,Inventory.Item");
+                var result = await _characterManager.Get(x => x.Id == id, null, "Race,Classes.Class,Inventory.Item,UserAccess");
                 if (result != null)
                 {
                     return Ok(new APIEntityResponse<Character>()
@@ -93,7 +93,7 @@ namespace SADnD.Server.Controllers
                     character.UserId = user.Id;
                 }
                 await _characterManager.Insert(character);
-                var result = (await _characterManager.Get(x => x.Id == character.Id, null, "Race,Classes.Class,Inventory.Item")).FirstOrDefault();
+                var result = (await _characterManager.Get(x => x.Id == character.Id, null, "Race,Classes.Class,Inventory.Item,UserAccess")).FirstOrDefault();
                 if (result != null)
                 {
                     return Ok(new APIEntityResponse<Character>()

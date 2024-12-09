@@ -1,5 +1,4 @@
-﻿
-@inject CharacterApiManager characterManager
+﻿@inject CharacterApiManager characterManagement
 @using Newtonsoft.Json
 
 <p>Markiere die Mitspieler, mit denen du deine Charakterinformationen teilen willst</p>
@@ -9,14 +8,19 @@
     @foreach (var coPlayer in coPlayers) {
         <div class="form-check">
             <input class="form-check-input" type="checkbox" id='@($"checkbox-{coPlayer.Id}")' 
-                @onchange="e => ToggleCoPlayerSelection(coPlayer, e.Value)"
-                checked="@acceptedCoPlayers.Contains(coPlayer)" />
+            @onchange="e => ToggleCoPlayerSelection(coPlayer, e.Value)"
+                   checked="@character.UserAccess.Any(x => x.Id == coPlayer.Id)" />
             <label class="form-check-label" for='@($"checkbox-{coPlayer.Id}")'>
                 @coPlayer.UserName
-            </label>
+            </label> 
+            @* <InputCheckbox class="form-check-input" id='@($"checkbox-{coPlayer.Id}")' @onchange="e => ToggleCoPlayerSelection(coPlayer, e.Value)"
+            checked="@acceptedCoPlayers.Contains(coPlayer)" />
+            <label class="form-check-label" for='@($"checkbox-{coPlayer.Id}")'>
+                @coPlayer.UserName
+            </label> *@
         </div>
     }
-    
+
     <div class="mt-3">
         <SubmitButton />
         <button class="btn btn-outline-secondary me-2" type="button" @onclick="Close">Abbrechen</button>
@@ -43,12 +47,13 @@
     [Parameter]
     public EventCallback OnClose { get; set; }
 
-    private string? characterId;
+    private int? characterId;
     private string? campaignId;
     private Campaign campaign = new Campaign();
     private Character character = new Character();
     private List<ApplicationUser> coPlayers = new List<ApplicationUser>();
     private List<ApplicationUser> acceptedCoPlayers = new List<ApplicationUser>();
+    public List<(ApplicationUser user, bool hasAccess)> userAccess = new List<(ApplicationUser user, bool hasAccess)>();
 
     private string UIMessage = "";
 
@@ -56,14 +61,24 @@
         await appState.EnsureCampaigns();
         campaignId = context.Character.CampaignId;
         character = context.Character;
-
         // ToDo: Liste acceptedCoPlayers mit Einträgen füllen.
-        // acceptedCoPlayers = character.PlayerAcces oder so ähnlich
+        if (character.UserAccess != null && character.UserAccess.Any()) {
+            acceptedCoPlayers = character.UserAccess.ToList();            
+        }
 
         if (!string.IsNullOrEmpty(campaignId)) {
             GetCoPlayers();
         }
-
+        // Console.WriteLine($"character.UserAccess: {JsonConvert.SerializeObject(character.UserAccess)}");
+        // if (character.UserAccess != null && character.UserAccess.Any()) {
+        //     foreach (var player in coPlayers){
+        //         if (character.UserAccess.Any(x => x.Id == player.Id))
+        //             userAccess.Add((player, true));
+        //         else 
+        //             userAccess.Add((player, false));
+        //     }
+        //     Console.WriteLine($"userAccess: {JsonConvert.SerializeObject(userAccess)}");
+        // }
     }
 
     private void GetCoPlayers() {
@@ -75,6 +90,7 @@
             if (campaign.Players != null && campaign.Players.Any()) {
                 foreach (var player in campaign.Players) {
                     if(player.Id != appState.UserId){
+                        player.Characters = null;
                         coPlayers.Add((player));
                     }
                 }
@@ -82,6 +98,7 @@
             if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any()) {
                 foreach (var dm in campaign.DungeonMasters) {
                     if(dm.Id != appState.UserId){
+                        dm.Characters = null;
                         coPlayers.Add((dm));
                     }
                 }
@@ -103,10 +120,9 @@
         try
         {
             // ToDo: Logik für speichern der AccessPlayer
-            Console.WriteLine($"acceptedCoPlayers: {JsonConvert.SerializeObject(acceptedCoPlayers)}");
-            
-            // await characterManager.Update(character);
-            // Close();
+            context.Character.UserAccess = acceptedCoPlayers;
+            await context.UpdateCharacter(context.Character);
+            Close();
         }
         catch (Exception ex)
         {

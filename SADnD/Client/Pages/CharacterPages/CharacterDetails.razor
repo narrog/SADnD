@@ -177,11 +177,15 @@
     protected override async Task OnInitializedAsync() {
         await appState.EnsureCharacters();
         await appState.EnsureNotes();
-        Character = appState.Characters.FirstOrDefault(c => c.Id == Int32.Parse(Id));
-        if (Character != null)
-            campaign = Character.CampaignId != null ? appState.Campaigns.FirstOrDefault(c => c.Id == Character.CampaignId) : null;
-        else
-            navManager.NavigateTo("/access-denied");
+
+        if (appState.Characters != null && appState.Characters.Any()){
+            Character = appState.Characters.FirstOrDefault(c => c.Id == Int32.Parse(Id));
+            if (Character != null)
+                campaign = Character.CampaignId != null ? appState.Campaigns.FirstOrDefault(c => c.Id == Character.CampaignId) : null;
+            else
+                navManager.NavigateTo("/access-denied");
+        }
+        
     }
 
     private async Task DeleteCharacter() {
@@ -228,4 +232,7 @@
         StateHasChanged();
     }
 
+    public async Task UpdateCharacter(Character character){
+        await characterManager.Update(character);
+    }
 }
