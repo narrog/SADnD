@@ -1,4 +1,5 @@
 ﻿@page "/new-appointments/{CampaignId}/{AppointmentFix}"
+@attribute [Authorize]
 @inject AppointmentApiManager appointmentManager
 @inject IJSRuntime js
 @using Newtonsoft.Json

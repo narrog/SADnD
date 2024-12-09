@@ -1,12 +1,14 @@
 ﻿@page "/open-appointments/{CampaignId}"
+@attribute [Authorize]
 @inject AppointmentApiManager appointmentManager
+@inject IJSRuntime js
 @using Newtonsoft.Json
 
 <h3>Terminplanung</h3>
 
 <div class="container-fluid mt-3">
     <div class="row">
-        @if (campaign != null && campaignAppointments != null && campaignAppointments.Any()) {
+        @if (campaign != null && tempAppointments != null && tempAppointments.Any()) {
             <table class="table table-striped align-middle">
                 <thead>
                     <tr>
@@ -14,19 +16,30 @@
                         <th>Zeit</th>
                         <th>Votes</th>
                         <th>Kommentare</th>
-                        @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
+                        @if (isUserDM) {
                             <th>Bestätigen</th>
                         }
                     </tr>
                 </thead>
                 <tbody>
-                
-                    @foreach (var appointment in campaignAppointments) {
+
+                    @foreach (var appointment in tempAppointments) {
                         <tr>
                             <td>@appointment.Date</td>
-                            <td>@appointment.StartTime - @appointment.EndTime </td>
-                            <td>Hier kommt die Anzahl abstimmungen</td>
+                            <td class="d-none d-md-table-cell">@appointment.StartTime - @appointment.EndTime</td>
+                            <td class="d-table-cell d-md-none">@appointment.StartTime</td>
                             <td>
+                                @if (appointment.AppointmentVotes != null) {
+                                    @appointment.AppointmentVotes.Count(x => x.Reaction == "yes")
+                                    <span> Zusagen</span>
+                                    @if (showVotes) {
+                                        @foreach (var vote in appointment.AppointmentVotes) {
+                                            <div><strong>@vote.User?.UserName</strong>: @vote.Reaction</div>
+                                        }
+                                    }
+                                }
+                            </td>
+                            <td class="d-none d-md-table-cell">
                                 @if(appointment.AppointmentVotes != null) {
                                     foreach (var vote in appointment.AppointmentVotes) {
                                         @if (!string.IsNullOrEmpty(vote.Comment)) {
@@ -35,26 +48,46 @@
                                     }
                                 }
                             </td>
-                            @* ToDo: Checkbox für DM
-                                @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
-                                <td>
+                            <td class="d-table-cell d-md-none">
+                                @if(appointment.AppointmentVotes != null) {
+                                    @if (!showVotes) {
+                                        @appointment.AppointmentVotes.Count(x => !string.IsNullOrEmpty(x.Comment))
+                                        <span> Kommentare</span>
+                                    }
+                                    else {
+                                        foreach (var vote in appointment.AppointmentVotes) {
+                                            @if (!string.IsNullOrEmpty(vote.Comment)) {
+                                                <strong>@vote.User?.UserName</strong><span>: </span>@vote.Comment<br />
+                                            }
+                                        }
+                                    }
+                                }
+                            </td>
+                            @if (isUserDM) {
+                                <td class="text-center text-md-start">
                                     <InputCheckbox type="checkbox" @bind-Value="appointment.Accepted" />
                                 </td>
-                            } *@
-                            
+                            }
+
                         </tr>
                     }
                 </tbody>
             </table>
         }
     </div>
-    @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
-        @* <button class="btn btn-primary" @onclick="Confirm">Übernehmen</button> *@
+    @if (isUserDM) {
+        <button class="btn btn-primary" @onclick="Post">Übernehmen</button>
+        <button class="btn btn-outline-secondary" @onclick="ShowVotes">@showVotesText</button>
     }
     else {
         <a href="vote-appointments/@CampaignId" class="btn btn-outline-primary" title="Verfügbarkeiten mitteilen">Jetzt abstimmen</a>
     }
     <a class="btn btn-secondary ms-2" href="campaign-details/@CampaignId">Zurück</a>
+    @if (!string.IsNullOrEmpty(UIMessage)){
+        <div class="row mt-3">
+            <p>@UIMessage</p>
+        </div>
+    }
 </div>
 
 
@@ -68,20 +101,29 @@
 
     private string currentUserId = "";
 
-    public IEnumerable<Appointment>? allAppointments;
-    public IEnumerable<Appointment>? campaignAppointments;
+    private IEnumerable<Appointment>? allAppointments;
+    private IEnumerable<Appointment>? campaignAppointments;
+    private List<Appointment> tempAppointments = new List<Appointment>();
 
+    private bool isUserDM;
+    private bool showVotes;
+    private string showVotesText = "Details anzeigen";
+    private string UIMessage = "";
 
     protected override async Task OnInitializedAsync() {
         await appState.EnsureCampaigns();
         currentUserId = appState.UserId;
 
         campaign = appState.Campaigns.FirstOrDefault(x => x.Id == CampaignId);
+        if (campaign != null){
+            if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)){
+                isUserDM = true;
+            }
+        }
 
         allAppointments = await appointmentManager.GetAll();
 
         GetAppointmentsToVote();
-        //GetUserVotes();
     }
 
     private void GetAppointmentsToVote() {
@@ -92,17 +134,47 @@
                 .Where(x => x.Date >= today && !x.Accepted && x.CampaignId == CampaignId)
                 .OrderBy(x => x.Date);
         }
+
+        if (campaignAppointments != null && campaignAppointments.Any()){
+            foreach (var appointment in campaignAppointments) {
+                tempAppointments.Add(appointment);
+            }
+
+        }
+    }
+    private void ShowVotes() {
+        showVotes = !showVotes;
+        showVotesText = showVotes ? "Details ausblenden" : "Details anzeigen";
+    }
+    private async void Post() {
+        try {
+            bool deleteDates = await js.InvokeAsync<bool>("confirm", "sollen nicht-bestätigte Termine gelöscht werden?");
+            if (tempAppointments != null && tempAppointments.Any()) {
+                foreach (var appointment in tempAppointments){
+                    if (appointment.Accepted){
+                        await appointmentManager.Update(appointment);
+                    }
+                    else {
+                        if (deleteDates){
+                            await appointmentManager.Delete(appointment);
+                        }
+                        else {
+                        }
+                    }
+                }
+                UIMessage = "Termine gespeichert";
+                StateHasChanged();
+                await Task.Delay(2500);
+                await js.InvokeVoidAsync("history.back");
+            }
+            else {
+                UIMessage = "Keine Termine gefunden";
+            }
+        }
+        catch (Exception) {
+            UIMessage = "Fehler beim Speichern";
+            throw;
+        }
     }
 
-    // // Termine fixieren
-    // private void Confirm() {
-    //     // Hier kannst du die Logik implementieren, z.B. welche Termine ausgewählt wurden
-    //     if (campaignAppointments != null && campaignAppointments.Any()) {
-    //         List<Appointment> fixedAppointments = campaignAppointments.Where(a => a.Accepted).ToList();
-    //         Console.WriteLine("Ausgewählte Termine:");
-    //         foreach (var appointment in fixedAppointments) {
-    //             Console.WriteLine($"{appointment.Date} / {appointment.StartTime} - {appointment.EndTime}");
-    //         }
-    //     }
-    // }
 }

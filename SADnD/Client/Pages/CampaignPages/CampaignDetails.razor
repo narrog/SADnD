@@ -70,7 +70,7 @@
                                                 <td class="d-none d-md-table-cell"></td>
                                             }
                                             <td class="d-none d-md-table-cell">
-                                                @if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any(dm => dm.Id == currentUserId))
+                                                @if (isUserDM) 
                                                 {
                                                     <button class="btn btn-outline-danger me-2" @onclick="() => RemovePlayer(entry.User, true)">entfernen</button>
                                                 }
@@ -87,7 +87,7 @@
                                         </tr>
                                         <tr class="d-md-none">
                                             <td colspan="4">
-                                                @if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any(dm => dm.Id == currentUserId))
+                                                @if (isUserDM)
                                                 {
                                                     <button class="btn btn-outline-danger me-2" @onclick="() => RemovePlayer(entry.User, true)">entfernen</button>
                                                 }
@@ -113,7 +113,8 @@
                         </table>
                     </div>
                     <div class="join-requests">
-                        @if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
+                        @if (isUserDM)
+                        {
                             <p>
                                 <strong>Offene Anfragen:</strong>
                                 <table class="table table-sm table-hover table-striped align-middle">
@@ -156,7 +157,7 @@
                                 <span>keine fixierten Termine vorhanden</span>
                             }
                         </p>
-                        @if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
+                        @if (isUserDM) {
                             <a href="new-appointments/@Campaign.Id/1" class="btn btn-outline-primary" title="Termine eintragen">Termine eintragen</a>
                             <a href="new-appointments/@Campaign.Id/0" class="btn btn-outline-primary ms-2" title="Neue Terminvorschläge">Umfrage erstellen</a>
                         }
@@ -176,7 +177,7 @@
                 }
             </div>
             <div class="row notes mt-3">
-                @if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any(dm => dm.Id == currentUserId))
+                @if (isUserDM)
                 {
 
                     <div class="col-2 my-1" id="notes-icons-container">
@@ -210,7 +211,7 @@
         <div class="row my-4 pt-4 border-top">
             <div>
                 <a class="btn btn-secondary me-2" onclick="history.back();">Zurück</a>
-                @if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any(dm => dm.Id == currentUserId))
+                @if (isUserDM)
                 {
                     <button class="btn btn-danger" @onclick="DeleteCampaign">Löschen</button>
                 }
@@ -239,6 +240,7 @@
     private IEnumerable<JoinRequest>? joinRequests;
     private string requestMessage = "";
     private string UIMessage = "";
+    private bool isUserDM;
 
     public new string ActiveCategory = "story";
 
@@ -253,6 +255,9 @@
         currentUserId = appState.UserId;
         Campaign = appState.Campaigns.FirstOrDefault(c => c.Id == Id);
         if(Campaign != null){
+            if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
+                isUserDM = true;
+            }
             await GetOpenJoinRequests();
             GetNextAppointments();
             await AllocatePlayersNCharacters();
