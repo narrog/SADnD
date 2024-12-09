@@ -6,11 +6,9 @@ using SADnD.Client;
 using SADnD.Client.Services;
 using SADnD.Client.Shared;
 using SADnD.Shared.Models;
-
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
-
 builder.Services.AddHttpClient("SADnD.ServerAPI", client => client.BaseAddress = new Uri($"{builder.HostEnvironment.BaseAddress}api/"))
     .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
 
@@ -171,24 +169,45 @@ builder.Services.AddBlazorDB(options =>
             PrimaryKey = "Id",
             PrimaryKeyAuto = true,
             UniqueIndexes = new List<string> {"Id"}
+        },
+        new StoreSchema()
+        {
+            Name = "Appointment",
+            PrimaryKey = "Id",
+            PrimaryKeyAuto = true,
+            UniqueIndexes = new List<string> {"Id"}
+        },
+        new StoreSchema()
+        {
+            Name = $"Appointment{Globals.LocalTransactionsSuffix}",
+            PrimaryKey = "Id",
+            PrimaryKeyAuto = true,
+            UniqueIndexes = new List<string> {"Id"}
+        },
+        new StoreSchema()
+        {
+            Name = $"Appointment{Globals.KeysSuffix}",
+            PrimaryKey = "Id",
+            PrimaryKeyAuto = true,
+            UniqueIndexes = new List<string> {"Id"}
         }
     };
 });
 builder.Services.AddScoped<CampaignApiManager>();
 //builder.Services.AddScoped<CampaignSyncManager>();
 builder.Services.AddScoped<CharacterApiManager>();
-//builder.Services.AddScoped<CharacterSyncManager>();
+builder.Services.AddScoped<CharacterSyncManager>();
 builder.Services.AddScoped<ClassApiManager>();
-//builder.Services.AddScoped<ClassSyncManager>();
+builder.Services.AddScoped<ClassSyncManager>();
 builder.Services.AddScoped<RaceApiManager>();
-//builder.Services.AddScoped<RaceSyncManager>();
+builder.Services.AddScoped<RaceSyncManager>();
 builder.Services.AddScoped<JoinRequestApiManager>();
-//builder.Services.AddScoped<JoinRequestSyncManager>();
+builder.Services.AddScoped<JoinRequestSyncManager>();
 builder.Services.AddScoped<InventoryItemApiManager>();
-//builder.Services.AddScoped<InventoryItemSyncManager>();
+builder.Services.AddScoped<InventoryItemSyncManager>();
 builder.Services.AddScoped<NoteApiManager>();
-//builder.Services.AddScoped<NoteSyncManager>();
+builder.Services.AddScoped<NoteSyncManager>();
 builder.Services.AddScoped<AppointmentApiManager>();
-//builder.Services.AddScoped<NoteSyncManager>();
+builder.Services.AddScoped<AppointmentSyncManager>();
 
 await builder.Build().RunAsync();

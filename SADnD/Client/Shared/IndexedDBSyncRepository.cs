@@ -6,7 +6,7 @@ using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SADnD.Client.Services;
-
+using System.Xml;
 namespace SADnD.Client.Shared
 {
     public class IndexedDBSyncRepository<TEntity> : IRepository<TEntity> where TEntity : class
@@ -15,14 +15,12 @@ namespace SADnD.Client.Shared
         private readonly APIRepository<TEntity> _apiRepository;
         private readonly IJSRuntime _jsruntime;
         string _dbName = "";
-        //string _primaryKeyName = "";
-        //bool _autoGenerateKey;
 
         IndexedDbManager manager;
         string storeName = "";
         Type entityType;
         PropertyInfo primaryKey;
-        public bool IsOnline { get; set; } = true;
+        public bool IsOnline { get; set; } = false;
 
         public delegate void OnlineStatusEventHandler(object sender, OnlineStatusEventArgs e);
         public event OnlineStatusEventHandler OnlineStatusChanged;
@@ -79,10 +77,8 @@ namespace SADnD.Client.Shared
             bool deleted = false;
             if (IsOnline)
             {
-                var onlineId = primaryKey.GetValue(entityToDelete);
                 deleted = await _apiRepository.Delete(entityToDelete);
-                var localEntity = await UpdateKeyToLocal(entityToDelete);
-                await DeleteOffline(localEntity);
+                await DeleteOffline(entityToDelete);
             }
             else
                 deleted = await DeleteOffline(entityToDelete);
@@ -91,17 +87,15 @@ namespace SADnD.Client.Shared
         public async Task<bool> DeleteOffline(TEntity entityToDelete)
         {
             await EnsureManager();
-            var Id = primaryKey.GetValue(entityToDelete);
-            return await Delete(Id);
+            return await DeleteOffline(primaryKey.GetValue(entityToDelete));
         }
         public async Task<bool> Delete(object id)
         {
             bool deleted = false;
             if (IsOnline)
             {
-                var localId = await GetLocalId(id);
-                await DeleteOffline(localId);
                 deleted = await _apiRepository.Delete(id);
+                await DeleteOffline(id);
             }
             else
                 deleted = await DeleteOffline(id);
@@ -113,17 +107,18 @@ namespace SADnD.Client.Shared
             await EnsureManager();
             try
             {
-                RecordDelete(id);
-                var result = await manager.DeleteRecordAsync(storeName, id);
+                var localId = await GetLocalId(id);
+                var result = await manager.DeleteRecordAsync(storeName, localId);
                 if (result.Failed)
                     return false;
+                RecordDelete(id);
 
                 if (IsOnline)
                 {
                     var keys = await GetKeys();
                     if (keys.Count > 0)
                     {
-                        var key = keys.Where(x => x.LocalId.ToString() == id.ToString()).FirstOrDefault();
+                        var key = keys.Where(x => x.LocalId.ToString() == localId.ToString()).FirstOrDefault();
                         if (key != null)
                             await manager.DeleteRecordAsync(KeyStoreName, key.Id);
                     }
@@ -141,7 +136,7 @@ namespace SADnD.Client.Shared
             if (IsOnline)
                 return;
             var action = LocalTransactionTypes.Delete;
-            var entity = await GetByID(id);
+            var entity = await GetByIDOffline(id);
             var record = new StoreRecord<LocalTransaction<TEntity>>()
             {
                 StoreName = LocalStoreName,
@@ -174,22 +169,29 @@ namespace SADnD.Client.Shared
                 {
                     if (!dontSync)
                     {
-                        await ClearLocalDB();
-                        var result = await manager.BulkAddRecordAsync(storeName, list);
-                        var localList = (await GetAllOffline(false)).ToList();
-                        var keys = new List<OnlineOfflineKey>();
-                        for (int i = 0; i < list.Count(); i++)
+                        var keys = await GetKeys();
+                        foreach (var entry in list)
                         {
-                            var localId = primaryKey.GetValue(localList[i]);
-                            keys.Add(new OnlineOfflineKey()
+                            var key = keys.FirstOrDefault(k => k.OnlineId.ToString() == primaryKey.GetValue(entry).ToString());
+                            if (key != null)
                             {
-                                Id = Convert.ToInt32(localId),
-                                OnlineId = primaryKey.GetValue(list[i]),
-                                LocalId = localId
-                            });
+                                await manager.UpdateRecordAsync(new UpdateRecord<TEntity>()
+                                {
+                                    StoreName = storeName,
+                                    Record = entry,
+                                    Key = key.LocalId
+                                });
+                                keys.Remove(key);
+                            }
+                            else
+                            {
+                                await InsertOffline(entry);
+                            }
                         }
-                        await manager.ClearTableAsync(KeyStoreName);
-                        result = await manager.BulkAddRecordAsync(KeyStoreName, keys);
+                        foreach (var ke in keys)
+                        {
+                            await DeleteOffline(ke.OnlineId);
+                        }
                     }
                     return list;
                 }
@@ -202,7 +204,6 @@ namespace SADnD.Client.Shared
         {
             await EnsureManager();
             var array = await manager.ToArray<TEntity>(storeName);
-            //Console.WriteLine(JsonConvert.SerializeObject(array));
             if (array == null)
                 return new List<TEntity>();
             else
@@ -253,6 +254,11 @@ namespace SADnD.Client.Shared
             try
             {
                 var onlineId = primaryKey.GetValue(entity);
+                if (Convert.ToInt32(onlineId) == 0)
+                {
+                    onlineId = -1;
+                    primaryKey.SetValue(entity, onlineId);
+                }
                 var record = new StoreRecord<TEntity>()
                 {
                     StoreName = storeName,
@@ -277,9 +283,9 @@ namespace SADnD.Client.Shared
                 };
                 await manager.AddRecordAsync(storeRecord);
 
-                RecordInsert(last);
+                RecordInsert(entity);
 
-                return last;
+                return entity;
             }
             catch (Exception ex)
             {
@@ -317,9 +323,7 @@ namespace SADnD.Client.Shared
             if (IsOnline)
             {
                 entityToUpdate = await _apiRepository.Update(entityToUpdate);
-                localEntity = JsonConvert.DeserializeObject<TEntity>(JsonConvert.SerializeObject(entityToUpdate));
-                localEntity = await UpdateKeyToLocal(localEntity);
-                await UpdateOffline(localEntity);
+                await UpdateOffline(entityToUpdate);
             }
             else
                 await UpdateOffline(entityToUpdate);
@@ -328,14 +332,14 @@ namespace SADnD.Client.Shared
         public async Task<TEntity> UpdateOffline(TEntity entityToUpdate)
         {
             await EnsureManager();
-            object id = primaryKey.GetValue(entityToUpdate);
+            object localId = await GetLocalId(primaryKey.GetValue(entityToUpdate));
             try
             {
                 await manager.UpdateRecord(new UpdateRecord<TEntity>()
                 {
                     StoreName = storeName,
                     Record = entityToUpdate,
-                    Key = id
+                    Key = localId
                 });
                 RecordUpdate(entityToUpdate);
                 return entityToUpdate;
@@ -380,22 +384,25 @@ namespace SADnD.Client.Shared
                 return true;
             else
             {
+                List<OnlineOfflineKey> keys = new();
                 foreach (var localTransaction in array.ToList())
                 {
                     try
                     {
+                        object oldOnlineId = new();
                         switch (localTransaction.Action)
                         {
                             case LocalTransactionTypes.Insert:
-                                var insertedEntity = await _apiRepository.Insert(localTransaction.Entity);
-                                var localId = primaryKey.GetValue(localTransaction.Entity);
-                                var onlineId = primaryKey.GetValue(insertedEntity);
-                                var key = new OnlineOfflineKey()
+                                oldOnlineId = primaryKey.GetValue(localTransaction.Entity);
+                                if (Convert.ToInt32(oldOnlineId) < 0)
                                 {
-                                    Id = Convert.ToInt32(localId),
-                                    OnlineId = onlineId,
-                                    LocalId = localId
-                                };
+                                    primaryKey.SetValue(localTransaction.Entity, 0);
+                                }
+                                var insertedEntity = await _apiRepository.Insert(localTransaction.Entity);
+                                var onlineId = primaryKey.GetValue(insertedEntity);
+                                keys = await GetKeys();
+                                var key = keys.FirstOrDefault(k => k.OnlineId.ToString() == oldOnlineId.ToString());
+                                key.OnlineId = primaryKey.GetValue(insertedEntity);
                                 await manager.AddRecordAsync(new StoreRecord<OnlineOfflineKey>()
                                 {
                                     StoreName = KeyStoreName,
@@ -403,11 +410,17 @@ namespace SADnD.Client.Shared
                                 });
                                 break;
                             case LocalTransactionTypes.Update:
-                                localTransaction.Entity = await UpdateKeyFromLocal(localTransaction.Entity);
+                                oldOnlineId = primaryKey.GetValue(localTransaction.Entity);
+                                if (Convert.ToInt32(oldOnlineId.ToString()) < 0)
+                                {
+                                    keys = await GetKeys();
+                                    var oldKey = keys.FirstOrDefault(k => k.OnlineId.ToString() == oldOnlineId.ToString());
+                                    var newKey = keys.FirstOrDefault(k => k.LocalId.ToString() == oldKey.LocalId.ToString() && k.Id != oldKey.Id);
+                                    primaryKey.SetValue(localTransaction.Entity, Convert.ToInt32(newKey.OnlineId.ToString()));
+                                }
                                 await _apiRepository.Update(localTransaction.Entity);
                                 break;
                             case LocalTransactionTypes.Delete:
-                                localTransaction.Entity = await UpdateKeyFromLocal(localTransaction.Entity);
                                 await _apiRepository.Delete(localTransaction.Entity);
                                 break;
                             default:
@@ -420,9 +433,24 @@ namespace SADnD.Client.Shared
                     }
                 }
                 await DeleteAllTransactions();
-                // TODO: Get all new records since last online, Clear and GetAll is wildly ineficient in bigger DBs
-                ClearLocalDB();
-                GetAll();
+                keys = await GetKeys();
+                foreach (var key in keys)
+                {
+                    if (Convert.ToInt32(key.OnlineId.ToString()) < 0)
+                    {
+                        await manager.DeleteRecordAsync(KeyStoreName, key.Id);
+                        var localEntity = (await manager.Where<TEntity>(storeName, "Id", key.LocalId)).FirstOrDefault();
+                        var newKey = keys.FirstOrDefault(k => k.LocalId.ToString() == key.LocalId.ToString() && k.Id != key.Id);
+                        primaryKey.SetValue(localEntity, Convert.ToInt32(newKey.OnlineId.ToString()));
+                        await manager.UpdateRecordAsync(new UpdateRecord<TEntity>()
+                        {
+                            StoreName = storeName,
+                            Record = localEntity,
+                            Key = newKey.LocalId
+                        });
+                    }
+                }
+                await GetAll();
                 return true;
             }
         }
