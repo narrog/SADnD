@@ -76,7 +76,7 @@
         }
     </div>
     @if (isUserDM) {
-        <button class="btn btn-primary" @onclick="Confirm">Übernehmen</button>
+        <button class="btn btn-primary" @onclick="Post">Übernehmen</button>
         <button class="btn btn-outline-secondary" @onclick="ShowVotes">@showVotesText</button>
     }
     else {
@@ -146,26 +146,26 @@
         showVotes = !showVotes;
         showVotesText = showVotes ? "Details ausblenden" : "Details anzeigen";
     }
-    private async void Confirm() {
+    private async void Post() {
         try {
             bool deleteDates = await js.InvokeAsync<bool>("confirm", "sollen nicht-bestätigte Termine gelöscht werden?");
             if (tempAppointments != null && tempAppointments.Any()) {
                 foreach (var appointment in tempAppointments){
                     if (appointment.Accepted){
                         await appointmentManager.Update(appointment);
-                        Console.WriteLine($"Termin vom {appointment.Date} wurde fixiert");
                     }
                     else {
                         if (deleteDates){
                             await appointmentManager.Delete(appointment);
-                            Console.WriteLine($"Termin vom {appointment.Date} wurde gelöscht");
                         }
                         else {
-                            Console.WriteLine($"Termin vom {appointment.Date} bleibt offen");
                         }
                     }
                 }
                 UIMessage = "Termine gespeichert";
+                StateHasChanged();
+                await Task.Delay(2500);
+                await js.InvokeVoidAsync("history.back");
             }
             else {
                 UIMessage = "Keine Termine gefunden";
