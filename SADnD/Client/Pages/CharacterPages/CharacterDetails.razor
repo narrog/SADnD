@@ -172,20 +172,29 @@
     private string unitOfWeight = "kg";
 
     private bool showShareDetails;
-
+    private string userId = "";
 
     protected override async Task OnInitializedAsync() {
         await appState.EnsureCharacters();
+        await appState.EnsureCampaigns();
         await appState.EnsureNotes();
 
-        if (appState.Characters != null && appState.Characters.Any()){
-            Character = appState.Characters.FirstOrDefault(c => c.Id == Int32.Parse(Id));
-            if (Character != null)
-                campaign = Character.CampaignId != null ? appState.Campaigns.FirstOrDefault(c => c.Id == Character.CampaignId) : null;
-            else
-                navManager.NavigateTo("/access-denied");
+        userId = appState.UserId;
+
+        Character = await characterManager.GetByID(Id);
+
+        if (Character == null){
+            navManager.NavigateTo("/access-denied");
+            return;
+        } 
+
+        if (Character.UserId == userId || (Character.UserAccess != null && Character.UserAccess.Any(x => x.Id == userId))){
+            campaign = Character.CampaignId != null ? appState.Campaigns.FirstOrDefault(c => c.Id == Character.CampaignId) : null;
         }
-        
+        else {
+            navManager.NavigateTo("/access-denied");
+        }
+       
     }
 
     private async Task DeleteCharacter() {
