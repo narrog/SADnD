@@ -32,7 +32,7 @@
                                 @if (appointment.AppointmentVotes != null) {
                                     @appointment.AppointmentVotes.Count(x => x.Reaction == "yes")
                                     <span> Zusagen</span>
-                                    @if (showVotes) {
+                                    @if (showDetails) {
                                         @foreach (var vote in appointment.AppointmentVotes) {
                                             <div><strong>@vote.User?.UserName</strong>: @vote.Reaction</div>
                                         }
@@ -50,7 +50,7 @@
                             </td>
                             <td class="d-table-cell d-md-none">
                                 @if(appointment.AppointmentVotes != null) {
-                                    @if (!showVotes) {
+                                    @if (!showDetails) {
                                         @appointment.AppointmentVotes.Count(x => !string.IsNullOrEmpty(x.Comment))
                                         <span> Kommentare</span>
                                     }
@@ -76,13 +76,13 @@
         }
     </div>
     @if (isUserDM) {
-        <button class="btn btn-primary" @onclick="Post">Übernehmen</button>
-        <button class="btn btn-outline-secondary" @onclick="ShowVotes">@showVotesText</button>
+        <button class="btn btn-primary me-2" @onclick="Post">Übernehmen</button>
     }
     else {
-        <a href="vote-appointments/@CampaignId" class="btn btn-outline-primary" title="Verfügbarkeiten mitteilen">Jetzt abstimmen</a>
+        <a href="vote-appointments/@CampaignId" class="btn btn-outline-primary me-2" title="Verfügbarkeiten mitteilen">Jetzt abstimmen</a>
     }
-    <a class="btn btn-secondary ms-2" href="campaign-details/@CampaignId">Zurück</a>
+    <button class="btn btn-outline-secondary me-2" @onclick="ShowDetails">@showDetailText</button>
+    <a class="btn btn-secondary me-2" href="campaign-details/@CampaignId">Zurück</a>
     @if (!string.IsNullOrEmpty(UIMessage)){
         <div class="row mt-3">
             <p>@UIMessage</p>
@@ -106,8 +106,8 @@
     private List<Appointment> tempAppointments = new List<Appointment>();
 
     private bool isUserDM;
-    private bool showVotes;
-    private string showVotesText = "Details anzeigen";
+    private bool showDetails;
+    private string showDetailText = "Details anzeigen";
     private string UIMessage = "";
 
     protected override async Task OnInitializedAsync() {
@@ -142,9 +142,9 @@
 
         }
     }
-    private void ShowVotes() {
-        showVotes = !showVotes;
-        showVotesText = showVotes ? "Details ausblenden" : "Details anzeigen";
+    private void ShowDetails() {
+        showDetails = !showDetails;
+        showDetailText = showDetails ? "Details ausblenden" : "Details anzeigen";
     }
     private async void Post() {
         try {
