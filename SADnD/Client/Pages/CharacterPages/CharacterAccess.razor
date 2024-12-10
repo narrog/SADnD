@@ -3,30 +3,22 @@
 
 <p>Markiere die Mitspieler, mit denen du deine Charakterinformationen teilen willst</p>
 
-<EditForm Model="@acceptedCoPlayers" OnValidSubmit="Post" class="w-100">
-
-    @foreach (var coPlayer in coPlayers) {
+@if (userAccess != null && userAccess.Any()){
+    @foreach (var coPlayer in userAccess)
+    {
         <div class="form-check">
-            <input class="form-check-input" type="checkbox" id='@($"checkbox-{coPlayer.Id}")' 
-            @onchange="e => ToggleCoPlayerSelection(coPlayer, e.Value)"
-                   checked="@character.UserAccess.Any(x => x.Id == coPlayer.Id)" />
-            <label class="form-check-label" for='@($"checkbox-{coPlayer.Id}")'>
-                @coPlayer.UserName
-            </label> 
-            @* <InputCheckbox class="form-check-input" id='@($"checkbox-{coPlayer.Id}")' @onchange="e => ToggleCoPlayerSelection(coPlayer, e.Value)"
-            checked="@acceptedCoPlayers.Contains(coPlayer)" />
-            <label class="form-check-label" for='@($"checkbox-{coPlayer.Id}")'>
-                @coPlayer.UserName
-            </label> *@
+            <InputCheckbox type="checkbox" @bind-Value="coPlayer.HasAccess" />
+            <label class="form-check-label" for='@($"checkbox-{coPlayer.User.Id}")'>
+                @coPlayer.User.UserName
+            </label>
         </div>
     }
 
     <div class="mt-3">
-        <SubmitButton />
+        <button class="btn btn-primary" @onclick="Post">Übernehmen</button>
         <button class="btn btn-outline-secondary me-2" type="button" @onclick="Close">Abbrechen</button>
     </div>
 
-    <ValidationSummary class="mt-3" />
     @if (!string.IsNullOrEmpty(UIMessage)) {
         <ul class="mt-3">
             <li class="validation-message">
@@ -34,7 +26,8 @@
             </li>
         </ul>
     }
-</EditForm>
+}
+
 
 
 
@@ -53,32 +46,25 @@
     private Character character = new Character();
     private List<ApplicationUser> coPlayers = new List<ApplicationUser>();
     private List<ApplicationUser> acceptedCoPlayers = new List<ApplicationUser>();
-    public List<(ApplicationUser user, bool hasAccess)> userAccess = new List<(ApplicationUser user, bool hasAccess)>();
+    public List<SetUserAccess> userAccess = new List<SetUserAccess>();
 
     private string UIMessage = "";
+
+    public class SetUserAccess
+    {
+        public ApplicationUser User { get; set; }
+        public bool HasAccess { get; set; }
+    }
 
     protected override async Task OnInitializedAsync() {
         await appState.EnsureCampaigns();
         campaignId = context.Character.CampaignId;
         character = context.Character;
-        // ToDo: Liste acceptedCoPlayers mit Einträgen füllen.
-        if (character.UserAccess != null && character.UserAccess.Any()) {
-            acceptedCoPlayers = character.UserAccess.ToList();            
-        }
 
         if (!string.IsNullOrEmpty(campaignId)) {
             GetCoPlayers();
         }
-        // Console.WriteLine($"character.UserAccess: {JsonConvert.SerializeObject(character.UserAccess)}");
-        // if (character.UserAccess != null && character.UserAccess.Any()) {
-        //     foreach (var player in coPlayers){
-        //         if (character.UserAccess.Any(x => x.Id == player.Id))
-        //             userAccess.Add((player, true));
-        //         else 
-        //             userAccess.Add((player, false));
-        //     }
-        //     Console.WriteLine($"userAccess: {JsonConvert.SerializeObject(userAccess)}");
-        // }
+
     }
 
     private void GetCoPlayers() {
@@ -104,22 +90,35 @@
                 }
             }
         }
+        InitUserAccess();
     }
-    private void ToggleCoPlayerSelection(ApplicationUser coPlayer, object isChecked) {
-        bool isSelected = (bool)isChecked;
-        if (isSelected) {
-            if (!acceptedCoPlayers.Contains(coPlayer)) {
-                acceptedCoPlayers.Add(coPlayer);
+    private void InitUserAccess() {
+        foreach (var player in coPlayers) {
+            if (character.UserAccess.Any(x => x.Id == player.Id)) {
+                userAccess.Add(new SetUserAccess {
+                        User = player,
+                        HasAccess = true
+                    });
+            }
+            else {
+                userAccess.Add(new SetUserAccess {
+                        User = player,
+                        HasAccess = false
+                    });
             }
         }
-        else {
-            acceptedCoPlayers.Remove(coPlayer);
-        }
     }
+
     private async void Post() {
         try
         {
-            // ToDo: Logik für speichern der AccessPlayer
+            acceptedCoPlayers.Clear();
+            foreach (var player in userAccess) {
+                if (player.HasAccess) {
+                    acceptedCoPlayers.Add(player.User);
+                }
+            }
+
             context.Character.UserAccess = acceptedCoPlayers;
             await context.UpdateCharacter(context.Character);
             Close();
