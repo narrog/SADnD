@@ -118,9 +118,11 @@
                     acceptedCoPlayers.Add(player.User);
                 }
             }
-
+            Console.WriteLine($"acceptedCoPlayers: {JsonConvert.SerializeObject(acceptedCoPlayers)}");
             context.Character.UserAccess = acceptedCoPlayers;
-            await context.UpdateCharacter(context.Character);
+            Console.WriteLine($"context.Character.UserAccess: {JsonConvert.SerializeObject(context.Character.UserAccess)}");
+            // ToDo: Speichern vom Charakter
+            // await context.UpdateCharacter(context.Character);
             Close();
         }
         catch (Exception ex)
