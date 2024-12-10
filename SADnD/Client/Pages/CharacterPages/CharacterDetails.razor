@@ -80,15 +80,15 @@
             @if (!showAddCampaign) {
                 <div class="row mt-3">
                     <div class="col-12">
-                        <button class="btn btn-outline-secondary" @onclick="ShowCharacterDetails">
+                        <button class="btn btn-outline-secondary me-2" @onclick="ShowCharacterDetails">
                             <span class="oi oi-eye me-2"></span> @showDetailsText
                         </button>
                         @if (Character.UserId == appState.UserId) {
-                            <a class="btn btn-outline-primary" href="/new-character/@Id">
+                            <a class="btn btn-outline-primary me-2" href="/new-character/@Id">
                                 <span class="oi oi-pencil me-2"></span> bearbeiten
                             </a>
                             @if (campaign != null) {
-                                <button class="btn btn-outline-secondary" @onclick="ShowShareDetails">
+                                <button class="btn btn-outline-secondary me-2" @onclick="ShowShareDetails">
                                     <span class="oi oi-eye me-2"></span> Details teilen
                                 </button>
                             }
