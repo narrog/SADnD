@@ -1,10 +1,10 @@
-﻿@page "/new-appointments/{CampaignId}/{AppointmentFix}"
+﻿@page "/new-appointments/{CampaignId}"
 @attribute [Authorize]
 @inject AppointmentApiManager appointmentManager
 @inject IJSRuntime js
 @using Newtonsoft.Json
 
-<h3>@pageTitle</h3>
+<h3>Termine eintragen</h3>
 
 <div class="container-fluid">
     <div class="row">
@@ -13,25 +13,39 @@
                 @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == appState.UserId)) {
                     <EditForm Model="listOfAppointments" OnValidSubmit=" Post">
                         <DataAnnotationsValidator />
-                        @foreach (var appointment in listOfAppointments) {
-                            <div class="form-group date-container mt-2">
-                                <div>
-                                    <label>Datum:</label>
-                                    <InputDate @bind-Value="appointment.Date" min="@DateTime.Today.ToString("yyyy-MM-dd")" class="form-control" />
-                                </div>
-                                <div>
-                                    <label>Start:</label>
-                                    <InputText @bind-Value="appointment.StartTimeInput" class="form-control" />
-                                </div>
-                                <div>
-                                    <label>Ende:</label>
-                                    <InputText @bind-Value="appointment.EndTimeInput" class="form-control" />
-                                </div>
-                                <div class="d-flex align-items-end">
-                                    <button type="button" class="btn btn-danger" @onclick="() => RemoveAppointment(appointment)">Entfernen</button>
-                                </div>
-                            </div>
-                        }
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Datum</th>
+                                    <th>Start</th>
+                                    <th>Ende</th>
+                                    <th>Fix</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var appointment in listOfAppointments) {
+                                    <tr>
+                                        <td>
+                                            <InputDate @bind-Value="appointment.Date" min="@DateTime.Today.ToString("yyyy-MM-dd")" class="form-control" />
+                                        </td>
+                                        <td>
+                                            <InputText @bind-Value="appointment.StartTimeInput" class="form-control" />
+                                        </td>
+                                        <td>
+                                            <InputText @bind-Value="appointment.EndTimeInput" class="form-control" />
+                                        </td>
+                                        <td>
+                                            <InputCheckbox @bind-Value="appointment.Accepted" class="form-check" />
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-danger" @onclick="() => RemoveAppointment(appointment)">Entfernen</button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        
                         <button type="button" class="btn btn-primary mt-3" @onclick="AddAppointment">Weiteren Termin hinzufügen</button>
                         <FormButtons />
                         <ValidationSummary class="mt-3" />
@@ -53,9 +67,6 @@
     private CascadingAppState appState { get; set; }
     [Parameter]
     public required string CampaignId { get; set; }
-    [Parameter]
-    public required string AppointmentFix { get; set; }
-    private bool appointmentFix;
 
     private List<Appointment> listOfAppointments = new();
     private List<Appointment> appointmentsToAdd = new();
@@ -70,9 +81,6 @@
         await appState.EnsureCampaigns();
         campaign = appState.Campaigns.FirstOrDefault(x => x.Id == CampaignId);
 
-        appointmentFix = AppointmentFix == "1" ? true : false;
-        pageTitle = AppointmentFix == "1" ? "Termine eintragen" : "Termin-Umfrage erstellen";
-
         AddAppointment(); 
     }
 
@@ -81,9 +89,10 @@
                 Date = DateOnly.FromDateTime(DateTime.Today),
                 CampaignId = CampaignId
             };
-        newAppointment.Accepted = appointmentFix;
+        
 
         if (listOfAppointments.Count > 0) {
+            newAppointment.Accepted = listOfAppointments[0].Accepted;
             newAppointment.StartTimeInput = listOfAppointments[0].StartTimeInput;
             newAppointment.EndTimeInput = listOfAppointments[0].EndTimeInput;
         }
