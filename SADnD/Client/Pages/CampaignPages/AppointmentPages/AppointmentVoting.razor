@@ -1,6 +1,6 @@
 ﻿@page "/vote-appointments/{CampaignId}"
 @attribute [Authorize]
-@inject AppointmentApiManager appointmentManager
+@inject SyncRepository<Appointment> appointmentManager
 
 <h3>Terminplanung</h3>
 

@@ -1,6 +1,6 @@
 ﻿@page "/open-appointments/{CampaignId}"
 @attribute [Authorize]
-@inject AppointmentApiManager appointmentManager
+@inject SyncRepository<Appointment> appointmentManager
 @inject IJSRuntime js
 @using Newtonsoft.Json
 
