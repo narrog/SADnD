@@ -1,7 +1,7 @@
 ﻿@page "/all-items"
 
 @attribute [Authorize]
-@inject InventoryItemApiManager inventoryItemManager
+@inject SyncRepository<InventoryItem> inventoryItemManager
 @inject IJSRuntime js
 
 <h3>Deine Items</h3>

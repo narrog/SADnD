@@ -1,10 +1,10 @@
 ﻿@page "/new-campaign"
 
 @attribute [Authorize]
-@using Newtonsoft.Json
 @inject IJSRuntime js
+@using Newtonsoft.Json
 
-@inject CampaignApiManager campaignManager
+@inject APIRepository<Campaign> campaignManager
 
 <h3>Kampagne hinzufügen</h3>
 
