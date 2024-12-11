@@ -16,7 +16,7 @@ namespace SADnD.Client.Shared
         private readonly IJSRuntime _jsruntime;
         string _dbName = "";
 
-        IndexedDbManager manager;
+        public IndexedDbManager manager;
         string storeName = "";
         Type entityType;
         PropertyInfo primaryKey;
@@ -50,7 +50,7 @@ namespace SADnD.Client.Shared
         }
 
         [JSInvokable("ConnectivityChanged")]
-        public async void OnConnectivityChanged(bool isOnline)
+        public virtual async void OnConnectivityChanged(bool isOnline)
         {
             IsOnline = isOnline;
 
@@ -63,7 +63,7 @@ namespace SADnD.Client.Shared
             }
         }
 
-        private async Task EnsureManager()
+        public async Task EnsureManager()
         {
             if (manager == null)
             {
@@ -72,7 +72,7 @@ namespace SADnD.Client.Shared
             }
         }
 
-        public async Task<bool> Delete(TEntity entityToDelete)
+        public virtual async Task<bool> Delete(TEntity entityToDelete)
         {
             bool deleted = false;
             if (IsOnline)
@@ -84,12 +84,12 @@ namespace SADnD.Client.Shared
                 deleted = await DeleteOffline(entityToDelete);
             return deleted;
         }
-        public async Task<bool> DeleteOffline(TEntity entityToDelete)
+        public virtual async Task<bool> DeleteOffline(TEntity entityToDelete)
         {
             await EnsureManager();
             return await DeleteOffline(primaryKey.GetValue(entityToDelete));
         }
-        public async Task<bool> Delete(object id)
+        public virtual async Task<bool> Delete(object id)
         {
             bool deleted = false;
             if (IsOnline)
@@ -102,7 +102,7 @@ namespace SADnD.Client.Shared
             return deleted;
         }
 
-        public async Task<bool> DeleteOffline(object id)
+        public virtual async Task<bool> DeleteOffline(object id)
         {
             await EnsureManager();
             try
@@ -131,7 +131,7 @@ namespace SADnD.Client.Shared
                 return false;
             }
         }
-        public async void RecordDelete(object id)
+        public virtual async void RecordDelete(object id)
         {
             if (IsOnline)
                 return;
@@ -150,21 +150,21 @@ namespace SADnD.Client.Shared
             };
             await manager.AddRecordAsync(record);
         }
-        private async Task ClearLocalDB()
-        {
-            await EnsureManager();
-            await manager.ClearTableAsync(KeyStoreName);
-            await manager.ClearTableAsync(storeName);
-        }
-        public async Task<IEnumerable<TEntity>> GetAll()
+        //private async Task ClearLocalDB()
+        //{
+        //    await EnsureManager();
+        //    await manager.ClearTableAsync(KeyStoreName);
+        //    await manager.ClearTableAsync(storeName);
+        //}
+        public virtual async Task<IEnumerable<TEntity>> GetAll()
         {
             return await GetAll(false);
         }
-        public async Task<IEnumerable<TEntity>> GetAll(bool dontSync = false)
+        public virtual async Task<IEnumerable<TEntity>> GetAll(bool dontSync = false)
         {
             if (IsOnline)
             {
-                var list = (await _apiRepository.GetAll()).ToList();
+                var list = await _apiRepository.GetAll();
                 if (list != null)
                 {
                     if (!dontSync)
@@ -200,7 +200,7 @@ namespace SADnD.Client.Shared
             else
                 return await GetAllOffline(true);
         }
-        public async Task<IEnumerable<TEntity>> GetAllOffline(bool onlineKeys)
+        public virtual async Task<IEnumerable<TEntity>> GetAllOffline(bool onlineKeys)
         {
             await EnsureManager();
             var array = await manager.ToArray<TEntity>(storeName);
@@ -218,14 +218,14 @@ namespace SADnD.Client.Shared
                 return array.ToList();
             }
         }
-        public async Task<TEntity> GetByID(object id)
+        public virtual async Task<TEntity> GetByID(object id)
         {
             if (IsOnline)
                 return await _apiRepository.GetByID(id);
             else
                 return await GetByIDOffline(id);
         }
-        public async Task<TEntity> GetByIDOffline(object id)
+        public virtual async Task<TEntity> GetByIDOffline(object id)
         {
             await EnsureManager();
             var localId = await GetLocalId(id);
@@ -235,7 +235,7 @@ namespace SADnD.Client.Shared
             else
                 return null;
         }
-        public async Task<TEntity> Insert(TEntity entity)
+        public virtual async Task<TEntity> Insert(TEntity entity)
         {
             TEntity returnValue;
             if (IsOnline)
@@ -247,7 +247,7 @@ namespace SADnD.Client.Shared
                 returnValue = await InsertOffline(entity);
             return returnValue;
         }
-        public async Task<TEntity> InsertOffline(TEntity entity)
+        public virtual async Task<TEntity> InsertOffline(TEntity entity)
         {
             await EnsureManager();
 
@@ -293,7 +293,7 @@ namespace SADnD.Client.Shared
                 return null;
             }
         }
-        public async void RecordInsert(TEntity entity)
+        public virtual async void RecordInsert(TEntity entity)
         {
             if (IsOnline)
                 return;
@@ -317,7 +317,7 @@ namespace SADnD.Client.Shared
                 // TODO: Log exception
             }
         }
-        public async Task<TEntity> Update(TEntity entityToUpdate)
+        public virtual async Task<TEntity> Update(TEntity entityToUpdate)
         {
             TEntity localEntity;
             if (IsOnline)
@@ -329,7 +329,7 @@ namespace SADnD.Client.Shared
                 await UpdateOffline(entityToUpdate);
             return entityToUpdate;
         }
-        public async Task<TEntity> UpdateOffline(TEntity entityToUpdate)
+        public virtual async Task<TEntity> UpdateOffline(TEntity entityToUpdate)
         {
             await EnsureManager();
             object localId = await GetLocalId(primaryKey.GetValue(entityToUpdate));
@@ -350,7 +350,7 @@ namespace SADnD.Client.Shared
                 return null;
             }
         }
-        public async void RecordUpdate(TEntity entity)
+        public virtual async void RecordUpdate(TEntity entity)
         {
             if (IsOnline)
                 return;
@@ -374,7 +374,7 @@ namespace SADnD.Client.Shared
                 // TODO: Log exception
             }
         }
-        public async Task<bool> SyncLocalToServer()
+        public virtual async Task<bool> SyncLocalToServer()
         {
             if (!IsOnline)
                 return false;
@@ -471,7 +471,7 @@ namespace SADnD.Client.Shared
             var key = keys.Where(x => x.LocalId.ToString() == localId.ToString()).FirstOrDefault();
             return key.OnlineId;
         }
-        private async Task<List<OnlineOfflineKey>> GetKeys()
+        public async Task<List<OnlineOfflineKey>> GetKeys()
         {
             await EnsureManager();
             return (await manager.ToArray<OnlineOfflineKey>(KeyStoreName)).ToList();
@@ -501,7 +501,7 @@ namespace SADnD.Client.Shared
             primaryKey.SetValue(entity, key);
             return entity;
         }
-        private async Task<TEntity> UpdateKeyFromLocal(TEntity entity)
+        public async Task<TEntity> UpdateKeyFromLocal(TEntity entity)
         {
             var localId = primaryKey.GetValue(entity);
             var keys = await GetKeys();

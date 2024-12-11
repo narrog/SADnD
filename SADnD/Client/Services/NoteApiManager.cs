@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using SADnD.Client.Shared;
 using SADnD.Shared;
 using SADnD.Shared.Models;
+using System.Collections.Generic;
 using System.Net;
 using System.Text;
 
@@ -10,11 +11,13 @@ namespace SADnD.Client.Services
 {
     public class NoteApiManager : APIRepository<Note>
     {
+        string _controllerName;
         HttpClient _httpClient;
         public NoteApiManager(HttpClient httpClient)
-            : base(httpClient, "note")
+            : base(httpClient,"note")
         {
             _httpClient = httpClient;
+            _controllerName = typeof(Note).Name;
         }
 
         private Dictionary<string, Type> typeMapping = new Dictionary<string, Type>()
@@ -25,11 +28,11 @@ namespace SADnD.Client.Services
             {"NoteQuest",typeof(NoteQuest)},
             {"NoteHint",typeof(NoteHint)}
         };
-        public async Task<IEnumerable<Note>> GetAll()
+        public override async Task<IEnumerable<Note>> GetAll()
         {
             try
             {
-                var result = await _httpClient.GetAsync("note");
+                var result = await _httpClient.GetAsync(_controllerName);
                 result.EnsureSuccessStatusCode();
                 string responseBody = await result.Content.ReadAsStringAsync();
                 var response = JsonConvert.DeserializeObject<APIListOfEntityResponse<JObject>>(responseBody);
@@ -49,15 +52,16 @@ namespace SADnD.Client.Services
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Exception: {ex.Message}");
                 return null;
             }
         }
-        public async Task<Note> GetByID(object id)
+        public override async Task<Note> GetByID(object id)
         {
             try
             {
                 var arg = WebUtility.HtmlEncode(id.ToString());
-                var url = "note" + "/" + arg;
+                var url = _controllerName + "/" + arg;
                 var result = await _httpClient.GetAsync(url);
                 result.EnsureSuccessStatusCode();
                 string responseBody = await result.Content.ReadAsStringAsync();
@@ -76,12 +80,12 @@ namespace SADnD.Client.Services
                 return null;
             }
         }
-        public async Task<Note> Insert(Note entity)
+        public override async Task<Note> Insert(Note entity)
         {
             try
             {
                 Console.WriteLine($"Insert {JsonConvert.SerializeObject(entity)}");
-                var result = await _httpClient.PostAsync("note", new StringContent(JsonConvert.SerializeObject(entity), Encoding.UTF8, "application/json"));
+                var result = await _httpClient.PostAsync(_controllerName, new StringContent(JsonConvert.SerializeObject(entity), Encoding.UTF8, "application/json"));
                 result.EnsureSuccessStatusCode();
                 string responseBody = await result.Content.ReadAsStringAsync();
                 var response = JsonConvert.DeserializeObject<APIEntityResponse<JObject>>(responseBody);
@@ -99,11 +103,11 @@ namespace SADnD.Client.Services
                 return null;
             }
         }
-        public async Task<Note> Update(Note entity)
+        public override async Task<Note> Update(Note entity)
         {
             try
             {
-                var result = await _httpClient.PutAsync("note", new StringContent(JsonConvert.SerializeObject(entity), Encoding.UTF8, "application/json"));
+                var result = await _httpClient.PutAsync(_controllerName, new StringContent(JsonConvert.SerializeObject(entity), Encoding.UTF8, "application/json"));
                 result.EnsureSuccessStatusCode();
                 string responseBody = await result.Content.ReadAsStringAsync();
                 var response = JsonConvert.DeserializeObject<APIEntityResponse<JObject>>(responseBody);
@@ -121,7 +125,7 @@ namespace SADnD.Client.Services
                 return null;
             }
         }
-        public async Task<bool> Delete(Note entity)
+        public override async Task<bool> Delete(Note entity)
         {
             try
             {
@@ -131,7 +135,7 @@ namespace SADnD.Client.Services
                     .ToString();
 
                 var arg = WebUtility.HtmlEncode(value);
-                var url = "note" + "/" + arg;
+                var url = _controllerName + "/" + arg;
                 var result = await _httpClient.DeleteAsync(url);
                 result.EnsureSuccessStatusCode();
                 return true;
@@ -141,11 +145,11 @@ namespace SADnD.Client.Services
                 return false;
             }
         }
-        public async Task<bool> Delete(object id)
+        public override async Task<bool> Delete(object id)
         {
             try
             {
-                var url = "note" + "/" + WebUtility.HtmlEncode(id.ToString());
+                var url = _controllerName + "/" + WebUtility.HtmlEncode(id.ToString());
                 Console.WriteLine($"url: {url}");
                 var result = await _httpClient.DeleteAsync(url);
                 Console.WriteLine($"result: {result}");

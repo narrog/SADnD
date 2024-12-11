@@ -151,21 +151,101 @@ builder.Services.AddBlazorDB(options =>
         },
         new StoreSchema()
         {
-            Name = "Note",
+            Name = "NoteStory",
             PrimaryKey = "Id",
             PrimaryKeyAuto = true,
             UniqueIndexes = new List<string> {"Id"}
         },
         new StoreSchema()
         {
-            Name = $"Note{Globals.LocalTransactionsSuffix}",
+            Name = $"NoteStory{Globals.LocalTransactionsSuffix}",
             PrimaryKey = "Id",
             PrimaryKeyAuto = true,
             UniqueIndexes = new List<string> {"Id"}
         },
         new StoreSchema()
         {
-            Name = $"Note{Globals.KeysSuffix}",
+            Name = $"NoteStory{Globals.KeysSuffix}",
+            PrimaryKey = "Id",
+            PrimaryKeyAuto = true,
+            UniqueIndexes = new List<string> {"Id"}
+        },new StoreSchema()
+        {
+            Name = "NotePerson",
+            PrimaryKey = "Id",
+            PrimaryKeyAuto = true,
+            UniqueIndexes = new List<string> {"Id"}
+        },
+        new StoreSchema()
+        {
+            Name = $"NotePerson{Globals.LocalTransactionsSuffix}",
+            PrimaryKey = "Id",
+            PrimaryKeyAuto = true,
+            UniqueIndexes = new List<string> {"Id"}
+        },
+        new StoreSchema()
+        {
+            Name = $"NotePerson{Globals.KeysSuffix}",
+            PrimaryKey = "Id",
+            PrimaryKeyAuto = true,
+            UniqueIndexes = new List<string> {"Id"}
+        },new StoreSchema()
+        {
+            Name = "NoteLocation",
+            PrimaryKey = "Id",
+            PrimaryKeyAuto = true,
+            UniqueIndexes = new List<string> {"Id"}
+        },
+        new StoreSchema()
+        {
+            Name = $"NoteLocation{Globals.LocalTransactionsSuffix}",
+            PrimaryKey = "Id",
+            PrimaryKeyAuto = true,
+            UniqueIndexes = new List<string> {"Id"}
+        },
+        new StoreSchema()
+        {
+            Name = $"NoteLocation{Globals.KeysSuffix}",
+            PrimaryKey = "Id",
+            PrimaryKeyAuto = true,
+            UniqueIndexes = new List<string> {"Id"}
+        },new StoreSchema()
+        {
+            Name = "NoteQuest",
+            PrimaryKey = "Id",
+            PrimaryKeyAuto = true,
+            UniqueIndexes = new List<string> {"Id"}
+        },
+        new StoreSchema()
+        {
+            Name = $"NoteQuest{Globals.LocalTransactionsSuffix}",
+            PrimaryKey = "Id",
+            PrimaryKeyAuto = true,
+            UniqueIndexes = new List<string> {"Id"}
+        },
+        new StoreSchema()
+        {
+            Name = $"NoteQuest{Globals.KeysSuffix}",
+            PrimaryKey = "Id",
+            PrimaryKeyAuto = true,
+            UniqueIndexes = new List<string> {"Id"}
+        },new StoreSchema()
+        {
+            Name = "NoteHint",
+            PrimaryKey = "Id",
+            PrimaryKeyAuto = true,
+            UniqueIndexes = new List<string> {"Id"}
+        },
+        new StoreSchema()
+        {
+            Name = $"NoteHint{Globals.LocalTransactionsSuffix}",
+            PrimaryKey = "Id",
+            PrimaryKeyAuto = true,
+            UniqueIndexes = new List<string> {"Id"}
+        },
+        new StoreSchema()
+        {
+            Name = $"NoteHint{Globals.KeysSuffix}",
             PrimaryKey = "Id",
             PrimaryKeyAuto = true,
             UniqueIndexes = new List<string> {"Id"}
@@ -205,6 +285,11 @@ builder.Services.AddScoped<JoinRequestApiManager>();
 builder.Services.AddScoped<JoinRequestSyncManager>();
 builder.Services.AddScoped<InventoryItemApiManager>();
 builder.Services.AddScoped<InventoryItemSyncManager>();
+builder.Services.AddScoped<IndexedDBRepository<NoteStory>>();
+builder.Services.AddScoped<IndexedDBRepository<NotePerson>>();
+builder.Services.AddScoped<IndexedDBRepository<NoteLocation>>();
+builder.Services.AddScoped<IndexedDBRepository<NoteQuest>>();
+builder.Services.AddScoped<IndexedDBRepository<NoteHint>>();
 builder.Services.AddScoped<NoteApiManager>();
 builder.Services.AddScoped<NoteSyncManager>();
 builder.Services.AddScoped<AppointmentApiManager>();

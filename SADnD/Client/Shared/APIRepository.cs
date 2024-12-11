@@ -15,10 +15,10 @@ namespace SADnD.Client.Shared
         public APIRepository(HttpClient httpClient, string controllerName)
         {
             _httpClient = httpClient;
-            _controllerName = controllerName;
+            _controllerName = typeof(TEntity).Name;
         }
 
-        public async Task<IEnumerable<TEntity>> GetAll()
+        public virtual async Task<IEnumerable<TEntity>> GetAll()
         {
             try
             {
@@ -40,7 +40,7 @@ namespace SADnD.Client.Shared
                 return null;
             }
         }
-        public async Task<TEntity> GetByID(object id)
+        public virtual async Task<TEntity> GetByID(object id)
         {
             try
             {
@@ -64,7 +64,7 @@ namespace SADnD.Client.Shared
                 return null;
             }
         }
-        public async Task<TEntity> Insert(TEntity entity)
+        public virtual async Task<TEntity> Insert(TEntity entity)
         {
             try
             {
@@ -86,7 +86,7 @@ namespace SADnD.Client.Shared
                 return null;
             }
         }
-        public async Task<TEntity> Update(TEntity entity)
+        public virtual async Task<TEntity> Update(TEntity entity)
         {
             try
             {
@@ -108,7 +108,7 @@ namespace SADnD.Client.Shared
                 return null;
             }
         }
-        public async Task<bool> Delete(TEntity entity)
+        public virtual async Task<bool> Delete(TEntity entity)
         {
             try
             {
@@ -128,7 +128,7 @@ namespace SADnD.Client.Shared
                 return false;
             }
         }
-        public async Task<bool> Delete(object id)
+        public virtual async Task<bool> Delete(object id)
         {
             Console.WriteLine("Funktion Delete in APIRepository aufgerufen");
             try
