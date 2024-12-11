@@ -1,24 +1,15 @@
 ﻿using BlazorDB;
 using Microsoft.JSInterop;
-using Newtonsoft.Json;
 using SADnD.Client.Shared;
 using SADnD.Shared.Models;
-using System.Collections.Generic;
-using System.Net.Http.Headers;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
 
 namespace SADnD.Client.Services
 {
-    public class NoteSyncManager : IndexedDBSyncRepository<Note>
+    public class NoteSyncManager : SyncRepository<Note>
     {
         private static SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
-        //private readonly string _dbName;
-        //private readonly IBlazorDbFactory _dbFactory;
         private readonly NoteApiManager _apiRepository;
         private readonly IJSRuntime _jsruntime;
-        //private readonly string _storeName;
         private readonly Dictionary<Type, object> _repositories;
         private readonly IndexedDBRepository<NoteStory> _storyDBRepository;
         private readonly IndexedDBRepository<NotePerson> _personDBRepository;
@@ -34,13 +25,10 @@ namespace SADnD.Client.Services
             IndexedDBRepository<NoteLocation> locationDBRepository, 
             IndexedDBRepository<NoteQuest> questDBRepository, 
             IndexedDBRepository<NoteHint> hintDBRepository)
-            : base("SADnD.IndexedDB", dbFactory, noteManager, jsRuntime)
+            : base(noteManager,null, jsRuntime)
         {
-            //_dbName = "SADnD.IndexedDB";
-            //_dbFactory = dbFactory;
             _apiRepository = noteManager;
             _jsruntime = jsRuntime;
-            //_storeName = "Note";
 
             _storyDBRepository = storyDBRepository;
             _personDBRepository = personDBRepository;
@@ -56,31 +44,8 @@ namespace SADnD.Client.Services
                 { typeof(NoteHint), _hintDBRepository}
             };
         }
-        //private Dictionary<string, Type> typeMapping = new Dictionary<string, Type>()
-        //{
-        //    {"NoteStory",typeof(NoteStory)},
-        //    {"NotePerson",typeof(NotePerson)},
-        //    {"NoteLocation",typeof(NoteLocation)},
-        //    {"NoteQuest",typeof(NoteQuest)},
-        //    {"NoteHint",typeof(NoteHint)}
-        //};
-        //private IndexedDBRepository<T> GetRepository<T>() where T: Note
-        //{
-        //    if(_repositories.TryGetValue(typeof(T), out var repo))
-        //    {
-        //        return repo as IndexedDBRepository<T>;
-        //    }
-        //    return null;
-        //}
-        //private object GetRepository(Note note)
-        //{
-        //    if (_repositories.TryGetValue(note.GetType(),out var repository)) 
-        //        return repository;
-        //    throw new InvalidOperationException();
-        //}
         public override async Task<bool> Delete(Note entityToDelete)
         {
-            Console.WriteLine($"delete Object: {JsonConvert.SerializeObject(entityToDelete)}");
             bool deleted = false;
             switch (entityToDelete.GetType().Name)
             {
@@ -119,9 +84,7 @@ namespace SADnD.Client.Services
                     }
                     else
                     {
-                        Console.WriteLine($"before record: {entityToDelete.Id}");
                         await _locationDBRepository.RecordDelete(entityToDelete.Id);
-                        Console.WriteLine($"after record: {JsonConvert.SerializeObject(entityToDelete)}");
                         deleted = await _locationDBRepository.Delete((NoteLocation)entityToDelete);
                     }
                     break;
@@ -484,14 +447,12 @@ namespace SADnD.Client.Services
         {
             if (!IsOnline)
                 return false;
-            Console.WriteLine($"StartSync");
             var transactionsStory = await _storyDBRepository.GetTransactions();
             if (transactionsStory != null || transactionsStory.Count > 0)
             {
                 foreach (var transaction in transactionsStory)
                 {
                     object oldOnlineId = transaction.Entity.Id;
-                    Console.WriteLine($"transaction entity id: {oldOnlineId}");
                     switch (transaction.Action)
                     {
 
@@ -567,7 +528,6 @@ namespace SADnD.Client.Services
             {
                 foreach (var transaction in transactionsLocation)
                 {
-                    Console.WriteLine($"{transaction.Entity.GetType().Name} - {transaction.ActionName} - {JsonConvert.SerializeObject(transaction.Entity)}");
                     object oldOnlineId = transaction.Entity.Id;
                     switch (transaction.Action)
                     {

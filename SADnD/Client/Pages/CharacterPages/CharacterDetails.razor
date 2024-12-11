@@ -1,11 +1,10 @@
 ﻿@page "/character-details/{id}"
 @attribute [Authorize]
-@inject CharacterSyncManager characterManager
-@inject CampaignApiManager campaignManager
-@inject NoteApiManager noteManager
+@inject SyncRepository<Character> characterManager
+@inject APIRepository<Campaign> campaignManager
+@inject NoteSyncManager noteManager
 @inject IJSRuntime js
-@inherits NotesCategoryParent 
-@using Newtonsoft.Json
+@inherits NotesCategoryParent
 
 <CascadingValue Value="@this" IsFixed="true">
     @if (Character != null) {

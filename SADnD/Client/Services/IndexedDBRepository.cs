@@ -1,11 +1,9 @@
 ﻿using BlazorDB;
-using Microsoft.JSInterop;
-using Newtonsoft.Json;
+using SADnD.Client.Shared;
 using SADnD.Shared;
-using System.Net.Http.Headers;
 using System.Reflection;
 
-namespace SADnD.Client.Shared
+namespace SADnD.Client.Services
 {
     public class IndexedDBRepository<TEntity> : IRepository<TEntity> where TEntity : class
     {
@@ -37,7 +35,6 @@ namespace SADnD.Client.Shared
         }
         public virtual async Task<bool> Delete(TEntity entityToDelete)
         {
-            Console.WriteLine($"ID for delete: {primaryKey.GetValue(entityToDelete)}");
             return await Delete(primaryKey.GetValue(entityToDelete));
         }
 
@@ -45,7 +42,6 @@ namespace SADnD.Client.Shared
         {
             await EnsureManager();
             var localId = await GetLocalId(id);
-            Console.WriteLine($"localId for delete: {localId}");
             var result = await manager.DeleteRecordAsync(storeName, localId);
             if (result.Failed)
                 return false;
@@ -55,7 +51,6 @@ namespace SADnD.Client.Shared
         {
             var action = LocalTransactionTypes.Delete;
             var entity = await GetByID(id);
-            Console.WriteLine($"in record: {JsonConvert.SerializeObject(entity)}");
             var record = new StoreRecord<LocalTransaction<TEntity>>()
             {
                 StoreName = LocalStoreName,
@@ -84,7 +79,11 @@ namespace SADnD.Client.Shared
                 {
                     foreach (var entity in array)
                     {
-                        primaryKey.SetValue(entity, await GetOnlineId(primaryKey.GetValue(entity)));
+                        var onlineId = (await GetOnlineId(primaryKey.GetValue(entity))).ToString();
+                        if (primaryKey.PropertyType == typeof(int))
+                            primaryKey.SetValue(entity, Convert.ToInt32(onlineId));
+                        else
+                            primaryKey.SetValue(entity, onlineId);
                     }
                 }
                 return array.ToList();
@@ -98,18 +97,14 @@ namespace SADnD.Client.Shared
             var items = await manager.Where<TEntity>(storeName, "Id", localId);
             if (items.Any())
             {
-                Console.WriteLine($"items: {JsonConvert.SerializeObject(items.First())}");
                 var result = items.First();
-                Console.WriteLine($"result before id change: {JsonConvert.SerializeObject(result)}");
                 var onlineId = (await GetOnlineId(primaryKey.GetValue(result))).ToString();
-                if (primaryKey.PropertyType == typeof(Int32))
+                if (primaryKey.PropertyType == typeof(int))
                 {
                     primaryKey.SetValue(result, Convert.ToInt32(onlineId));
-                    Console.WriteLine($"id changed (int): {JsonConvert.SerializeObject(result)}");
                     return result;
                 }
                 primaryKey.SetValue(result, onlineId);
-                Console.WriteLine($"id changed (string): {JsonConvert.SerializeObject(result)}");
                 return result;
             }
             else
@@ -268,14 +263,12 @@ namespace SADnD.Client.Shared
         {
             var keys = await GetKeys();
             var key = keys.Where(x => x.OnlineId.ToString() == onlineId.ToString()).FirstOrDefault();
-            Console.WriteLine($"GetLocalId: {onlineId.ToString()} {key.LocalId.ToString()} - {key.LocalId.GetType()}");
             return key.LocalId;
         }
         private async Task<object> GetOnlineId(object localId)
         {
             var keys = await GetKeys();
             var key = keys.Where(x => x.LocalId.ToString() == localId.ToString()).FirstOrDefault();
-            Console.WriteLine($"GetOnlineId: {localId.ToString()} {key.LocalId.ToString()} - {key.LocalId.GetType()}");
             return key.OnlineId;
         }
     }

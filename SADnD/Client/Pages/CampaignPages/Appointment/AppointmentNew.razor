@@ -1,7 +1,6 @@
 ﻿@page "/new-appointments/{CampaignId}"
-@inject AppointmentSyncManager appointmentManager
+@inject SyncRepository<Appointment> appointmentManager
 @inject IJSRuntime js
-@using Newtonsoft.Json
 
 <h3>Terminvorschläge erstellen</h3>
 

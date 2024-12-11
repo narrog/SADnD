@@ -1,18 +1,12 @@
-﻿using BlazorDB;
-using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
 using SADnD.Shared;
-using System.Linq.Expressions;
 using System.Reflection;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using SADnD.Client.Services;
-using System.Xml;
-using SADnD.Shared.Models;
-namespace SADnD.Client.Shared
+using SADnD.Client.Shared;
+namespace SADnD.Client.Services
 {
     public class SyncRepository<TEntity> : IRepository<TEntity> where TEntity : class
     {
-        private static SemaphoreSlim semaphore = new SemaphoreSlim(1,1);
+        private static SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
         private readonly APIRepository<TEntity> _apiRepository;
         private readonly IndexedDBRepository<TEntity> _indexedDBRepository;
         private readonly IJSRuntime _jsruntime;

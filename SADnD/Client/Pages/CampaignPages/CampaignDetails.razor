@@ -1,10 +1,9 @@
 ﻿@page "/campaign-details/{id}"
 @attribute [Authorize]
-@inject CampaignApiManager campaignManager
-@inject JoinRequestSyncManager joinRequestManager
+@inject APIRepository<Campaign> campaignManager
+@inject SyncRepository<JoinRequest> joinRequestManager
 @inject IJSRuntime js
 @inherits NotesCategoryParent
-@using Newtonsoft.Json
 
 <h3>@Campaign.Name</h3>
 

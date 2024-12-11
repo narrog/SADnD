@@ -3,16 +3,15 @@ using SADnD.Shared;
 using System.Net;
 using System.Text;
 
-namespace SADnD.Client.Shared
+namespace SADnD.Client.Services
 {
     public class APIRepository<TEntity> : IRepository<TEntity>
         where TEntity : class
     {
         string _controllerName;
-        // string _primaryKeyName;
         HttpClient _httpClient;
 
-        public APIRepository(HttpClient httpClient, string controllerName)
+        public APIRepository(HttpClient httpClient)
         {
             _httpClient = httpClient;
             _controllerName = typeof(TEntity).Name;
@@ -130,13 +129,10 @@ namespace SADnD.Client.Shared
         }
         public virtual async Task<bool> Delete(object id)
         {
-            Console.WriteLine("Funktion Delete in APIRepository aufgerufen");
             try
             {
                 var url = _controllerName + "/" + WebUtility.HtmlEncode(id.ToString());
-                Console.WriteLine($"url: {url}");
                 var result = await _httpClient.DeleteAsync(url);
-                Console.WriteLine($"result: {result}");
                 result.EnsureSuccessStatusCode();
                 return true;
             }

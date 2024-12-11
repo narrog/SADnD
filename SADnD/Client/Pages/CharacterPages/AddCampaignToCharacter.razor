@@ -1,7 +1,6 @@
-﻿@inject CharacterSyncManager characterManager
-@inject CampaignApiManager campaignManager
+﻿@inject SyncRepository<Character> characterManager
+@inject APIRepository<Campaign> campaignManager
 @inject IJSRuntime js
-@using Newtonsoft.Json
 
 <h4>Kampagne zuweisen</h4>
 

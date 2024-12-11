@@ -1,6 +1,6 @@
 ﻿@using System.Security.Claims
-@inject CampaignApiManager campaignManager
-@inject CharacterSyncManager characterManager
+@inject APIRepository<Campaign> campaignManager
+@inject SyncRepository<Character> characterManager
 @inject NoteSyncManager noteManager
 
 <CascadingValue Value="this">
