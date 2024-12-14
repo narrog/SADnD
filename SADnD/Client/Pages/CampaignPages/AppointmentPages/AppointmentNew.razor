@@ -87,7 +87,7 @@
                 Date = DateOnly.FromDateTime(DateTime.Today),
                 CampaignId = CampaignId
             };
-        
+
 
         if (listOfAppointments.Count > 0) {
             newAppointment.Accepted = listOfAppointments[0].Accepted;
@@ -115,6 +115,7 @@
             AddAppointment();
             StateHasChanged();
             await Task.Delay(2500);
+            await appState.GetCampaigns();
             await js.InvokeVoidAsync("history.back");
         }
         catch (Exception) {
