@@ -135,7 +135,7 @@ namespace SADnD.Server.Controllers
                     character.UserId = user.Id;
                 }
                 await _characterManager.Update(character);
-                var result = await _characterManager.GetByID(character.Id);
+                var result = (await _characterManager.Get(x => x.Id == character.Id, null, "Race,Classes.Class,Inventory.Item,UserAccess")).FirstOrDefault();
                 if (result != null)
                 {
                     return Ok(new APIEntityResponse<Character>()

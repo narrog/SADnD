@@ -193,7 +193,7 @@
         else {
             navManager.NavigateTo("/access-denied");
         }
-       
+
     }
 
     private async Task DeleteCharacter() {
@@ -240,7 +240,8 @@
         StateHasChanged();
     }
 
-    public async Task UpdateCharacter(Character character){
-        await characterManager.Update(character);
+    public async Task UpdateCharacter(){
+        Character = await characterManager.Update(Character);
+        appState.Characters[appState.Characters.FindIndex(c => c.Id == Character.Id)] = Character;
     }
 }
