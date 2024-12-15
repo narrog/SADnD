@@ -1,5 +1,5 @@
-﻿@inject CampaignApiManager campaignManager
-@inject JoinRequestApiManager joinRequestManager
+﻿@inject APIRepository<Campaign> campaignManager
+@inject SyncRepository<JoinRequest> joinRequestManager
 @inject IJSRuntime js
 
 <div class="container-fluid mt-3">

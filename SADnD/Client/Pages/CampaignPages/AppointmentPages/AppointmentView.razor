@@ -1,0 +1,180 @@
+﻿@page "/open-appointments/{CampaignId}"
+@attribute [Authorize]
+@inject SyncRepository<Appointment> appointmentManager
+@inject IJSRuntime js
+@using Newtonsoft.Json
+
+<h3>Terminplanung</h3>
+
+<div class="container-fluid mt-3">
+    <div class="row">
+        @if (campaign != null && tempAppointments != null && tempAppointments.Any()) {
+            <table class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Datum</th>
+                        <th>Zeit</th>
+                        <th>Votes</th>
+                        <th>Kommentare</th>
+                        @if (isUserDM) {
+                            <th>Bestätigen</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @foreach (var appointment in tempAppointments) {
+                        <tr>
+                            <td>@appointment.Date</td>
+                            <td class="d-none d-md-table-cell">@appointment.StartTime - @appointment.EndTime</td>
+                            <td class="d-table-cell d-md-none">@appointment.StartTime</td>
+                            <td>
+                                @if (appointment.AppointmentVotes != null) {
+                                    @appointment.AppointmentVotes.Count(x => x.Reaction == "yes")
+                                    <span> Zusagen</span>
+                                    @if (showDetails) {
+                                        @foreach (var vote in appointment.AppointmentVotes) {
+                                            <div><strong>@vote.User?.UserName</strong>: @vote.Reaction</div>
+                                        }
+                                    }
+                                }
+                            </td>
+                            <td class="d-none d-md-table-cell">
+                                @if(appointment.AppointmentVotes != null) {
+                                    foreach (var vote in appointment.AppointmentVotes) {
+                                        @if (!string.IsNullOrEmpty(vote.Comment)) {
+                                            <strong>@vote.User?.UserName</strong><span>: </span>@vote.Comment<br />
+                                        }
+                                    }
+                                }
+                            </td>
+                            <td class="d-table-cell d-md-none">
+                                @if(appointment.AppointmentVotes != null) {
+                                    @if (!showDetails) {
+                                        @appointment.AppointmentVotes.Count(x => !string.IsNullOrEmpty(x.Comment))
+                                        <span> Kommentare</span>
+                                    }
+                                    else {
+                                        foreach (var vote in appointment.AppointmentVotes) {
+                                            @if (!string.IsNullOrEmpty(vote.Comment)) {
+                                                <strong>@vote.User?.UserName</strong><span>: </span>@vote.Comment<br />
+                                            }
+                                        }
+                                    }
+                                }
+                            </td>
+                            @if (isUserDM) {
+                                <td class="text-center text-md-start">
+                                    <InputCheckbox type="checkbox" @bind-Value="appointment.Accepted" />
+                                </td>
+                            }
+
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+    @if (isUserDM) {
+        <button class="btn btn-primary me-2" @onclick="Post">Übernehmen</button>
+    }
+    else {
+        <a href="vote-appointments/@CampaignId" class="btn btn-outline-primary me-2" title="Verfügbarkeiten mitteilen">Jetzt abstimmen</a>
+    }
+    <button class="btn btn-outline-secondary me-2" @onclick="ShowDetails">@showDetailText</button>
+    <a class="btn btn-secondary me-2" href="campaign-details/@CampaignId">Zurück</a>
+    @if (!string.IsNullOrEmpty(UIMessage)){
+        <div class="row mt-3">
+            <p>@UIMessage</p>
+        </div>
+    }
+</div>
+
+
+@code {
+    [CascadingParameter]
+    private CascadingAppState appState { get; set; }
+    [Parameter]
+    public required string CampaignId { get; set; }
+
+    public Campaign? campaign;
+
+    private string currentUserId = "";
+
+    private IEnumerable<Appointment>? allAppointments;
+    private IEnumerable<Appointment>? campaignAppointments;
+    private List<Appointment> tempAppointments = new List<Appointment>();
+
+    private bool isUserDM;
+    private bool showDetails;
+    private string showDetailText = "Details anzeigen";
+    private string UIMessage = "";
+
+    protected override async Task OnInitializedAsync() {
+        await appState.EnsureCampaigns();
+        currentUserId = appState.UserId;
+
+        campaign = appState.Campaigns.FirstOrDefault(x => x.Id == CampaignId);
+        if (campaign != null){
+            if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)){
+                isUserDM = true;
+            }
+        }
+
+        allAppointments = await appointmentManager.GetAll();
+
+        GetAppointmentsToVote();
+    }
+
+    private void GetAppointmentsToVote() {
+        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+
+        if (allAppointments != null && allAppointments.Any(x => x.CampaignId == CampaignId) && allAppointments.Any()) {
+            campaignAppointments = allAppointments
+                .Where(x => x.Date >= today && !x.Accepted && x.CampaignId == CampaignId)
+                .OrderBy(x => x.Date);
+        }
+
+        if (campaignAppointments != null && campaignAppointments.Any()){
+            foreach (var appointment in campaignAppointments) {
+                tempAppointments.Add(appointment);
+            }
+
+        }
+    }
+    private void ShowDetails() {
+        showDetails = !showDetails;
+        showDetailText = showDetails ? "Details ausblenden" : "Details anzeigen";
+    }
+    private async void Post() {
+        try {
+            bool deleteDates = await js.InvokeAsync<bool>("confirm", "sollen nicht-bestätigte Termine gelöscht werden?");
+            if (tempAppointments != null && tempAppointments.Any()) {
+                foreach (var appointment in tempAppointments){
+                    if (appointment.Accepted){
+                        await appointmentManager.Update(appointment);
+                    }
+                    else {
+                        if (deleteDates){
+                            await appointmentManager.Delete(appointment);
+                        }
+                        else {
+                        }
+                    }
+                }
+                UIMessage = "Termine gespeichert";
+                StateHasChanged();
+                await Task.Delay(2500);
+                await js.InvokeVoidAsync("history.back");
+            }
+            else {
+                UIMessage = "Keine Termine gefunden";
+            }
+        }
+        catch (Exception) {
+            UIMessage = "Fehler beim Speichern";
+            throw;
+        }
+    }
+
+}
