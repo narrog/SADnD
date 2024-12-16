@@ -16,6 +16,7 @@ builder.Services.AddHttpClient("SADnD.ServerAPI", client => client.BaseAddress =
 builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("SADnD.ServerAPI"));
 
 builder.Services.AddApiAuthorization();
+builder.Services.AddCascadingAuthenticationState();
 
 builder.Services.AddBlazorDB(options =>
 {
