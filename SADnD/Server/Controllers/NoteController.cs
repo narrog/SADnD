@@ -41,7 +41,7 @@ namespace SADnD.Server.Controllers
             try
             {
                 var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
-                var result = await _noteManager.Get(n => n.UserId == id);
+                var result = await _noteManager.Get(n => n.UserId == id || n.Character.UserAccess.Any(u => u.Id == id));
                 return Ok(new APIListOfEntityResponse<Note>()
                 {
                     Success = true,
