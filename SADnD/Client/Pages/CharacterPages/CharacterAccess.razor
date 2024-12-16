@@ -1,0 +1,135 @@
+﻿
+@inject SyncRepository<Character> characterManager
+@using Newtonsoft.Json
+
+<p>Markiere die Mitspieler, mit denen du deine Charakterinformationen teilen willst</p>
+
+@if (userAccess != null && userAccess.Any()){
+    @foreach (var coPlayer in userAccess)
+    {
+        <div class="form-check">
+            <InputCheckbox type="checkbox" @bind-Value="coPlayer.HasAccess" />
+            <label class="form-check-label" for='@($"checkbox-{coPlayer.User.Id}")'>
+                @coPlayer.User.UserName
+            </label>
+        </div>
+    }
+
+    <div class="mt-3">
+        <button class="btn btn-primary" @onclick="Post">Übernehmen</button>
+        <button class="btn btn-outline-secondary me-2" type="button" @onclick="Close">Abbrechen</button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(UIMessage)) {
+        <ul class="mt-3">
+            <li class="validation-message">
+                @UIMessage
+            </li>
+        </ul>
+    }
+}
+
+
+
+
+
+@code {
+    [CascadingParameter]
+    private CascadingAppState appState { get; set; }
+    [CascadingParameter]
+    private CharacterDetails context { get; set; }
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    private int? characterId;
+    private string? campaignId;
+    private Campaign campaign = new Campaign();
+    private Character character = new Character();
+    private List<ApplicationUser> coPlayers = new List<ApplicationUser>();
+    private List<ApplicationUser> acceptedCoPlayers = new List<ApplicationUser>();
+    public List<SetUserAccess> userAccess = new List<SetUserAccess>();
+
+    private string UIMessage = "";
+
+    public class SetUserAccess
+    {
+        public ApplicationUser User { get; set; }
+        public bool HasAccess { get; set; }
+    }
+
+    protected override async Task OnInitializedAsync() {
+        await appState.EnsureCampaigns();
+        campaignId = context.Character.CampaignId;
+        character = context.Character;
+
+        if (!string.IsNullOrEmpty(campaignId)) {
+            GetCoPlayers();
+        }
+
+    }
+
+    private void GetCoPlayers() {
+        if (context.campaign != null)
+            campaign = context.campaign;
+
+        coPlayers.Clear();
+        if (campaign != null) {
+            if (campaign.Players != null && campaign.Players.Any()) {
+                foreach (var player in campaign.Players) {
+                    if(player.Id != appState.UserId){
+                        player.Characters = null;
+                        coPlayers.Add((player));
+                    }
+                }
+            }
+            if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any()) {
+                foreach (var dm in campaign.DungeonMasters) {
+                    if(dm.Id != appState.UserId){
+                        dm.Characters = null;
+                        coPlayers.Add((dm));
+                    }
+                }
+            }
+        }
+        InitUserAccess();
+    }
+    private void InitUserAccess() {
+        foreach (var player in coPlayers) {
+            if (character.UserAccess.Any(x => x.Id == player.Id)) {
+                userAccess.Add(new SetUserAccess {
+                        User = player,
+                        HasAccess = true
+                    });
+            }
+            else {
+                userAccess.Add(new SetUserAccess {
+                        User = player,
+                        HasAccess = false
+                    });
+            }
+        }
+    }
+
+    private async void Post() {
+        try
+        {
+            acceptedCoPlayers.Clear();
+            foreach (var player in userAccess) {
+                if (player.HasAccess) {
+                    acceptedCoPlayers.Add(player.User);
+                }
+            }
+            context.Character.UserAccess = acceptedCoPlayers;
+            await context.UpdateCharacter();
+            Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private async void Close() {
+        await OnClose.InvokeAsync();
+    }
+}

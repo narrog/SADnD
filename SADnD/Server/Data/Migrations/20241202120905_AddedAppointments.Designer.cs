@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SADnD.Server.Data;
@@ -11,9 +12,11 @@ using SADnD.Server.Data;
 namespace SADnD.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241202120905_AddedAppointments")]
+    partial class AddedAppointments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,21 +55,6 @@ namespace SADnD.Server.Migrations
                     b.HasIndex("PlayersId");
 
                     b.ToTable("CampaignPlayers", (string)null);
-                });
-
-            modelBuilder.Entity("CharacterAccess", b =>
-                {
-                    b.Property<int>("CharacterAccessId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("UserAccessId")
-                        .HasColumnType("text");
-
-                    b.HasKey("CharacterAccessId", "UserAccessId");
-
-                    b.HasIndex("UserAccessId");
-
-                    b.ToTable("CharacterAccess");
                 });
 
             modelBuilder.Entity("Duende.IdentityServer.EntityFramework.Entities.DeviceFlowCodes", b =>
@@ -939,21 +927,6 @@ namespace SADnD.Server.Migrations
                     b.HasOne("SADnD.Shared.Models.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("PlayersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("CharacterAccess", b =>
-                {
-                    b.HasOne("SADnD.Shared.Models.Character", null)
-                        .WithMany()
-                        .HasForeignKey("CharacterAccessId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SADnD.Shared.Models.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserAccessId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

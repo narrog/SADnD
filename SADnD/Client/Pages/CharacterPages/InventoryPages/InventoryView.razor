@@ -1,5 +1,4 @@
-﻿@inject CharacterApiManager characterManager
-@using Newtonsoft.Json
+﻿@inject SyncRepository<Character> characterManager
 
 <table class="table table-striped">
     <tbody>
@@ -12,8 +11,10 @@
                         @inventoryItem.Count
                     </td>
                     <td width="12%" class="align-middle">
-                        <button @onclick="() => IncreaseItemCount(inventoryItem)" title="Anzahl erhöhen">+</button>
-                        <button @onclick="() => DecreaseItemCount(inventoryItem)" title="Anzahl verringern">-</button>
+                        @if(context.Character.UserId == appState.UserId) {
+                            <button @onclick="() => IncreaseItemCount(inventoryItem)" title="Anzahl erhöhen">+</button>
+                            <button @onclick="() => DecreaseItemCount(inventoryItem)" title="Anzahl verringern">-</button>
+                        }
                     </td>
                     @if (inventoryItem.Item != null) {
                         <td width="50%" class="align-middle">@inventoryItem.Item.Name</td>
@@ -60,15 +61,12 @@
     [Parameter]
     public string? UnitOfWeight { get; set; }
 
-    // private Character character;
     private bool showUIMessage;
     private string UIMessage = string.Empty;
 
     private float weightTotal;
 
     protected override async Task OnInitializedAsync() {
-        // await appState.EnsureCharacters();
-        // character = appState.Characters.FirstOrDefault(c => c.Id == CharacterId);
         GetWeightSum();
     }
 

@@ -41,5 +41,6 @@ namespace SADnD.Shared.Models
         public Campaign? Campaign { get; set; }
         public ICollection<Inventory>? Inventory { get; set; }
         public ICollection<Note>? Notes { get; set; }
+        public ICollection<ApplicationUser>? UserAccess { get; set; }
     }
 }

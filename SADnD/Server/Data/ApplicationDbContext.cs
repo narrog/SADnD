@@ -23,10 +23,17 @@ namespace SADnD.Server.Data
         public DbSet<Inventory> Inventories { get; set; }
         public DbSet<InventoryItem> InventoryItems { get; set; }
         public DbSet<Note> Notes { get; set; }
+        public DbSet<Appointment> Appointments { get; set; }
+        public DbSet<AppointmentVote> AppointmentVotes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            builder.Entity<ApplicationUser>()
+                .HasMany(u => u.Characters)
+                .WithOne(c => c.User)
+                .HasForeignKey(c => c.UserId);
 
             builder.Entity<Character>()
                 .HasMany(c => c.Inventory)
@@ -39,6 +46,11 @@ namespace SADnD.Server.Data
                 .WithOne(n => n.Character)
                 .HasForeignKey(n => n.CharacterId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Character>()
+                .HasMany(c => c.UserAccess)
+                .WithMany(u => u.CharacterAccess)
+                .UsingEntity("CharacterAccess");
 
             builder.Entity<Note>()
                 .HasMany(n => n.Notes)

@@ -1,0 +1,185 @@
+﻿@page "/vote-appointments/{CampaignId}"
+@attribute [Authorize]
+@inject SyncRepository<Appointment> appointmentManager
+
+<h3>Terminplanung</h3>
+
+<div class="container-fluid mt-3">
+    <div class="row">
+        <div class="col-12 col-xl-8">
+            <div class="table-responsive">
+                <EditForm Model="listOfAppointmentVotes" OnValidSubmit="Post">
+                    <DataAnnotationsValidator />
+                    <table class="table table-borderless align-middle border-bottom">
+                        @if (campaignAppointments != null && campaignAppointments.Any()) {
+                            <thead>
+                                <tr>
+                                    <td>Datum</td>
+                                    <td>Zeit</td>
+                                    <td>Vote</td>
+                                    <td class="d-none d-md-table-cell">Kommentar</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (campaignAppointments != null && campaignAppointments.Any()) {
+                                    @for (int i = 0; i < campaignAppointments.Count(); i++) {
+                                        var appointment = campaignAppointments.ElementAt(i);
+                                        var userVote = listOfAppointmentVotes.FirstOrDefault(v => v.AppointmentId == appointment.Id);
+
+                                        <tr class="border-top">
+                                            <td>@appointment.Date.ToShortDateString()</td>
+                                            <td>@appointment.StartTime.ToShortTimeString() - @appointment.EndTime.ToShortTimeString()</td>
+                                            <td>
+                                                @if (userVote != null) {
+                                                    <InputSelect @bind-Value="userVote.Reaction" class="form-select">
+                                                        <option value="">Wählen...</option>
+                                                        <option value="yes">Ja</option>
+                                                        <option value="no">Nein</option>
+                                                        <option value="maybe">Vielleicht</option>
+                                                    </InputSelect>
+                                                }
+                                                else {
+                                                    <span>Keine Abstimmung möglich</span>
+                                                }
+
+                                            </td>
+                                            <td class="d-none d-md-table-cell">
+                                                @if (userVote != null) {
+                                                    <InputText @bind-Value="userVote.Comment" class="form-control" />
+                                                }
+                                                else {
+                                                    <span>Keine Abstimmung möglich</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                        <tr class="d-md-none">
+                                            <td colspan="3">
+                                                @if (userVote != null) {
+                                                    <InputText @bind-Value="userVote.Comment" class="form-control" placeholder="Kommentar" />
+                                                }
+                                                else {
+                                                    <span>Keine Abstimmung möglich</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else {
+                                    <tr>
+                                        <td colspan="4">Daten werden geladen oder es gibt keine Daten</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        }
+                    </table>
+                    <FormButtons />
+                    <ValidationSummary class="mt-3" />
+                </EditForm>
+            </div>
+            
+            <div class="mt-3">
+                @UIMessage
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    [CascadingParameter]
+    private CascadingAppState appState { get; set; }
+    [Parameter]
+    public required string CampaignId { get; set; }
+
+    private Campaign campaign = new();
+
+    public IEnumerable<Appointment>? campaignAppointments;
+    public IEnumerable<Appointment>? allAppointments;
+    public List<AppointmentVote> listOfAppointmentVotes = new();
+
+    private string UIMessage = "";
+
+    protected override async Task OnInitializedAsync() {
+        await appState.EnsureCampaigns();
+
+        allAppointments = await appointmentManager.GetAll();
+
+        GetAppointmentsToVote();
+        GetUserVotes();
+    }
+
+    private void GetAppointmentsToVote(){
+        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+
+        if (allAppointments != null && allAppointments.Any(x => x.CampaignId == CampaignId) && allAppointments.Any(x => !x.Accepted)) {
+            campaignAppointments = allAppointments
+                .Where(x => !x.Accepted && x.Date >= today && x.CampaignId == CampaignId)
+                .OrderBy(x => x.Date);
+        }
+    }
+
+    private void GetUserVotes (){
+
+        var currentUserId = appState.UserId;
+
+        listOfAppointmentVotes = campaignAppointments?.Select(appointment =>
+        {
+            var existingVote = appointment.AppointmentVotes?.FirstOrDefault(v => v.UserId == currentUserId);
+
+            return existingVote ?? new AppointmentVote
+                {
+                    AppointmentId = appointment.Id,
+                    UserId = currentUserId,
+                    Reaction = "",
+                    Comment = ""
+                };
+        }).ToList() ?? new List<AppointmentVote>();
+
+    }
+
+    private async void Post() { 
+        try {
+            if (CheckValidity()) {
+                foreach (var vote in listOfAppointmentVotes) {
+                    var appointment = campaignAppointments?.FirstOrDefault(a => a.Id == vote.AppointmentId);
+                    if (appointment != null) {
+
+                        if (appointment.AppointmentVotes == null) {
+                            appointment.AppointmentVotes = new List<AppointmentVote>();
+                        }
+
+                        var existingVote = appointment.AppointmentVotes
+                            .FirstOrDefault(v => v.UserId == vote.UserId && v.AppointmentId == vote.AppointmentId);
+
+                        if (existingVote != null) {
+                            existingVote.Reaction = vote.Reaction;
+                            existingVote.Comment = vote.Comment;
+                        }
+                        else {
+                            appointment.AppointmentVotes.Add(vote);
+                        }
+                        await appointmentManager.Update(appointment);
+                        navManager.NavigateTo($"/campaign-details/{CampaignId}");
+                    }
+                }
+            }
+            else {
+                UIMessage = "Bitte alle Votes ausfüllen.";
+            }
+
+        }
+        catch (Exception) {
+            UIMessage = "Fehler beim Speichern";
+        }
+    }
+
+    private bool CheckValidity() {
+        bool votesAreValid = true;
+        foreach (var vote in listOfAppointmentVotes) {
+            if (string.IsNullOrEmpty(vote.Reaction)) {
+                votesAreValid = false;
+            }
+        }
+        return votesAreValid;
+    }
+}

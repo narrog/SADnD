@@ -1,51 +1,47 @@
 ﻿@page "/campaign-details/{id}"
 @attribute [Authorize]
-@inject CampaignApiManager campaignManager
-@inject JoinRequestApiManager joinRequestManager
+@inject APIRepository<Campaign> campaignManager
+@inject SyncRepository<Character> characterManager
+@inject SyncRepository<JoinRequest> joinRequestManager
 @inject IJSRuntime js
 @inherits NotesCategoryParent
-@using Newtonsoft.Json
 
 <h3>@Campaign.Name</h3>
 
-<CascadingValue Value="this" IsFixed="false">
+<CascadingValue Value="@this" IsFixed="true">
     @if(Campaign != null){
         <div class="container-fluid mt-3">
             <div class="row">
                 <div class="col-12 col-xl-8">
-                    <strong>Dungeonmaster: </strong><br />
-                    @if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any())
-                    {
-                        <p>
-                            <ul>
-                                @foreach (var master in Campaign.DungeonMasters)
-                                {
-                                    @if (master.UserName != null)
-                                    {
-                                        <li>
-                                            @master.UserName
-                                        </li>
+                    <div class="campaign-infos">
+                        <strong>Dungeonmaster: </strong><br />
+                        @if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any()) {
+                            <p>
+                                <ul>
+                                    @foreach (var master in Campaign.DungeonMasters) {
+                                        @if (master.UserName != null) {
+                                            <li>@master.UserName</li>
+                                        }
                                     }
-                                }
-                            </ul>
+                                </ul>
+                            </p>
+                        }
+                        else {
+                            <p>Kein DungeonMaster gefunden</p>
+                        }
+                        <p>
+                            <strong>Zugangscode: </strong>@Campaign.Id
+                            <span class="oi oi-share-boxed ms-2" @onclick="ShareAccessCode" title="Zugangscode teilen" style="cursor: pointer;" aria-hidden="true"></span>
                         </p>
-                    }
-                    else
-                    {
-                        <p>Kein DungeonMaster gefunden</p>
-                    }
-                    <p>
-                        <strong>Zugangscode: </strong>@Campaign.Id
-                        <span class="oi oi-share-boxed ms-2" @onclick="ShareAccessCode" title="Zugangscode teilen" style="cursor: pointer;" aria-hidden="true"></span>
-                    </p>
-                    <div class="table-responsive">
-                        <strong>Mitspieler</strong>
+                    </div>     
+                    <div class="table-responsive co-players">
+                        <strong>Mitspieler:</strong>
                         <table class="table table-borderless align-middle border-bottom">
                             @if (Campaign.Players != null && Campaign.Players.Any())
                             {
                                 <tbody>
                                     @foreach (var entry in PlayerCharacters)
-                                    {
+                                    {                                            
                                         <tr class="border-top">
                                             @if (entry.User.UserName != null)
                                             {
@@ -53,13 +49,8 @@
                                             }
                                             @if (entry.Character != null)
                                             {
-                                                @if (entry.Character.Name != null)
-                                                {
-                                                    <td>@entry.Character.Name</td>
-                                                }
-                                                <td>
-                                                    @entry.Character.Race!.Name
-                                                </td>
+                                                <td>@entry.Character.Name</td>
+                                                <td>@entry.Character.Race!.Name</td>
                                                 <td class="d-none d-md-table-cell">
                                                     @if (entry.Character.Classes != null && entry.Character.Classes.Any())
                                                     {
@@ -79,35 +70,31 @@
                                                 <td class="d-none d-md-table-cell"></td>
                                             }
                                             <td class="d-none d-md-table-cell">
-                                                @if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any(dm => dm.Id == currentUserId))
-                                                {
+                                                @if (isDungeonMaster) {
                                                     <button class="btn btn-outline-danger me-2" @onclick="() => RemovePlayer(entry.User, true)">entfernen</button>
                                                 }
-                                                @if (entry.User.Id == currentUserId)
-                                                {
+                                                @if (entry.User.Id == currentUserId) {
                                                     <button class="btn btn-outline-primary me-2" @onclick="() => ShowAddCharacter(entry.Character)">Zuweisung ändern</button>
                                                     <button class="btn btn-outline-danger me-2" @onclick="() => RemovePlayer(entry.User, false)">austreten</button>
-                                                    @if (entry.Character != null)
-                                                    {
-                                                        <button class="btn btn-outline-secondary me-2" @onclick="() => ShowCharacterDetails(entry.User, entry.Character)">Info</button>
-                                                    }
+                                                    
+                                                }
+                                                @if (entry.Character != null) {
+                                                    <button class="btn btn-outline-secondary me-2" @onclick="() => ShowCharacterDetails(entry.Character)">Info</button>
                                                 }
                                             </td>
                                         </tr>
                                         <tr class="d-md-none">
                                             <td colspan="4">
-                                                @if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any(dm => dm.Id == currentUserId))
-                                                {
+                                                @if (isDungeonMaster) {
                                                     <button class="btn btn-outline-danger me-2" @onclick="() => RemovePlayer(entry.User, true)">entfernen</button>
                                                 }
-                                                @if (entry.User.Id == currentUserId)
-                                                {
+                                                @if (entry.User.Id == currentUserId) {
                                                     <button class="btn btn-outline-primary me-2" @onclick="() => ShowAddCharacter(entry.Character)">Zuweisung ändern</button>
                                                     <button class="btn btn-outline-danger me-2" @onclick="() => RemovePlayer(entry.User, false)">austreten</button>
-                                                    @if (entry.Character != null)
-                                                    {
-                                                        <button class="btn btn-outline-secondary me-2" @onclick="() => ShowCharacterDetails(entry.User, entry.Character)">Info</button>
-                                                    }
+                                                    
+                                                }
+                                                @if (entry.Character != null) {
+                                                    <button class="btn btn-outline-secondary me-2" @onclick="() => ShowCharacterDetails(entry.Character)">Info</button>
                                                 }
                                             </td>
 
@@ -121,7 +108,7 @@
                             }
                         </table>
                     </div>
-                    @if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any(dm => dm.Id == currentUserId))
+                    @if (isDungeonMaster)
                     {
                         <p>
                             <strong>Offene Anfragen</strong>
@@ -144,62 +131,82 @@
                                                     @requestMessage
                                                 </td>
 
-                                            </tr>
-                                        }
-                                    </tbody>
-                                }
-                                else
-                                {
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    }
+                                else {
                                     <tr><td>keine offenen Anfragen</td></tr>
                                 }
                             </table>
                         </p>
                     }
                 </div>
-                @if (showAddCharacter)
-                {
-                    <div class="col-12 col-xl-4 mt-3 mt-xl-0">
-                        <AddCharacterToCampaign OriginalCharacter="selectedCharacter"
-                                                OnClose="HideAddCharacter" />
-                    </div>
-                }
-            </div>
-            <div class="row">
-                @if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any(dm => dm.Id == currentUserId))
-                {
-
-                    <div class="col-2 my-1" id="notes-icons-container">
-                        <NotesCategoryIcons @bind-ActiveCategory="ActiveCategory"
-                                            OnCategoryChanged="HandleCategoryChanged"
-                                            CampaignId="@Id"
-                                            ViewTypeIsDM="true" />
-                    </div>
-                    <div class="col-10">
-                        @if (!ShowAddNotes)
-                        {
-                            <NotesView NotesCategory="@ActiveCategory"
-                                       CampaignId="@Id"
-                                       OnEditNote="ShowAddNotesAsync"
-                                       ViewTypeIsDM="true" />
-
-                            <button class="btn btn-secondary mt-1" @onclick="() => ShowAddNotesAsync(0)">Notiz hinzufügen</button>
+                <div class="appointments">
+                    <p><strong>Termine: </strong>
+                        @if (nextAppointments != null) {
+                            <ul>
+                                @foreach (var appointment in nextAppointments) {
+                                    <li>@appointment.Date.ToLongDateString(), @appointment.StartTime.ToShortTimeString() -  @appointment.EndTime.ToShortTimeString() Uhr</li>
+                                }
+                            </ul>
                         }
-                        else
-                        {
-                            <NotesAdd NotesCategory="@ActiveCategory"
-                                      SelectedNoteId="@SelectedNoteId"
-                                      CampaignId="@Id"
-                                      OnClose="HideAddNotesAsync" />
+                        else {
+                            <span>keine fixierten Termine vorhanden</span>
                         }
+                    </p>
+                    @if (isUserDM) {
+                        <a href="new-appointments/@Campaign.Id" class="btn btn-outline-primary" title="Termine eintragen">Termine eintragen</a>
+                    }
+                    @if (hasAppointmentsToVote) {
+                        <a href="open-appointments/@Campaign.Id" class="btn btn-outline-primary ms-2" title="Verfügbarkeiten mitteilen">Umfrage ansehen</a>
 
-                    </div>
-                }
+                    }
+                </div>
             </div>
+            @if (showAddCharacter)
+            {
+                <div class="col-12 col-xl-4 mt-3 mt-xl-0">
+                    <AddCharacterToCampaign OriginalCharacter="selectedCharacter"
+                    OnClose="HideAddCharacter" />
+                </div>
+            }
+        </div>
+        <div class="row">
+            @if (isDungeonMaster)
+            {
+
+                <div class="col-2 my-1" id="notes-icons-container">
+                    <NotesCategoryIcons @bind-ActiveCategory="ActiveCategory"
+                    OnCategoryChanged="HandleCategoryChanged"
+                    CampaignId="@Id"
+                    ViewTypeIsDM="true" />
+                </div>
+                <div class="col-10">
+                    @if (!ShowAddNotes)
+                    {
+                        <NotesView NotesCategory="@ActiveCategory"
+                        CampaignId="@Id"
+                        OnEditNote="ShowAddNotesAsync"
+                        ViewTypeIsDM="true" />
+
+                        <button class="btn btn-secondary mt-1" @onclick="() => ShowAddNotesAsync(0)">Notiz hinzufügen</button>
+                    }
+                    else
+                    {
+                        <NotesAdd NotesCategory="@ActiveCategory"
+                        SelectedNoteId="@SelectedNoteId"
+                        CampaignId="@Id"
+                        OnClose="HideAddNotesAsync" />
+                    }
+
+                </div>
+            }
         </div>
         <div class="row my-4 pt-4 border-top">
             <div>
                 <a class="btn btn-secondary me-2" onclick="history.back();">Zurück</a>
-                @if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any(dm => dm.Id == currentUserId))
+                @if (isDungeonMaster)
                 {
                     <button class="btn btn-danger" @onclick="DeleteCampaign">Löschen</button>
                 }
@@ -213,7 +220,7 @@
             </div>
         }
     }
-    
+
 </CascadingValue>
 
 @code {
@@ -225,27 +232,44 @@
     public List<(ApplicationUser User, Character Character)> PlayerCharacters = new List<(ApplicationUser User, Character Character)>();
     private Character playerCharacter = new Character();
     private Character? selectedCharacter;
+    private List<Character>? joindCharacters = new List<Character>();
     private IEnumerable<JoinRequest>? joinRequests;
     private string requestMessage = "";
     private string UIMessage = "";
+    private bool isUserDM;
 
     public new string ActiveCategory = "story";
+
+    private IEnumerable<Appointment>? nextAppointments;
+    private bool hasAppointmentsToVote;
 
     private string currentUserId = "";
     private bool showAddCharacter;
 
+    private bool isDungeonMaster;
+    private bool isCharacterOwner;
+    private bool hasCharacterAccess;
+
     protected override async Task OnInitializedAsync() {
         await appState.EnsureCampaigns();
         currentUserId = appState.UserId;
-        Campaign = appState.Campaigns.FirstOrDefault(c => c.Id == Id);
+
+        if (appState.Campaigns != null && appState.Campaigns.Any())
+            Campaign = appState.Campaigns.FirstOrDefault(c => c.Id == Id) ?? new Campaign();
+
+
         if(Campaign != null){
+            if (Campaign.DungeonMasters != null && Campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)) {
+                isUserDM = true;
+            }
             await GetOpenJoinRequests();
+            GetNextAppointments();
             await AllocatePlayersNCharacters();
+            isDungeonMaster = Campaign.DungeonMasters != null ? Campaign.DungeonMasters.Any(dm => dm.Id == currentUserId) : false;
         }
         else {
             navManager.NavigateTo("/access-denied");
         }
-
     }
 
     private async Task GetOpenJoinRequests() {
@@ -278,10 +302,16 @@
         Campaign = appState.Campaigns.FirstOrDefault(c => c.Id == Id);
         PlayerCharacters.Clear();
 
+        Character temp = new();
+
         if (Campaign.Players != null && Campaign.Players.Any()) {
             foreach (var player in Campaign.Players) {
                 Character character = Campaign.Characters.FirstOrDefault(c => c.UserId == player.Id);
                 PlayerCharacters.Add((player, character));
+                if(character != null){
+                    temp = await characterManager.GetByID(character.Id);
+                    joindCharacters.Add(temp);
+                }
             }
         }
     }
@@ -307,12 +337,13 @@
         showAddCharacter = true;
     }
     private async void HideAddCharacter() {
-        // await AllocatePlayersNCharacters();
         showAddCharacter = false;
         StateHasChanged();
     }
-    private void ShowCharacterDetails(ApplicationUser user, Character character) {
-        if (user.Id == currentUserId) {
+    private async Task ShowCharacterDetails(Character character) {
+        await GetUserPerm(character);
+        
+        if (isCharacterOwner || hasCharacterAccess) {
             if (character != null) {
                 navManager.NavigateTo($"character-details/{character.Id}");
             }
@@ -355,6 +386,38 @@
             Console.WriteLine($"Exception RemovePlayer: {ex.Message}");
         }
 
+    }
+
+    private async Task GetUserPerm(Character character) {
+        isCharacterOwner = false;
+        hasCharacterAccess = false;
+
+        Character temp = await characterManager.GetByID(character.Id);
+
+        if (temp.UserId == currentUserId) {
+            isCharacterOwner = true;
+            Console.WriteLine($"{currentUserId} ist Owner von Character {temp.Name}");
+            return;
+        }
+        if (temp.UserAccess != null && temp.UserAccess.Any(x => x.Id == currentUserId)) {
+            hasCharacterAccess = true;
+            Console.WriteLine($"{currentUserId} hat Zugriff auf Character {temp.Name}");
+            return;
+        }
+    }
+
+    private void GetNextAppointments(){
+        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+
+        if (Campaign.Appointments != null && Campaign.Appointments.Any(x => x.Accepted)) {
+            nextAppointments = Campaign.Appointments
+                .Where(x => x.Accepted && x.Date >= today) 
+                .OrderBy(x => x.Date);
+        }
+        if (Campaign.Appointments != null && Campaign.Appointments.Any(x => !x.Accepted && x.Date >= today)) {
+            hasAppointmentsToVote = true;
+        }
+        
     }
 
     private async Task DeleteCampaign() {

@@ -6,9 +6,9 @@
 @using System.Security.Claims
 @inject IJSRuntime js
 
-@inject CharacterApiManager characterManager
-@inject ClassApiManager classManager
-@inject RaceApiManager raceManager
+@inject SyncRepository<Character> characterManager
+@inject SyncRepository<Class> classManager
+@inject SyncRepository<Race> raceManager
 
 
 

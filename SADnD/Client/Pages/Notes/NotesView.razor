@@ -1,5 +1,5 @@
-﻿@inject NoteApiManager noteManager
-@inject CharacterApiManager characterManager
+﻿@inject NoteSyncManager noteManager
+@inject SyncRepository<Character> characterManager
 @inject IJSRuntime js
 
 @if (filteredNotes != null && filteredNotes.Any() != false) {
@@ -11,12 +11,14 @@
                 <p><strong>Ort: </strong>@notePerson.Location</p>
                 <p><strong>Zugehörigkeit: </strong>@notePerson.Affiliation</p>
             }
-            <button class="pointer me-2 btn btn-outline-secondary" @onclick="() => OnEditNote.InvokeAsync(note.Id)">
-                <i class="oi oi-pencil me-1"></i> bearbeiten
-            </button>
-            <button class="pointer me-2 btn btn-outline-secondary" @onclick="() => DeleteNote(note)">
-                <i class="oi oi-trash text-danger me-1"></i> löschen
-            </button>
+            @if (note.UserId == appState.UserId) {
+                <button class="pointer me-2 btn btn-outline-secondary" @onclick="() => OnEditNote.InvokeAsync(note.Id)">
+                    <i class="oi oi-pencil me-1"></i> bearbeiten
+                </button>
+                <button class="pointer me-2 btn btn-outline-secondary" @onclick="() => DeleteNote(note)">
+                    <i class="oi oi-trash text-danger me-1"></i> löschen
+                </button>
+            }
         </div>
     }
 }
@@ -93,22 +95,6 @@ else {
             Console.WriteLine(ex.Message);
         }
     }
-    // private async void ShowAddNotes(int noteId) {
-    //     selectedNoteId = noteId;
-    //     UIMessage = "";
-    //     showAddNotes = true;
-    //     await OnParametersSetAsync();
-    //     StateHasChanged();
-    // }
-    // private async void HideAddNotes() {
-    //     await OnParametersSetAsync();
-    //     showAddNotes = false;
-    //     StateHasChanged();
-    // }
-    // public void ResetAddNotes() {
-    //     showAddNotes = false;
-    //     StateHasChanged();
-    // }
 
     public async void DeleteNote(Note note) {
         string toDeleteName = note.Name;

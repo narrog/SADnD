@@ -65,13 +65,13 @@
             };
 
             return ActiveCategory == category
-                ? "ps-2 my-1 bg-light text-dark border"
-                : $"ps-2 my-1 bg-dark text-light {categoryHasNotes}";
+                ? "ps-0 ps-md-2 my-1 text-center text-md-start bg-light text-dark border"
+                : $"ps-0 ps-md-2 my-1 text-center text-md-start bg-dark text-light {categoryHasNotes}";
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
-            return "ps-2 my-1 bg-dark text-light";
+            return "ps-0 ps-md-2 my-1 text-center text-md-start bg-dark text-light";
         }
     }
 

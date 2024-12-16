@@ -1,11 +1,10 @@
 ﻿@page "/join-campaign"
 
 @attribute [Authorize]
-@using Newtonsoft.Json
 @inject IJSRuntime js
 
-@inject JoinRequestApiManager joinRequestManager
-@inject CampaignApiManager campaignManager
+@inject SyncRepository<JoinRequest> joinRequestManager
+@inject APIRepository<Campaign> campaignManager
 
 <h3>Kampagne beitreten</h3>
 <div class="container-fluid">
