@@ -164,7 +164,8 @@
                 }
                 UIMessage = "Termine gespeichert";
                 StateHasChanged();
-                await Task.Delay(2500);
+                await appState.GetCampaigns();
+                await Task.Delay(1500);
                 await js.InvokeVoidAsync("history.back");
             }
             else {

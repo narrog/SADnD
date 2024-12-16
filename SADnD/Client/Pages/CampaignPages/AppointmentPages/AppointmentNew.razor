@@ -114,7 +114,7 @@
             listOfAppointments.Clear();
             AddAppointment();
             StateHasChanged();
-            await Task.Delay(2500);
+            await Task.Delay(1500);
             await appState.GetCampaigns();
             await js.InvokeVoidAsync("history.back");
         }
