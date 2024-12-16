@@ -24,6 +24,8 @@ jobs:
             echo ${{ secrets.PASS }} | sudo -S ./cleanup.sh
 
       - name: Copy files to server
+        env:
+          ROOT_PATH: /share/Container/SADnD/
         uses: appleboy/scp-action@v0.1.7
         with: 
           host: ${{ secrets.HOST }}
@@ -31,7 +33,6 @@ jobs:
           password: ${{ secrets.PASS }}
           source: "./"
           target: "/share/Container/SADnD/"
-          tar_tmp_path: "/share/Container/SADnD/"
 
       - name: Deploy with Docker Compose
         uses: appleboy/ssh-action@v1.1.0
