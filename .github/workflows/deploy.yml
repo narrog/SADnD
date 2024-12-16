@@ -24,8 +24,6 @@ jobs:
             echo ${{ secrets.PASS }} | sudo -S ./cleanup.sh
 
       - name: Copy files to server
-        env:
-          ROOT_PATH: /share/Container/SADnD/
         uses: appleboy/scp-action@v0.1.7
         with: 
           host: ${{ secrets.HOST }}
