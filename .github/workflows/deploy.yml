@@ -38,6 +38,7 @@ jobs:
           host: ${{ secrets.HOST}}
           username: ${{ secrets.USER }}
           password: ${{ secrets.PASS }}
+          command_timeout: 20m
           script: |
             cd /share/Container/SADnD
             echo ${{ secrets.PASS }} | sudo -S ./buildRestart.sh
