@@ -20,6 +20,7 @@ namespace SADnD.Shared.Models
         public Race? Race { get; set; }
         public ICollection<CharacterClass>? Classes { get; set; }
         public int? ArmorClass {  get; set; }
+        [Range(1, int.MaxValue, ErrorMessage = "HP ungültig")]
         public int MaxHitpoints { get; set; }
         public int Hitpoints { get; set; }
         public int TemporaryHitpoints { get; set; } = 0;

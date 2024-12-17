@@ -20,9 +20,13 @@
             <DataAnnotationsValidator />
             <div class="row">
 
-                <div class="col-12 col-md-4 p-1">
+                <div class="col-10 col-md-3 p-1">
                     <label for="name">Name:</label>
                     <InputText @bind-Value="@character.Name" id="name" class="form-control"></InputText>
+                </div>
+                <div class="col-2 col-md-1 p-1">
+                    <label for="hitpoints">HP:</label>
+                    <InputNumber @bind-Value="@character.MaxHitpoints" id="hitpoints" class="form-control"></InputNumber>
                 </div>
             </div>
             <div class="row">
@@ -202,6 +206,7 @@
                     if (message != "null") {
                         bool confirm = await js.InvokeAsync<bool>("confirm", "Speichern & zurück zur Übersicht?");
                         if (confirm) {
+                            character.Hitpoints = character.MaxHitpoints;
                             if (string.IsNullOrEmpty(CharacterId)) {
                                 character = await characterManager.Insert(character);
                                 appState.Characters.Add(character);
