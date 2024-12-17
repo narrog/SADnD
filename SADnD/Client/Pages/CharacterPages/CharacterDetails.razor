@@ -85,6 +85,28 @@
                     @if (showDeathSaves) {
                         <div class="mt-2">
                             <strong>Rettungswürfe</strong>
+                            <table>
+                                <tr>
+                                    <td>
+                                        <a @onclick='() => AddDeathSaves(true)' title="Erfolg erfassen" class="pointer text-success"><i class="bi-plus-square-fill"></i></a> Erfolge
+                                    </td>
+                                    @for (int i = 0; i < 3; i++) {
+                                        <td>
+                                            <i class="@GetIconClass(i, true)"></i>
+                                        </td>
+                                    }
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <a @onclick='() => AddDeathSaves(false)' title="Erfolg erfassen" class="pointer text-danger"><i class="bi-plus-square-fill"></i></a> Fehlschläge
+                                    </td>
+                                    @for (int i = 0; i < 3; i++) {
+                                        <td>
+                                            <i class="@GetIconClass(i, false)"></i>
+                                        </td>
+                                    }
+                                </tr>
+                            </table>
                         </div>
                     }
                 </div>
@@ -215,6 +237,9 @@
     private int hitpointInt;
     private string hitpointError = "";
     private bool showDeathSaves;
+    private List<bool> DeathRoles = new List<bool>();
+    int successCount;
+    int failCount;
 
     protected override async Task OnInitializedAsync() {
         await appState.EnsureCharacters();
@@ -237,6 +262,8 @@
             navManager.NavigateTo("/access-denied");
         }
 
+        if (Character.Hitpoints == 0)
+            showDeathSaves = true;
     }
 
     private async Task DeleteCharacter() {
@@ -332,7 +359,7 @@
     private async void HitpointsDamage() {
         if (Character.TemporaryHitpoints == 0){
             Character.Hitpoints -= hitpointInt;
-            if (Character.Hitpoints < 0){
+            if (Character.Hitpoints <= 0){
                 Character.Hitpoints = 0;
                 showDeathSaves = true;
             }
@@ -361,5 +388,38 @@
         CloseHitpointInput();
         hitpointInt = 0;
         await characterManager.Update(Character);
+    }
+
+    private async void AddDeathSaves(bool isSuccess) {
+        CountDeathRoles();
+
+        if (isSuccess && successCount < 3) {
+            Character.DeathRoles!.Add(true);
+        }
+        else if (!isSuccess && failCount < 3)
+        {
+            Character.DeathRoles!.Add(false);
+        }
+        await characterManager.Update(Character);
+    }
+    private string GetIconClass(int index, bool isSuccess) {
+        CountDeathRoles();
+
+        if (isSuccess && index < successCount)
+            return "bi-square-fill text-success"; 
+        else if (!isSuccess && index < failCount)
+            return "bi-square-fill text-danger";
+        else
+            return "bi-square-fill text-dark"; 
+    }
+
+    private void CountDeathRoles(){
+        if(Character.DeathRoles != null){
+            successCount = Character.DeathRoles.Count(d => d);
+            failCount = Character.DeathRoles.Count(d => !d);
+        }
+        else {
+            Character.DeathRoles = new List<bool>();
+        }
     }
 }

@@ -24,7 +24,7 @@ namespace SADnD.Shared.Models
         public int MaxHitpoints { get; set; }
         public int Hitpoints { get; set; }
         public int TemporaryHitpoints { get; set; } = 0;
-        public bool[]? DeathRoles { get; set; }
+        public List<bool>? DeathRoles { get; set; }
         public string? Background {  get; set; }
         [Range (1, int.MaxValue, ErrorMessage = "Alter ungültig")]
         public int? Age { get; set; }
