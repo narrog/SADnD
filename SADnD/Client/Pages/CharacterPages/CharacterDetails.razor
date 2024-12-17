@@ -8,7 +8,8 @@
 
 <CascadingValue Value="@this" IsFixed="true">
     @if (Character != null) {
-        <h3>"@Character.Name"</h3>
+
+        <h3>@Character.Name @isDeadText</h3>
 
         <div class="container-fluid mt-3">
             <div class="row">
@@ -51,21 +52,25 @@
 
                 </div>
 
-                <div class="col-6 col-md-4 p-0">
+                <div class="col-6 col-md-4 col-xl-2 p-0">
                     <h4>Trefferpunkte</h4>
 
                     <table class="w-100">
-                        <tr>
+                        <tr class="table-row-height">
                             <td>@Character.Hitpoints / @Character.MaxHitpoints</td>
                             <td>
                                 <a @onclick='() => ShowHitpointInput("healing")' title="Heilung erfassen" class="pointer text-success"><i class="bi bi-plus-circle-fill"></i></a>
+                            </td>
+                            <td>
                                 <a @onclick='() => ShowHitpointInput("damage")' title="Schaden erfassen" class="pointer text-danger"><i class="bi bi-fire"></i></a>
                             </td>
                         </tr>
-                        <tr>
+                        <tr class="table-row-height">
                             <td>temporär: @Character.TemporaryHitpoints</td>
                             <td>
-                                <a @onclick='() => ShowHitpointInput("addTemporary")' title="Temporäre Hitpoints erfassen" class="pointer"><i class="bi bi-shield-fill-plus"></i></a>
+                                <a @onclick='() => ShowHitpointInput("addTemporary")' title="Temporäre Hitpoints erfassen" class="pointer text-primary"><i class="bi bi-shield-fill-plus"></i></a>
+                            </td>
+                            <td>
                                 <a @onclick="TempHitpointsRemove" title="Temporäre Hitpoints löschen" class="pointer text-danger"><i class="bi bi-shield-slash-fill"></i></a>
                             </td>
                         </tr>
@@ -85,24 +90,24 @@
                     @if (showDeathSaves) {
                         <div class="mt-2">
                             <strong>Rettungswürfe</strong>
-                            <table>
-                                <tr>
+                            <table class="w-100">
+                                <tr class="table-row-height">
                                     <td>
                                         <a @onclick='() => AddDeathSaves(true)' title="Erfolg erfassen" class="pointer text-success"><i class="bi-plus-square-fill"></i></a> Erfolge
                                     </td>
                                     @for (int i = 0; i < 3; i++) {
                                         <td>
-                                            <i class="@GetIconClass(i, true)"></i>
+                                            <a @onclick='() => AddDeathSaves(true)' title="Erfolg erfassen" class="pointer"><i class="@GetIconClass(i, true)"></i></a>
                                         </td>
                                     }
                                 </tr>
-                                <tr>
+                                <tr class="table-row-height">
                                     <td>
-                                        <a @onclick='() => AddDeathSaves(false)' title="Erfolg erfassen" class="pointer text-danger"><i class="bi-plus-square-fill"></i></a> Fehlschläge
+                                        <a @onclick='() => AddDeathSaves(false)' title="Fehlschlag erfassen" class="pointer text-danger"><i class="bi-plus-square-fill"></i></a> Fehlschläge
                                     </td>
                                     @for (int i = 0; i < 3; i++) {
                                         <td>
-                                            <i class="@GetIconClass(i, false)"></i>
+                                            <a @onclick='() => AddDeathSaves(false)' title="Fehlschlag erfassen" class="pointer"><i class="@GetIconClass(i, false)"></i></a>
                                         </td>
                                     }
                                 </tr>
@@ -238,8 +243,9 @@
     private string hitpointError = "";
     private bool showDeathSaves;
     private List<bool> DeathRoles = new List<bool>();
-    int successCount;
-    int failCount;
+    private int successCount;
+    private int failCount;
+    private string isDeadText = "";
 
     protected override async Task OnInitializedAsync() {
         await appState.EnsureCharacters();
@@ -264,6 +270,10 @@
 
         if (Character.Hitpoints == 0)
             showDeathSaves = true;
+
+        CountDeathRoles();
+        if (failCount == 3)
+            isDeadText = "(tot)";
     }
 
     private async Task DeleteCharacter() {
@@ -318,7 +328,6 @@
     private void ShowHitpointInput(string hitpointType) {
         hitpointInputType = hitpointType;
         showHitpointsInput = true;
-        Console.WriteLine($"hitpointInputType {hitpointInputType}");
     }
     private void CloseHitpointInput(){
         showHitpointsInput = false;
@@ -332,15 +341,12 @@
 
         switch (hitpointInputType) {
             case "healing":
-                Console.WriteLine("EditHitpoints aufgerufen - healing ausgewählt");
                 HitpointsHealing();
                 break;
             case "damage":
-                Console.WriteLine("EditHitpoints aufgerufen - damage ausgewählt");
                 HitpointsDamage();
                 break;
             case "addTemporary":
-                Console.WriteLine("EditHitpoints aufgerufen - addTemporary ausgewählt");
                 TempHitpointsAdd();
                 break;
             default:
@@ -353,7 +359,10 @@
         if (Character.Hitpoints > Character.MaxHitpoints) {
             Character.Hitpoints = Character.MaxHitpoints;
         }
-
+        Character.DeathRoles = null;
+        showDeathSaves = false;
+        CountDeathRoles();
+        isDeadText = "";
         await SaveHitpoints();
     }
     private async void HitpointsDamage() {
@@ -396,21 +405,26 @@
         if (isSuccess && successCount < 3) {
             Character.DeathRoles!.Add(true);
         }
-        else if (!isSuccess && failCount < 3)
-        {
+        else if (!isSuccess && failCount < 3) {
             Character.DeathRoles!.Add(false);
+            if (failCount == 2){
+                isDeadText = "(tot)";
+                StateHasChanged();
+            }
         }
         await characterManager.Update(Character);
     }
     private string GetIconClass(int index, bool isSuccess) {
         CountDeathRoles();
-
+        string iconClass = "";
         if (isSuccess && index < successCount)
-            return "bi-square-fill text-success"; 
+            iconClass = "bi bi-square-fill text-success";
         else if (!isSuccess && index < failCount)
-            return "bi-square-fill text-danger";
+            iconClass = "bi bi-square-fill text-danger";
         else
-            return "bi-square-fill text-dark"; 
+            iconClass = "bi bi-square-fill text-dark";
+
+        return iconClass;
     }
 
     private void CountDeathRoles(){
