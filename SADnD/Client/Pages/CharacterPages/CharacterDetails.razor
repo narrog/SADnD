@@ -12,7 +12,7 @@
 
         <div class="container-fluid mt-3">
             <div class="row">
-                <div class="col-12 col-md-6 col-xl-4">
+                <div class="col-6 col-xl-4">
                     <p><strong>Rasse: </strong>@(Character.Race != null ? Character.Race.Name : "Unbekannt")</p>
                     @if (Character.Classes != null && Character.Classes.Any()) {
                         <p>
@@ -46,12 +46,49 @@
                         }
                     </p>
 
-                    @* TODO:
-                    <p><strong>Trefferpunkte: </strong>@Character.Hitpoints </p>
-                    <p><strong>Spellslots: </strong></p> *@
+
 
 
                 </div>
+
+                <div class="col-6 col-md-4 p-0">
+                    <h4>Trefferpunkte</h4>
+
+                    <table class="w-100">
+                        <tr>
+                            <td>@Character.Hitpoints / @Character.MaxHitpoints</td>
+                            <td>
+                                <a @onclick='() => ShowHitpointInput("healing")' title="Heilung erfassen" class="pointer text-success"><i class="bi bi-plus-circle-fill"></i></a>
+                                <a @onclick='() => ShowHitpointInput("damage")' title="Schaden erfassen" class="pointer text-danger"><i class="bi bi-fire"></i></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>temporär: @Character.TemporaryHitpoints</td>
+                            <td>
+                                <a @onclick='() => ShowHitpointInput("addTemporary")' title="Temporäre Hitpoints erfassen" class="pointer"><i class="bi bi-shield-fill-plus"></i></a>
+                                <a @onclick="TempHitpointsRemove" title="Temporäre Hitpoints löschen" class="pointer text-danger"><i class="bi bi-shield-slash-fill"></i></a>
+                            </td>
+                        </tr>
+                    </table>
+                    @if (showHitpointsInput){
+                        <InputNumber @bind-Value="@hitpointInt" min="1" class="form-control" />
+                        <div class="mt-2">
+                            <button class="btn btn-primary" type="button" @onclick="EditHitpoints">Speichern</button>
+                            <button class="btn btn-outline-secondary" type="button" @onclick="CloseHitpointInput">Abbrechen</button>
+                        </div>
+                        @if (!string.IsNullOrEmpty(hitpointError)){
+                            <div>
+                                @hitpointError
+                            </div>
+                        }
+                    }
+                    @if (showDeathSaves) {
+                        <div class="mt-2">
+                            <strong>Rettungswürfe</strong>
+                        </div>
+                    }
+                </div>
+
                 @if (showCharacterDetails) {
                     <div class="col-12 col-md-6">
                         <p>
@@ -173,6 +210,12 @@
     private bool showShareDetails;
     private string userId = "";
 
+    private bool showHitpointsInput;
+    private string hitpointInputType = "";
+    private int hitpointInt;
+    private string hitpointError = "";
+    private bool showDeathSaves;
+
     protected override async Task OnInitializedAsync() {
         await appState.EnsureCharacters();
         await appState.EnsureCampaigns();
@@ -218,11 +261,11 @@
         showShareDetails = !showShareDetails;
         StateHasChanged();
     }
-    private async void ShowAddItems() {
+    private void ShowAddItems() {
         showAddItems = true;
         StateHasChanged();
     }
-    private async void HideAddItems() {
+    private void HideAddItems() {
         showAddItems = false;
         StateHasChanged();
     }
@@ -233,7 +276,7 @@
         showAddCampaign = true;
         StateHasChanged();
     }
-    private async Task HideAddCampaign() {
+    private void HideAddCampaign() {
         showAddCampaign = false;
         Character = appState.Characters.FirstOrDefault(c => c.Id == Int32.Parse(Id));
         campaign = Character.CampaignId != null ? appState.Campaigns.FirstOrDefault(c => c.Id == Character.CampaignId) : null;
@@ -243,5 +286,80 @@
     public async Task UpdateCharacter(){
         Character = await characterManager.Update(Character);
         appState.Characters[appState.Characters.FindIndex(c => c.Id == Character.Id)] = Character;
+    }
+
+    private void ShowHitpointInput(string hitpointType) {
+        hitpointInputType = hitpointType;
+        showHitpointsInput = true;
+        Console.WriteLine($"hitpointInputType {hitpointInputType}");
+    }
+    private void CloseHitpointInput(){
+        showHitpointsInput = false;
+    }
+
+    private void EditHitpoints() {
+        if (hitpointInt < 1) {
+            hitpointError = "Bitte Eingabe überprüfen";
+            return;
+        }
+
+        switch (hitpointInputType) {
+            case "healing":
+                Console.WriteLine("EditHitpoints aufgerufen - healing ausgewählt");
+                HitpointsHealing();
+                break;
+            case "damage":
+                Console.WriteLine("EditHitpoints aufgerufen - damage ausgewählt");
+                HitpointsDamage();
+                break;
+            case "addTemporary":
+                Console.WriteLine("EditHitpoints aufgerufen - addTemporary ausgewählt");
+                TempHitpointsAdd();
+                break;
+            default:
+                Console.WriteLine("Ungültiger Eingabetyp: " + hitpointInputType);
+                break;
+        }
+    }
+    private async void HitpointsHealing() {
+        Character.Hitpoints += hitpointInt;
+        if (Character.Hitpoints > Character.MaxHitpoints) {
+            Character.Hitpoints = Character.MaxHitpoints;
+        }
+
+        await SaveHitpoints();
+    }
+    private async void HitpointsDamage() {
+        if (Character.TemporaryHitpoints == 0){
+            Character.Hitpoints -= hitpointInt;
+            if (Character.Hitpoints < 0){
+                Character.Hitpoints = 0;
+                showDeathSaves = true;
+            }
+        }
+        else {
+            Character.TemporaryHitpoints -= hitpointInt;
+            if (Character.TemporaryHitpoints < 0) {
+                Character.Hitpoints += Character.TemporaryHitpoints;
+                Character.TemporaryHitpoints = 0;
+            }
+        }
+
+        await SaveHitpoints();
+    }
+    private async void TempHitpointsAdd() {
+        Character.TemporaryHitpoints += hitpointInt;
+
+        await SaveHitpoints();
+    }
+    private async void TempHitpointsRemove() {
+        Character.TemporaryHitpoints = 0;
+
+        await SaveHitpoints();
+    }
+    private async Task SaveHitpoints(){
+        CloseHitpointInput();
+        hitpointInt = 0;
+        await characterManager.Update(Character);
     }
 }
