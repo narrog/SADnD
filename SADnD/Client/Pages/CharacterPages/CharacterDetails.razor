@@ -34,7 +34,7 @@
                     }
 
                     <p>
-                        <strong>Kampagne: </strong>
+                        <strong>Kampagne: </strong><br />
                         @if (campaign != null) {
                             <a href="campaign-details/@Character.CampaignId" title="Kampagnen-Details öffnen">
                                 <span class="oi oi-eye me-2 pointer"></span>@campaign.Name
@@ -143,15 +143,15 @@
             @if (!showAddCampaign) {
                 <div class="row mt-3">
                     <div class="col-12">
-                        <button class="btn btn-outline-secondary me-2" @onclick="ShowCharacterDetails">
+                        <button class="btn btn-outline-secondary me-2 mb-1" @onclick="ShowCharacterDetails">
                             <span class="oi oi-eye me-2"></span> @showDetailsText
                         </button>
                         @if (Character.UserId == appState.UserId) {
-                            <a class="btn btn-outline-primary me-2" href="/new-character/@Id">
+                            <a class="btn btn-outline-primary me-2 mb-1" href="/new-character/@Id">
                                 <span class="oi oi-pencil me-2"></span> bearbeiten
                             </a>
                             @if (campaign != null) {
-                                <button class="btn btn-outline-secondary me-2" @onclick="ShowShareDetails">
+                                <button class="btn btn-outline-secondary me-2 mb-1" @onclick="ShowShareDetails">
                                     <span class="oi oi-eye me-2"></span> Details teilen
                                 </button>
                             }
