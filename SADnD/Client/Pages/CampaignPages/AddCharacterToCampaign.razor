@@ -21,12 +21,12 @@
     <div class="mt-2">
         <p>
             <strong>Name:</strong> @selectedCharacter.Name <br />
-            <strong>Rasse:</strong> @selectedCharacter.Race.Name <br />
+            <strong>Rasse:</strong> @selectedCharacter.Race!.Name <br />
             <strong>Klassen:</strong><br />
             @if (selectedCharacter.Classes != null) {
                 <ul>
                     @foreach (var characterClass in selectedCharacter.Classes) {
-                        <li>@characterClass.Class.Name - Level: @characterClass.Level</li>
+                        <li>@characterClass.Class!.Name - Level: @characterClass.Level</li>
                     }
                 </ul>
             }
@@ -62,8 +62,6 @@
     private CascadingAppState appState { get; set; }
     [CascadingParameter]
     private CampaignDetails context { get; set; }
-    // [Parameter]
-    // public required Campaign Campaign { get; set; }
     [Parameter]
     public Character? OriginalCharacter { get; set; }
     [Parameter]
@@ -72,7 +70,6 @@
     private IEnumerable<Character>? charactersFromUser;
     private Character selectedCharacter = new();
     bool characterHasCampaign;
-    // private Campaign campaign = new();
 
     private string UIMessage = "";
 
@@ -105,7 +102,7 @@
                 return;
             }
 
-            await CheckForOtherCampaign();
+            CheckForOtherCampaign();
             if (characterHasCampaign) {
                 bool confirm = await js.InvokeAsync<bool>("confirm", "Charakter kann nur in einer Kampagne gleichzeitig sein.\r\nSoll die Kampagne geändert werden?");
                 if (!confirm) return;
@@ -128,7 +125,7 @@
             Console.WriteLine($"{ex.Message}");
         }
     }
-    private async Task CheckForOtherCampaign(){
+    private void CheckForOtherCampaign(){
         Character temp = appState.Characters.FirstOrDefault(c => c.Id == SelectedCharacterId);
         characterHasCampaign = false;
         characterHasCampaign = temp.CampaignId != null;

@@ -1,8 +1,6 @@
 ﻿@page "/new-campaign"
 
 @attribute [Authorize]
-@inject IJSRuntime js
-@using Newtonsoft.Json
 
 @inject APIRepository<Campaign> campaignManager
 
@@ -33,7 +31,6 @@
     private Campaign campaign = new Campaign();
     string UIMessage = "";
     string controllerName = "campaign";
-    string message = "";
     string name = "";
 
 
@@ -46,7 +43,6 @@
         try {
             if (controllerName == "campaign") {
                 campaign = await campaignManager.Insert(campaign);
-                message = JsonConvert.SerializeObject(campaign);
                 appState.Campaigns.Add(campaign);
             }
             UIMessage = "Kampagne erfolgreich erstellt";

@@ -76,7 +76,7 @@
                                                 @if (entry.User.Id == currentUserId) {
                                                     <button class="btn btn-outline-primary me-2" @onclick="() => ShowAddCharacter(entry.Character)">Zuweisung ändern</button>
                                                     <button class="btn btn-outline-danger me-2" @onclick="() => RemovePlayer(entry.User, false)">austreten</button>
-                                                    
+
                                                 }
                                                 @if (entry.Character != null) {
                                                     <button class="btn btn-outline-secondary me-2" @onclick="() => ShowCharacterDetails(entry.Character)">Info</button>
@@ -91,7 +91,7 @@
                                                 @if (entry.User.Id == currentUserId) {
                                                     <button class="btn btn-outline-primary me-2" @onclick="() => ShowAddCharacter(entry.Character)">Zuweisung ändern</button>
                                                     <button class="btn btn-outline-danger me-2" @onclick="() => RemovePlayer(entry.User, false)">austreten</button>
-                                                    
+
                                                 }
                                                 @if (entry.Character != null) {
                                                     <button class="btn btn-outline-secondary me-2" @onclick="() => ShowCharacterDetails(entry.Character)">Info</button>
@@ -131,10 +131,10 @@
                                                     @requestMessage
                                                 </td>
 
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    }
+                                            </tr>
+                                        }
+                                    </tbody>
+                                }
                                 else {
                                     <tr><td>keine offenen Anfragen</td></tr>
                                 }
@@ -291,6 +291,7 @@
             joinRequest.User = null;
             await joinRequestManager.Update(joinRequest);
             UIMessage = $"Beitrittsanfrage akzeptiert";
+            await AllocatePlayersNCharacters();
             await GetOpenJoinRequests();
             await appState.GetCampaigns();
             Campaign = appState.Campaigns.FirstOrDefault(c => c.Id == Id);
@@ -299,7 +300,8 @@
     }
     public async Task AllocatePlayersNCharacters()
     {
-        Campaign = appState.Campaigns.FirstOrDefault(c => c.Id == Id);
+        Campaign = await campaignManager.GetByID(Id);
+        // Campaign = appState.Campaigns.FirstOrDefault(c => c.Id == Id);
         PlayerCharacters.Clear();
 
         Character temp = new();
@@ -320,7 +322,7 @@
             if (await js.InvokeAsync<bool>("navigator.canShare", new { text = "Test" })) {
                 await js.InvokeVoidAsync("navigator.share", new {
                     title = "Dungeon Kampagne",
-                    text = $"Hier ist der Zugangscode: {Campaign.Id}"
+                    text = $"Trete meiner Kampagne unter sadnd.benpeter.ch/join-campaign bei. Der Zugangscode lautet: {Campaign.Id}"
                 });
             }
             else {
@@ -332,17 +334,17 @@
             Console.WriteLine($"Fehler beim Teilen: {ex.Message}");
         }
     }
-    private void ShowAddCharacter(Character characterToChange) {
+    private void ShowAddCharacter(Character? characterToChange) {
         selectedCharacter = characterToChange;
         showAddCharacter = true;
     }
-    private async void HideAddCharacter() {
+    private void HideAddCharacter() {
         showAddCharacter = false;
         StateHasChanged();
     }
     private async Task ShowCharacterDetails(Character character) {
         await GetUserPerm(character);
-        
+
         if (isCharacterOwner || hasCharacterAccess) {
             if (character != null) {
                 navManager.NavigateTo($"character-details/{character.Id}");
@@ -374,9 +376,13 @@
                 Campaign = await campaignManager.Update(Campaign);
                 appState.Campaigns[appState.Campaigns.FindIndex(c => c.Id == Id)] = Campaign;
                 UIMessage = uiMessage;
-                if (!isKicked) {
+                if (!isKicked)
                     await js.InvokeVoidAsync("history.back");
+                else{
+                    await AllocatePlayersNCharacters();
+                    StateHasChanged();
                 }
+                    
             }
             else {
                 Console.WriteLine($"Spieler '{toDeleteName}' nicht gefunden");
@@ -396,12 +402,10 @@
 
         if (temp.UserId == currentUserId) {
             isCharacterOwner = true;
-            Console.WriteLine($"{currentUserId} ist Owner von Character {temp.Name}");
             return;
         }
         if (temp.UserAccess != null && temp.UserAccess.Any(x => x.Id == currentUserId)) {
             hasCharacterAccess = true;
-            Console.WriteLine($"{currentUserId} hat Zugriff auf Character {temp.Name}");
             return;
         }
     }
