@@ -12,8 +12,8 @@
                     </td>
                     <td width="12%" class="align-middle">
                         @if(context.Character.UserId == appState.UserId) {
-                            <button @onclick="() => IncreaseItemCount(inventoryItem)" title="Anzahl erhöhen">+</button>
-                            <button @onclick="() => DecreaseItemCount(inventoryItem)" title="Anzahl verringern">-</button>
+                            <a @onclick="() => IncreaseItemCount(inventoryItem)" title="Anzahl erhöhen" class="text-success pointer"><i class="bi bi-plus-square-fill"></i></a>
+                            <a @onclick="() => DecreaseItemCount(inventoryItem)" title="Anzahl verringern" class="text-danger pointer"><i class="bi bi-dash-square-fill"></i></a>
                         }
                     </td>
                     @if (inventoryItem.Item != null) {
@@ -23,7 +23,7 @@
                                 @inventoryItem.Item.Weight @UnitOfWeight
                             </td>
                             <td width="15%" class="align-middle text-end">
-                                @(inventoryItem.Count * inventoryItem.Item.Weight) @UnitOfWeight
+                                @((inventoryItem.Count * Convert.ToDecimal(inventoryItem.Item.Weight)).ToString("G29")) @UnitOfWeight
                             </td>
                         }
                         else {
@@ -35,7 +35,7 @@
             }
             <tr>
                 <td class="align-middle text-end" colspan="4">Gewicht Total</td>
-                <td class="align-middle text-end">@weightTotal @UnitOfWeight</td>
+                <td class="align-middle text-end">@weightTotal.ToString("G29") @UnitOfWeight</td>
             </tr>
         }
         else {
@@ -64,21 +64,22 @@
     private bool showUIMessage;
     private string UIMessage = string.Empty;
 
-    private float weightTotal;
+    private decimal weightTotal;
 
     protected override async Task OnInitializedAsync() {
+        await Task.Delay(1500);
         GetWeightSum();
     }
 
     private void GetWeightSum() {        
         weightTotal = 0;
-        float weightProduct;
+        decimal weightProduct;
         if (context.Character.Inventory != null && context.Character.Inventory.Any())
         {
             foreach (var inventoryItem in context.Character.Inventory) {
                 @if (inventoryItem.Item != null) {
                     @if (inventoryItem.Item.Weight != null) {
-                        weightProduct = inventoryItem.Item.Weight.Value * inventoryItem.Count;
+                        weightProduct = Convert.ToDecimal(inventoryItem.Item.Weight.Value) * inventoryItem.Count;
                         weightTotal += weightProduct;
                     }
                 }
