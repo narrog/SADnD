@@ -2,7 +2,6 @@
 @page "/new-character/{CharacterId}"
 
 @attribute [Authorize]
-@using Newtonsoft.Json
 @using System.Security.Claims
 @inject IJSRuntime js
 
@@ -166,11 +165,10 @@
         'M',
         'L'
     };
-    private IEnumerable<Class> allClasses;
-    private IEnumerable<Race> allRaces;
+    private IEnumerable<Class>? allClasses;
+    private IEnumerable<Race>? allRaces;
     string UIMessage = "";
     string controllerName = "character";
-    string message = "";
 
     bool showClassError = false;
     bool showLevelError = false;
@@ -180,7 +178,7 @@
         get => character.SizeCategory.ToString();
         set {
             if (!string.IsNullOrEmpty(value)) {
-                character.SizeCategory = value[0]; // Nimmt das erste Zeichen
+                character.SizeCategory = value[0]; 
             }
         }
     }
@@ -191,7 +189,7 @@
         await appState.EnsureCharacters();
         character.UserId = appState.UserId;
         if (!string.IsNullOrEmpty(CharacterId)){
-            character = appState.Characters.FirstOrDefault(c => c.Id == Int32.Parse(CharacterId));
+            character = appState.Characters.FirstOrDefault(c => c.Id == Int32.Parse(CharacterId)) ?? new();
         }
     }
 
@@ -203,25 +201,21 @@
             if (!showClassError) { 
                 CheckLevelSum();
                 if (!showLevelError) {
-                    if (message != "null") {
-                        bool confirm = await js.InvokeAsync<bool>("confirm", "Speichern & zurück zur Übersicht?");
-                        if (confirm) {
-                            character.Hitpoints = character.MaxHitpoints;
-                            if (string.IsNullOrEmpty(CharacterId)) {
-                                character = await characterManager.Insert(character);
-                                appState.Characters.Add(character);
-                                message = JsonConvert.SerializeObject(character);
-                            }
-                            else {
-                                character = await characterManager.Update(character);
-                                appState.Characters[appState.Characters.FindIndex(c => c.Id == character.Id)] = character;
-                                message = JsonConvert.SerializeObject(character);
-                            }
-                            await js.InvokeVoidAsync("history.back");
+                    bool confirm = await js.InvokeAsync<bool>("confirm", "Speichern & zurück zur Übersicht?");
+                    if (confirm) {
+                        character.Hitpoints = character.MaxHitpoints;
+                        if (string.IsNullOrEmpty(CharacterId)) {
+                            character = await characterManager.Insert(character);
+                            appState.Characters.Add(character);
                         }
-                        else
-                            return;
+                        else {
+                            character = await characterManager.Update(character);
+                            appState.Characters[appState.Characters.FindIndex(c => c.Id == character.Id)] = character;
+                        }
+                        await js.InvokeVoidAsync("history.back");
                     }
+                    else
+                        return;
                 }
             }
         }

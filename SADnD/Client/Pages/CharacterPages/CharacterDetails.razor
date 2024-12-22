@@ -226,7 +226,7 @@
 
     private bool showAddCampaign;
     public Campaign? campaign;
-    private List<(ApplicationUser User, Character Character)> playerCharacters;
+    private List<(ApplicationUser User, Character Character)>? playerCharacters;
 
     private bool showCharacterDetails;
     private string showDetailsText = "Details anzeigen";
@@ -284,6 +284,7 @@
 
         await characterManager.Delete(Character.Id);
         appState.Characters.Remove(Character);
+        await Task.Delay(1000);
         await js.InvokeVoidAsync("history.back");
     }
 
@@ -316,7 +317,7 @@
     }
     private void HideAddCampaign() {
         showAddCampaign = false;
-        Character = appState.Characters.FirstOrDefault(c => c.Id == Int32.Parse(Id));
+        Character = appState.Characters.FirstOrDefault(c => c.Id == Int32.Parse(Id)) ?? new();
         campaign = Character.CampaignId != null ? appState.Campaigns.FirstOrDefault(c => c.Id == Character.CampaignId) : null;
         StateHasChanged();
     }
