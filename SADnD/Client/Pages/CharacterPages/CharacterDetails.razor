@@ -283,7 +283,7 @@
         if (!confirm) return;
 
         await characterManager.Delete(Character.Id);
-        appState.Characters.Remove(Character);
+        appState.Characters.Remove(appState.Characters[appState.Characters.FindIndex(x => x.Id == Character.Id)]);
         await Task.Delay(1000);
         await js.InvokeVoidAsync("history.back");
     }

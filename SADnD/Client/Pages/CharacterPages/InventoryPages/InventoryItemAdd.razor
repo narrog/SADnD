@@ -61,11 +61,9 @@
     public bool ShowAddItems { get; set; }
     [Parameter] 
     public EventCallback OnClose { get; set; }
-    // [Parameter] public required Character Character { get; set; }
     [Parameter] 
     public required string UnitOfWeight { get; set; }
 
-    // private Character character;
     private InventoryItem item = new InventoryItem();
     private InventoryItem savedItem = new InventoryItem();
     private bool isItemSelected = false;
@@ -86,8 +84,6 @@
     private int count = 1;
 
     protected override async Task OnInitializedAsync() {
-        // await appState.EnsureCharacters();
-        // Context.Character = appState.Characters.FirstOrDefault(c => c.Id == Context.Character.Id);
         item.UserId = appState.UserId;
         allItems = await inventoryItemManager.GetAll();
         allItems = allItems.OrderBy(item => item.Name);
@@ -111,7 +107,6 @@
             if (itemExists) {
                 UIMessage = "Item bereits im Inventar vorhanden";
                 showUIMessage = true;
-                //Close();
                 return;
             }
             else {
