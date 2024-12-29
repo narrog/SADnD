@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace SADnD.Shared.Models
 {
@@ -13,7 +8,7 @@ namespace SADnD.Shared.Models
     {
         public string Id { get; set; } = GenerateId();
         [Required]
-        [StringLength(maximumLength:50, MinimumLength = 5, ErrorMessage ="Name muss zwischen 5 und 50 Zeichen lang sein")]
+        [StringLength(maximumLength: 50, MinimumLength = 5, ErrorMessage = "Name muss zwischen 5 und 50 Zeichen lang sein")]
         public string Name { get; set; }
         [JsonIgnore]
         public ICollection<ApplicationUser>? EFDungeonMasters { get; set; }
@@ -31,8 +26,8 @@ namespace SADnD.Shared.Models
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
             var random = new Random();
-            return new string(Enumerable.Repeat(chars,length)
-                .Select(s => s[random.Next(s.Length)]).ToArray() );
+            return new string(Enumerable.Repeat(chars, length)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
         }
         public void RegenerateId()
         {

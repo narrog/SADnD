@@ -1,5 +1,4 @@
-﻿using IdentityModel;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SADnD.Shared.Models;
 
 namespace SADnD.Server.Data
@@ -44,10 +43,11 @@ namespace SADnD.Server.Data
             }
 
             // Synchronisiere UserAccess
-            var updatedUserAccess = entityToUpdate.EFUserAccess.Select(user =>
+            var updatedUserAccess = entityToUpdate.EFUserAccess?.Select(user =>
                 context.Users.Local.FirstOrDefault(u => u.Id == user.Id) ??
                 context.Users.Attach(user).Entity
             ).ToList();
+            updatedUserAccess = updatedUserAccess == null ? new List<ApplicationUser>() : updatedUserAccess;
             foreach (var existingUser in existingCharacter.EFUserAccess.ToList())
             {
                 if (!updatedUserAccess.Any(u => u.Id == existingUser.Id))

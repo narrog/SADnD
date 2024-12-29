@@ -39,14 +39,6 @@ namespace SADnD.Server.Controllers
             {
                 var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
                 var result = await _noteManager.Get(n => n.UserId == id || n.Character.EFUserAccess.Any(u => u.Id == id));
-                result.ToList().ForEach(note =>
-                {
-                    note.Character.UserAccess = new List<User>();
-                    foreach (var user in note.Character.EFUserAccess)
-                    {
-                        note.Character.UserAccess.Add(new User(user));
-                    }
-                });
                 return Ok(new APIListOfEntityResponse<Note>()
                 {
                     Success = true,

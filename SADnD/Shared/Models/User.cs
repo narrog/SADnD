@@ -5,6 +5,7 @@
         public string Id { get; set; }
         public string UserName { get; set; }
         public ICollection<Character>? Characters { get; set; }
+        public User() { }
         public User(ApplicationUser appUser) 
         {
             Id = appUser.Id;

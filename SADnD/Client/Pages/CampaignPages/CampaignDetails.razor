@@ -428,7 +428,7 @@
         bool success = await campaignManager.Delete(Campaign.Id);
 
         if (success) {
-            appState.Campaigns.Remove(Campaign);
+            appState.Campaigns.Remove(appState.Campaigns[appState.Campaigns.FindIndex(c => c.Id == Campaign.Id)]);
             UIMessage = $"Kampagne '{toDeleteName}' erfolgreich gelöscht.";
             await js.InvokeVoidAsync("history.back");
         }

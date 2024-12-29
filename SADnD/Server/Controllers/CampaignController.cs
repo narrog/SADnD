@@ -159,7 +159,7 @@ namespace SADnD.Server.Controllers
                 var oldCampaign = (await _campaignManager.Get(x => x.Id == campaign.Id,null,"EFDungeonMasters,EFPlayers")).FirstOrDefault();
                 foreach (var player in oldCampaign.EFPlayers)
                 {
-                    if (!campaign.EFPlayers.Any(p => p.Id == player.Id))
+                    if (!campaign.Players.Any(p => p.Id == player.Id))
                         oldCampaign.EFPlayers.Remove(player);
                 }
                 oldCampaign.Name = campaign.Name;
