@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SADnD.Shared.Models
 {
@@ -17,7 +18,11 @@ namespace SADnD.Shared.Models
         public string CampaignId { get; set; }
         [JsonIgnore]
         public Campaign? Campaign { get; set; }
+        [ForeignKey("AppUser")]
         public string UserId { get; set; }
-        public ApplicationUser? User { get; set; }
+        [JsonIgnore]
+        public ApplicationUser? AppUser { get; set; }
+        [NotMapped]
+        public User? User { get; set; }
     }
 }

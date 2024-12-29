@@ -32,7 +32,7 @@ namespace SADnD.Server.Data
 
             builder.Entity<ApplicationUser>()
                 .HasMany(u => u.Characters)
-                .WithOne(c => c.User)
+                .WithOne(c => c.AppUser)
                 .HasForeignKey(c => c.UserId);
 
             builder.Entity<Character>()
@@ -48,7 +48,7 @@ namespace SADnD.Server.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<Character>()
-                .HasMany(c => c.UserAccess)
+                .HasMany(c => c.EFUserAccess)
                 .WithMany(u => u.CharacterAccess)
                 .UsingEntity("CharacterAccess");
 
@@ -74,12 +74,12 @@ namespace SADnD.Server.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<Campaign>()
-                .HasMany(c => c.DungeonMasters)
+                .HasMany(c => c.EFDungeonMasters)
                 .WithMany(u => u.DungeonMasterCampaigns)
                 .UsingEntity(j => j.ToTable("CampaignDungeonMasters"));
 
             builder.Entity<Campaign>()
-                .HasMany(c => c.Players)
+                .HasMany(c => c.EFPlayers)
                 .WithMany(u => u.PlayerCampaigns)
                 .UsingEntity(j => j.ToTable("CampaignPlayers"));
 

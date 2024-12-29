@@ -1,10 +1,7 @@
-﻿using Azure;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Newtonsoft.Json.Linq;
-using SADnD.Server.Areas.Identity;
 using SADnD.Server.Data;
 using SADnD.Shared;
 using SADnD.Shared.Models;
@@ -41,7 +38,15 @@ namespace SADnD.Server.Controllers
             try
             {
                 var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
-                var result = await _noteManager.Get(n => n.UserId == id || n.Character.UserAccess.Any(u => u.Id == id));
+                var result = await _noteManager.Get(n => n.UserId == id || n.Character.EFUserAccess.Any(u => u.Id == id));
+                result.ToList().ForEach(note =>
+                {
+                    note.Character.UserAccess = new List<User>();
+                    foreach (var user in note.Character.EFUserAccess)
+                    {
+                        note.Character.UserAccess.Add(new User(user));
+                    }
+                });
                 return Ok(new APIListOfEntityResponse<Note>()
                 {
                     Success = true,
@@ -101,7 +106,6 @@ namespace SADnD.Server.Controllers
                 }
                 if (note.CampaignId != null ^ note.CharacterId != null)
                 {
-                    var type = note.GetType();
                     await _noteManager.Insert(note);
                     var result = (await _noteManager.Get(x => x.Id == note.Id)).FirstOrDefault();
                     if (result != null)

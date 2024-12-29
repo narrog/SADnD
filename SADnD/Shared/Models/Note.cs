@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -28,9 +29,12 @@ namespace SADnD.Shared.Models
         public int? CharacterId { get; set; }
         [JsonIgnore]
         public Character? Character { get; set; }
+        [ForeignKey("AppUser")]
         public string UserId { get; set; }
         [JsonIgnore]
-        public ApplicationUser? User { get; set; }
+        public ApplicationUser? AppUser { get; set; }
+        [NotMapped]
+        public User? User { get; set; }
         [JsonIgnore]
         public ICollection<Note>? Notes { get; set; }
         [JsonIgnore]

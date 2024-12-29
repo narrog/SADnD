@@ -18,7 +18,7 @@ namespace SADnD.Server.Data
         public override async Task<Character> Update(Character entityToUpdate)
         {
             var existingCharacter = await context.Characters
-                .Include(c => c.UserAccess)
+                .Include(c => c.EFUserAccess)
                 .Include(c => c.Inventory)
                 .Include(c => c.Classes)
                 .FirstOrDefaultAsync(c => c.Id == entityToUpdate.Id);
@@ -44,22 +44,22 @@ namespace SADnD.Server.Data
             }
 
             // Synchronisiere UserAccess
-            var updatedUserAccess = entityToUpdate.UserAccess.Select(user =>
+            var updatedUserAccess = entityToUpdate.EFUserAccess.Select(user =>
                 context.Users.Local.FirstOrDefault(u => u.Id == user.Id) ??
                 context.Users.Attach(user).Entity
             ).ToList();
-            foreach (var existingUser in existingCharacter.UserAccess.ToList())
+            foreach (var existingUser in existingCharacter.EFUserAccess.ToList())
             {
                 if (!updatedUserAccess.Any(u => u.Id == existingUser.Id))
                 {
-                    existingCharacter.UserAccess.Remove(existingUser);
+                    existingCharacter.EFUserAccess.Remove(existingUser);
                 }
             }
             foreach (var updatedUser in updatedUserAccess)
             {
-                if (!existingCharacter.UserAccess.Any(u => u.Id == updatedUser.Id))
+                if (!existingCharacter.EFUserAccess.Any(u => u.Id == updatedUser.Id))
                 {
-                    existingCharacter.UserAccess.Add(updatedUser);
+                    existingCharacter.EFUserAccess.Add(updatedUser);
                 }
             }
 

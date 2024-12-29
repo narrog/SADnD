@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using SADnD.Client.Pages.CampaignPages;
 using SADnD.Server.Areas.Identity;
 using SADnD.Server.Data;
 using SADnD.Shared;
@@ -39,7 +37,11 @@ namespace SADnD.Server.Controllers
             {
                 var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
                 var user = await _userManager.FindByIdAsync(id);
-                var result = await _requestManager.Get(x => x.Campaign.DungeonMasters.Any(dm => dm.Id == id) || x.UserId == id,null,"Campaign,User");
+                var result = await _requestManager.Get(x => x.Campaign.EFDungeonMasters.Any(dm => dm.Id == id) || x.UserId == id,null,"Campaign,AppUser");
+                result.ToList().ForEach(request =>
+                {
+                    request.User = new User(request.AppUser);
+                });
                 return Ok(new APIListOfEntityResponse<JoinRequest>()
                 {
                     Success = true,
@@ -58,9 +60,10 @@ namespace SADnD.Server.Controllers
         {
             try
             {
-                var result = (await _requestManager.Get(x => x.Id == id,null,"Campaign,User")).FirstOrDefault();
+                var result = (await _requestManager.Get(x => x.Id == id,null,"Campaign,AppUser")).FirstOrDefault();
                 if (result != null)
                 {
+                    result.User = new User(result.AppUser);
                     return Ok(new APIEntityResponse<JoinRequest>()
                     {
                         Success = true,
@@ -95,12 +98,12 @@ namespace SADnD.Server.Controllers
                     return StatusCode(403);
                 }
 
-                var campaign = (await _campaignManager.Get(c => c.Id == request.CampaignId,null,"DungeonMasters,Players")).FirstOrDefault();
+                var campaign = (await _campaignManager.Get(c => c.Id == request.CampaignId,null,"EFDungeonMasters,EFPlayers")).FirstOrDefault();
                 if (campaign == null)
                 {
                     return StatusCode(404);
                 }
-                if (campaign.Players.Any(p => p.Id == id) || campaign.DungeonMasters.Any(dm =>  dm.Id == id))
+                if (campaign.EFPlayers.Any(p => p.Id == id) || campaign.EFDungeonMasters.Any(dm =>  dm.Id == id))
                 {
                     return Ok(new APIEntityResponse<JoinRequest>()
                     {
@@ -143,12 +146,12 @@ namespace SADnD.Server.Controllers
             try
             {
                 var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
-                var campaign = (await _campaignManager.Get(c => c.Id == request.CampaignId, null, "DungeonMasters,Players")).FirstOrDefault();
-                if (!campaign.DungeonMasters.Any(dm => dm.Id == id) && request.Accepted != null)
+                var campaign = (await _campaignManager.Get(c => c.Id == request.CampaignId, null, "EFDungeonMasters,EFPlayers")).FirstOrDefault();
+                if (!campaign.EFDungeonMasters.Any(dm => dm.Id == id) && request.Accepted != null)
                 {
                     return StatusCode(404);
                 }
-                if (campaign.Players.Any(p => p.Id == id) || !campaign.DungeonMasters.Any(dm => dm.Id == id)) 
+                if (campaign.EFPlayers.Any(p => p.Id == id) || !campaign.EFDungeonMasters.Any(dm => dm.Id == id)) 
                 {
                     return StatusCode(403);
                 }
@@ -156,9 +159,9 @@ namespace SADnD.Server.Controllers
                 if (request.Accepted != null)
                 {
                     var user = await _userManager.FindByIdAsync(request.UserId);
-                    campaign.Players.Add(user);
+                    campaign.EFPlayers.Add(user);
                     await _campaignManager.Update(campaign);
-                    await _customClaimsService.AddCampaignClaims(user);
+                    //await _customClaimsService.AddCampaignClaims(user);
                 }
                 var result = (await _requestManager.GetByID(request.Id));
                 if (result != null)
@@ -192,8 +195,8 @@ namespace SADnD.Server.Controllers
             try
             {
                 var userId = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
-                var request = (await _requestManager.Get(r => r.Id == id,null,"User,Campaign.DungeonMasters")).FirstOrDefault();
-                if (request != null && (request.User.Id == userId || request.Campaign.DungeonMasters.Any(dm => dm.Id == userId))) 
+                var request = (await _requestManager.Get(r => r.Id == id,null,"AppUser,Campaign.EFDungeonMasters")).FirstOrDefault();
+                if (request != null && (request.AppUser.Id == userId || request.Campaign.EFDungeonMasters.Any(dm => dm.Id == userId))) 
                 {
                     var success = await _requestManager.Delete(id);
                     if (success)

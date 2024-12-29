@@ -31,7 +31,15 @@ namespace SADnD.Server.Controllers
             try
             {
                 var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
-                var result = await _characterManager.Get(x => x.UserId == id,null,"Race,Classes.Class,Inventory.Item,UserAccess");
+                var result = await _characterManager.Get(x => x.UserId == id,null,"Race,Classes.Class,Inventory.Item,EFUserAccess");
+                result.ToList().ForEach(character =>
+                {
+                    character.UserAccess = new List<User>();
+                    foreach (var user in character.EFUserAccess)
+                    {
+                        character.UserAccess.Add(new User(user));
+                    }
+                });
                 return Ok(new APIListOfEntityResponse<Character>()
                 {
                     Success = true,
@@ -50,13 +58,18 @@ namespace SADnD.Server.Controllers
         {
             try
             {
-                var result = await _characterManager.Get(x => x.Id == id, null, "Race,Classes.Class,Inventory.Item,UserAccess");
+                var result = (await _characterManager.Get(x => x.Id == id, null, "Race,Classes.Class,Inventory.Item,EFUserAccess")).FirstOrDefault();
                 if (result != null)
                 {
+                    result.UserAccess = new List<User>();
+                    foreach (var user in result.EFUserAccess)
+                    {
+                        result.UserAccess.Add(new User(user));
+                    }
                     return Ok(new APIEntityResponse<Character>()
                     {
                         Success = true,
-                        Data = result.FirstOrDefault()
+                        Data = result
                     });
                 }
                 else
@@ -93,9 +106,14 @@ namespace SADnD.Server.Controllers
                     character.UserId = user.Id;
                 }
                 await _characterManager.Insert(character);
-                var result = (await _characterManager.Get(x => x.Id == character.Id, null, "Race,Classes.Class,Inventory.Item,UserAccess")).FirstOrDefault();
+                var result = (await _characterManager.Get(x => x.Id == character.Id, null, "Race,Classes.Class,Inventory.Item,EFUserAccess")).FirstOrDefault();
                 if (result != null)
                 {
+                    result.UserAccess = new List<User>();
+                    foreach (var efUser in result.EFUserAccess)
+                    {
+                        result.UserAccess.Add(new User(efUser));
+                    }
                     return Ok(new APIEntityResponse<Character>()
                     {
                         Success = true,
@@ -135,9 +153,14 @@ namespace SADnD.Server.Controllers
                     character.UserId = user.Id;
                 }
                 await _characterManager.Update(character);
-                var result = (await _characterManager.Get(x => x.Id == character.Id, null, "Race,Classes.Class,Inventory.Item,UserAccess")).FirstOrDefault();
+                var result = (await _characterManager.Get(x => x.Id == character.Id, null, "Race,Classes.Class,Inventory.Item,EFUserAccess")).FirstOrDefault();
                 if (result != null)
                 {
+                    result.UserAccess = new List<User>();
+                    foreach (var efUser in result.EFUserAccess)
+                    {
+                        result.UserAccess.Add(new User(efUser));
+                    }
                     return Ok(new APIEntityResponse<Character>()
                     {
                         Success = true,

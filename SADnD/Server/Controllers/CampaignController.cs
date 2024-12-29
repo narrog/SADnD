@@ -35,7 +35,20 @@ namespace SADnD.Server.Controllers
             {
                 var id = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
                 var user = await _userManager.FindByIdAsync(id);
-                var result = await _campaignManager.Get(x => x.DungeonMasters.Any(dm  => dm.Id == user.Id) || x.Players.Any(p => p.Id == user.Id),null,"DungeonMasters,Players,Characters.Race,Characters.Classes.Class,Appointments");
+                var result = await _campaignManager.Get(x => x.EFDungeonMasters.Any(dm  => dm.Id == user.Id) || x.EFPlayers.Any(p => p.Id == user.Id),null,"EFDungeonMasters,EFPlayers,Characters.Race,Characters.Classes.Class,Appointments");
+                result.ToList().ForEach(campaign =>
+                {
+                    campaign.DungeonMasters = new List<User>();
+                    foreach (var dm in campaign.EFDungeonMasters)
+                    {
+                        campaign.DungeonMasters.Add(new User(dm));
+                    }
+                    campaign.Players = new List<User>();
+                    foreach (var player in campaign.EFPlayers)
+                    {
+                        campaign.Players.Add(new User(player));
+                    }
+                });
                 return Ok(new APIListOfEntityResponse<Campaign>()
                 {
                     Success = true,
@@ -54,9 +67,19 @@ namespace SADnD.Server.Controllers
         {
             try
             {
-                var result = (await _campaignManager.Get(x => x.Id == id.ToUpper(), null, "DungeonMasters,Players,Characters.Race,Characters.Classes.Class,Appointments")).FirstOrDefault();
+                var result = (await _campaignManager.Get(x => x.Id == id.ToUpper(), null, "EFDungeonMasters,EFPlayers,Characters.Race,Characters.Classes.Class,Appointments")).FirstOrDefault();
                 if (result != null)
                 {
+                    result.DungeonMasters = new List<User>();
+                    foreach (var dm in result.EFDungeonMasters)
+                    {
+                        result.DungeonMasters.Add(new User(dm));
+                    }
+                    result.Players = new List<User>();
+                    foreach (var player in result.EFPlayers)
+                    {
+                        result.Players.Add(new User(player));
+                    }
                     return Ok(new APIEntityResponse<Campaign>()
                     {
                         Success = true,
@@ -93,14 +116,18 @@ namespace SADnD.Server.Controllers
                 var user = await _userManager.FindByIdAsync(id);
                 if (user != null)
                 {
-                    campaign.DungeonMasters = new List<ApplicationUser>() { user};
+                    campaign.EFDungeonMasters = new List<ApplicationUser>() { user};
                 }
                 await _campaignManager.Insert(campaign);
                 var result = (await _campaignManager.Get(x => x.Id == campaign.Id)).FirstOrDefault();
                 if (result != null)
                 {
-
-                    await _customClaimsService.AddCampaignClaims(user);
+                    result.DungeonMasters = new List<User>();
+                    foreach (var dm in result.EFDungeonMasters)
+                    {
+                        result.DungeonMasters.Add(new User(dm));
+                    }
+                    //await _customClaimsService.AddCampaignClaims(user);
                     return Ok(new APIEntityResponse<Campaign>()
                     {
                         Success = true,
@@ -129,17 +156,27 @@ namespace SADnD.Server.Controllers
         {
             try
             {
-                var oldCampaign = (await _campaignManager.Get(x => x.Id == campaign.Id,null,"DungeonMasters,Players")).FirstOrDefault();
-                foreach (var player in oldCampaign.Players)
+                var oldCampaign = (await _campaignManager.Get(x => x.Id == campaign.Id,null,"EFDungeonMasters,EFPlayers")).FirstOrDefault();
+                foreach (var player in oldCampaign.EFPlayers)
                 {
-                    if (!campaign.Players.Any(p => p.Id == player.Id))
-                        oldCampaign.Players.Remove(player);
+                    if (!campaign.EFPlayers.Any(p => p.Id == player.Id))
+                        oldCampaign.EFPlayers.Remove(player);
                 }
                 oldCampaign.Name = campaign.Name;
                 await _campaignManager.Update(oldCampaign);
-                var result = (await _campaignManager.Get(x => x.Id == campaign.Id,null,"DungeonMasters,Players,Characters.Race,Characters.Classes.Class,Appointments")).FirstOrDefault();
+                var result = (await _campaignManager.Get(x => x.Id == campaign.Id,null,"EFDungeonMasters,EFPlayers,Characters.Race,Characters.Classes.Class,Appointments")).FirstOrDefault();
                 if (result != null)
                 {
+                    result.DungeonMasters = new List<User>();
+                    foreach (var dm in result.EFDungeonMasters)
+                    {
+                        result.DungeonMasters.Add(new User(dm));
+                    }
+                    result.Players = new List<User>();
+                    foreach (var player in result.EFPlayers)
+                    {
+                        result.Players.Add(new User(player));
+                    }
                     return Ok(new APIEntityResponse<Campaign>()
                     {
                         Success = true,

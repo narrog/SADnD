@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace SADnD.Shared.Models
@@ -13,8 +15,14 @@ namespace SADnD.Shared.Models
         [Required]
         [StringLength(maximumLength:50, MinimumLength = 5, ErrorMessage ="Name muss zwischen 5 und 50 Zeichen lang sein")]
         public string Name { get; set; }
-        public ICollection<ApplicationUser>? DungeonMasters { get; set; }
-        public ICollection<ApplicationUser>? Players { get; set; }
+        [JsonIgnore]
+        public ICollection<ApplicationUser>? EFDungeonMasters { get; set; }
+        [JsonIgnore]
+        public ICollection<ApplicationUser>? EFPlayers { get; set; }
+        [NotMapped]
+        public ICollection<User>? DungeonMasters { get; set; }
+        [NotMapped]
+        public ICollection<User>? Players { get; set; }
         public ICollection<JoinRequest>? JoinRequests { get; set; }
         public ICollection<Note>? Notes { get; set; }
         public ICollection<Character>? Characters { get; set; }
