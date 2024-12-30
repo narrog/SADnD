@@ -1,6 +1,5 @@
 ﻿@inject SyncRepository<InventoryItem> inventoryItemManager
 @inject SyncRepository<Character> characterManager
-@inject IJSRuntime js
 
 <EditForm Model="@item" OnValidSubmit="@Post" class="w-100">
     <DataAnnotationsValidator />

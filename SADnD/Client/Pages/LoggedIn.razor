@@ -1,0 +1,62 @@
+﻿@page "/LoggedIn"
+@using BlazorDB
+@using Newtonsoft.Json
+@using SADnD.Shared
+@inject IJSRuntime js
+@inject IBlazorDbFactory _dbFactory
+@inject NavigationManager navManager
+
+@* @inject SyncRepository<Campaign> campaignManager *@
+@inject SyncRepository<Character> characterManager
+@inject SyncRepository<Class> classManager
+@inject SyncRepository<Race> raceManager
+@inject SyncRepository<JoinRequest> joinRequestManager
+@inject SyncRepository<InventoryItem> itemManager
+@inject NoteSyncManager noteManager
+@inject SyncRepository<Appointment> appointmentManager
+
+@attribute [Authorize]
+
+<PageTitle>LoggedIn</PageTitle>
+
+<p>Aktualisiert...</p>
+
+@code {
+    private readonly string _dbName = "SADnD.IndexedDB";
+    [CascadingParameter]
+    public CascadingAppState appState { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        var currentUserId = appState.UserId;
+        var storedUserId = await js.InvokeAsync<string>("localStorage.getItem", "UserId");
+        var storedTimestamp = await js.InvokeAsync<string>("localStorage.getItem", "LastSynced");
+        if (storedUserId == null || storedTimestamp == null ||
+            storedUserId != currentUserId || (DateTime.UtcNow - DateTime.Parse(storedTimestamp)).TotalDays >= 30)
+        {
+            await DeleteDatabase();
+            await FillDatabase();
+            await js.InvokeVoidAsync("localStorage.setItem", "UserId", currentUserId);
+            await js.InvokeVoidAsync("localStorage.setItem", "LastSynced", DateTime.UtcNow.ToString("o"));
+        }
+        navManager.NavigateTo("/");
+    }
+
+    private async Task DeleteDatabase()
+    {
+        var manager = await _dbFactory.GetDbManager(_dbName);
+        await manager.DeleteDbAsync(_dbName);
+        await manager.OpenDb();
+    }
+
+    private async Task FillDatabase()
+    {
+        // await campaignManager.GetAll();
+        await characterManager.GetAll();
+        await classManager.GetAll();
+        await raceManager.GetAll();
+        await joinRequestManager.GetAll();
+        await itemManager.GetAll();
+        await noteManager.GetAll();
+        await appointmentManager.GetAll();
+    }
+}
