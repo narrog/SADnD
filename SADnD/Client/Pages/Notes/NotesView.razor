@@ -102,7 +102,7 @@ else {
         if (!confirm) return;
 
         await noteManager.Delete(note);
-        appState.Notes.Remove(note);
+        appState.Notes.Remove(appState.Notes[appState.Notes.FindIndex(n => n.Id == note.Id)]);
         await GetNotesAndApplyFilter();
         //showAddNotes = false;
         StateHasChanged();

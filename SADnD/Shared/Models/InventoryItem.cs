@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
+﻿using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SADnD.Shared.Models
 {
@@ -16,8 +12,11 @@ namespace SADnD.Shared.Models
         public string Name { get; set; }
         [Range (0, int.MaxValue, ErrorMessage = "Gewicht darf nicht negativ sein")]
         public float? Weight { get; set; }
+        [ForeignKey("AppUser")]
         public string UserId { get; set; }
         [JsonIgnore]
-        public ApplicationUser? User { get; set; }
+        public ApplicationUser? AppUser { get; set; }
+        [NotMapped]
+        public User? User { get; set; }
     }
 }

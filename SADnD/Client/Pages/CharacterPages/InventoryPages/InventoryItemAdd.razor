@@ -1,6 +1,5 @@
 ﻿@inject SyncRepository<InventoryItem> inventoryItemManager
 @inject SyncRepository<Character> characterManager
-@inject IJSRuntime js
 
 <EditForm Model="@item" OnValidSubmit="@Post" class="w-100">
     <DataAnnotationsValidator />
@@ -110,7 +109,7 @@
                 return;
             }
             else {
-                Context.Character.Inventory.Add(new Inventory() { CharacterId = Context.Character.Id, Item = item, Count = count });
+                Context.Character.Inventory.Add(new Inventory() { CharacterId = Context.Character.Id, Item = item, Count = count});
                 Context.Character = await characterManager.Update(Context.Character);
                 appState.Characters[appState.Characters.FindIndex(c => c.Id == Context.Character.Id)] = Context.Character;
                 await OnClose.InvokeAsync();

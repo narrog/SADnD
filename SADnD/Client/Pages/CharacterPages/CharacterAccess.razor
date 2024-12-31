@@ -39,15 +39,15 @@
     private string? campaignId;
     private Campaign campaign = new Campaign();
     private Character character = new Character();
-    private List<ApplicationUser> coPlayers = new List<ApplicationUser>();
-    private List<ApplicationUser> acceptedCoPlayers = new List<ApplicationUser>();
+    private List<User> coPlayers = new List<User>();
+    private List<User> acceptedCoPlayers = new List<User>();
     public List<SetUserAccess> userAccess = new List<SetUserAccess>();
 
     private string UIMessage = "";
 
     public class SetUserAccess
     {
-        public ApplicationUser User { get; set; }
+        public User User { get; set; }
         public bool HasAccess { get; set; }
     }
 

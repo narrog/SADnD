@@ -229,7 +229,7 @@
     [Parameter]
     public required string Id { get; set; }
     public Campaign Campaign { get; set; } = new Campaign();
-    public List<(ApplicationUser User, Character Character)> PlayerCharacters = new List<(ApplicationUser User, Character Character)>();
+    public List<(User User, Character Character)> PlayerCharacters = new List<(User User, Character Character)>();
     private Character playerCharacter = new Character();
     private Character? selectedCharacter;
     private List<Character>? joindCharacters = new List<Character>();
@@ -355,7 +355,7 @@
         }
     }
 
-    private async Task RemovePlayer(ApplicationUser playerToDelete, bool isKicked) {
+    private async Task RemovePlayer(User playerToDelete, bool isKicked) {
 
         try {
             string toDeleteName = playerToDelete.UserName;
@@ -432,7 +432,7 @@
         bool success = await campaignManager.Delete(Campaign.Id);
 
         if (success) {
-            appState.Campaigns.Remove(Campaign);
+            appState.Campaigns.Remove(appState.Campaigns[appState.Campaigns.FindIndex(c => c.Id == Campaign.Id)]);
             UIMessage = $"Kampagne '{toDeleteName}' erfolgreich gelöscht.";
             await js.InvokeVoidAsync("history.back");
         }

@@ -183,7 +183,13 @@
         }
     }
 
-    protected override async Task OnInitializedAsync() {
+    protected override async Task OnInitializedAsync()
+    {
+        if (classManager == null || raceManager == null)
+        {
+            Console.WriteLine("Repository ist nicht verfügbar!");
+            return;
+        }
         allClasses = await classManager.GetAll();
         allRaces = await raceManager.GetAll();
         await appState.EnsureCharacters();

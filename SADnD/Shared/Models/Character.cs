@@ -1,10 +1,6 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SADnD.Shared.Models
 {
@@ -35,14 +31,20 @@ namespace SADnD.Shared.Models
         public float? Weight { get; set; }
         public string? Sex { get; set; }
         public string? Alignment { get; set; }
+        [ForeignKey("AppUser")]
         public string? UserId { get; set; }
         [JsonIgnore]
-        public ApplicationUser? User { get; set; }
+        public ApplicationUser? AppUser { get; set; }
+        [NotMapped]
+        public User? User { get; set; }
         public string? CampaignId { get; set; }
         [JsonIgnore]
         public Campaign? Campaign { get; set; }
         public ICollection<Inventory>? Inventory { get; set; }
         public ICollection<Note>? Notes { get; set; }
-        public ICollection<ApplicationUser>? UserAccess { get; set; }
+        [JsonIgnore]
+        public ICollection<ApplicationUser>? EFUserAccess { get; set; }
+        [NotMapped]
+        public ICollection<User>? UserAccess { get; set; }
     }
 }
