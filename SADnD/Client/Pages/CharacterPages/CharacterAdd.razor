@@ -2,7 +2,6 @@
 @page "/new-character/{CharacterId}"
 
 @attribute [Authorize]
-@using Newtonsoft.Json
 @using System.Security.Claims
 @inject IJSRuntime js
 
@@ -20,17 +19,17 @@
             <DataAnnotationsValidator />
             <div class="row">
 
-                <div class="col-10 col-md-3 p-1">
+                <div class="col-10 col-md-5 col-xl-3 p-1">
                     <label for="name">Name:</label>
                     <InputText @bind-Value="@character.Name" id="name" class="form-control"></InputText>
                 </div>
-                <div class="col-2 col-md-1 p-1">
+                <div class="col-2 col-md-1 col-xl-1 p-1">
                     <label for="hitpoints">HP:</label>
                     <InputNumber @bind-Value="@character.MaxHitpoints" id="hitpoints" class="form-control"></InputNumber>
                 </div>
             </div>
             <div class="row">
-                <div class="col-12 col-md-4 p-1">
+                <div class="col-12 col-md-6 col-xl-4 p-1">
                     <label for="race">Rasse:</label>
                     <InputSelect @bind-Value="@character.RaceId" id="race" class="form-select">
                         <option selected value="0">Bitte auswählen</option>
@@ -41,7 +40,7 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-12 col-md-4 p-1">
+                <div class="col-12 col-md-6 col-xl-4 p-1">
                     <label for="class">Klasse:</label>
                     @if (character.Classes != null) {
                         @foreach (var charClass in character.Classes) {
@@ -54,8 +53,8 @@
                                 </InputSelect>
                                 <InputNumber @bind-Value="@charClass.Level" class="form-control">
                                 </InputNumber>
-                                <button @onclick="@AddClass" title="Weitere Klasse hinzufügen">+</button>
-                                <button @onclick="() => RemoveClass(charClass)" title="Diese Klasse löschen">-</button>
+                                <a @onclick='AddClass' title="Weitere Klasse hinzufügen" class="pointer text-success"><i class="bi bi-plus-square-fill"></i></a>
+                                <a @onclick='() => RemoveClass(charClass)' title="Diese Klasse löschen" class="pointer text-danger"><i class="bi bi-dash-square-fill"></i></a>
                             </div>
                         }
                     }
@@ -166,11 +165,10 @@
         'M',
         'L'
     };
-    private IEnumerable<Class> allClasses;
-    private IEnumerable<Race> allRaces;
+    private IEnumerable<Class>? allClasses;
+    private IEnumerable<Race>? allRaces;
     string UIMessage = "";
     string controllerName = "character";
-    string message = "";
 
     bool showClassError = false;
     bool showLevelError = false;
@@ -180,7 +178,7 @@
         get => character.SizeCategory.ToString();
         set {
             if (!string.IsNullOrEmpty(value)) {
-                character.SizeCategory = value[0]; // Nimmt das erste Zeichen
+                character.SizeCategory = value[0]; 
             }
         }
     }
@@ -197,7 +195,7 @@
         await appState.EnsureCharacters();
         character.UserId = appState.UserId;
         if (!string.IsNullOrEmpty(CharacterId)){
-            character = appState.Characters.FirstOrDefault(c => c.Id == Int32.Parse(CharacterId));
+            character = appState.Characters.FirstOrDefault(c => c.Id == Int32.Parse(CharacterId)) ?? new();
         }
     }
 
@@ -209,26 +207,21 @@
             if (!showClassError) { 
                 CheckLevelSum();
                 if (!showLevelError) {
-                    if (message != "null") {
-                        bool confirm = await js.InvokeAsync<bool>("confirm", "Speichern & zurück zur Übersicht?");
-                        if (confirm) {
-                            character.Hitpoints = character.MaxHitpoints;
-                            if (string.IsNullOrEmpty(CharacterId)) {
-                                character = await characterManager.Insert(character);
-                                appState.Characters.Add(character);
-                                message = JsonConvert.SerializeObject(character);
-                            }
-                            else {
-                                character = await characterManager.Update(character);
-                                appState.Characters[appState.Characters.FindIndex(c => c.Id == character.Id)] = character;
-                                message = JsonConvert.SerializeObject(character);
-                            }
-                            // Console.WriteLine($"message: {message}");
-                            await js.InvokeVoidAsync("history.back");
+                    bool confirm = await js.InvokeAsync<bool>("confirm", "Speichern & zurück zur Übersicht?");
+                    if (confirm) {
+                        character.Hitpoints = character.MaxHitpoints;
+                        if (string.IsNullOrEmpty(CharacterId)) {
+                            character = await characterManager.Insert(character);
+                            appState.Characters.Add(character);
                         }
-                        else
-                            return;
+                        else {
+                            character = await characterManager.Update(character);
+                            appState.Characters[appState.Characters.FindIndex(c => c.Id == character.Id)] = character;
+                        }
+                        await js.InvokeVoidAsync("history.back");
                     }
+                    else
+                        return;
                 }
             }
         }

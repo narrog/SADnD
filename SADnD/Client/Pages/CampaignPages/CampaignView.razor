@@ -1,6 +1,5 @@
 ﻿@inject APIRepository<Campaign> campaignManager
 @inject SyncRepository<JoinRequest> joinRequestManager
-@inject IJSRuntime js
 
 <div class="container-fluid mt-3">
     <div class="row">
@@ -114,10 +113,6 @@
                 campaigns = appState.Campaigns;
         }
     }
-
-    // private async Task GetAllCampaigns() {
-    //     campaigns = (await campaignManager.GetAll()).OrderBy(x => x.Name);
-    // }
 
     private async Task GetOpenJoinRequests() {
         joinRequests = (await joinRequestManager.GetAll()).OrderBy(x => x.CampaignId);

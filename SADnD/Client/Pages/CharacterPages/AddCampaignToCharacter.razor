@@ -53,11 +53,11 @@
     protected override async Task OnInitializedAsync() {
         await appState.EnsureCharacters();
         if (!string.IsNullOrEmpty(CharacterId)) {
-            characterToAdd = appState.Characters.FirstOrDefault(c => c.Id == Int32.Parse(CharacterId));
+            characterToAdd = appState.Characters.FirstOrDefault(c => c.Id == Int32.Parse(CharacterId)) ?? new();
         }
-        await GetCampaignsFromUser();
+        GetCampaignsFromUser();
     }
-    private async Task GetCampaignsFromUser() {
+    private void GetCampaignsFromUser() {
         campaignsFromUser = appState.Campaigns
             .Where(c => c.Players?.Any(player => player.Id == appState.UserId) == true);
     }
@@ -69,13 +69,13 @@
                 StateHasChanged();
                 return;
             }
-            await CheckForExistingCharacter();
+            CheckForExistingCharacter();
             if (hasOtherCharacter && existingCharacter != null) {
                 bool confirm = await js.InvokeAsync<bool>("confirm", "Bei dieser Kampagne ist bereits ein Charakter zugewiesen.\r\nSoll der bestehende Charakter überschrieben werden?");
 
                 if (!confirm) return;
 
-                Character characterToRemove = appState.Characters.FirstOrDefault(c => c.Id == existingCharacter.Id);
+                Character characterToRemove = appState.Characters.FirstOrDefault(c => c.Id == existingCharacter.Id) ?? new();
                 characterToRemove.CampaignId = null;
                 characterToRemove = await characterManager.Update(characterToRemove);
                 appState.Characters[appState.Characters.FindIndex(c => c.Id == characterToRemove.Id)] = characterToRemove;
@@ -92,8 +92,8 @@
         }
     }
 
-    private async Task CheckForExistingCharacter() {
-        selectedCampaign = appState.Campaigns.FirstOrDefault(c => c.Id == selectedCampaignId);
+    private void CheckForExistingCharacter() {
+        selectedCampaign = appState.Campaigns.FirstOrDefault(c => c.Id == selectedCampaignId) ?? new();
         charactersFromCampaign = selectedCampaign.Characters;
         if (charactersFromCampaign != null) {
             if (charactersFromCampaign.Any(x => x.UserId == appState.UserId)) {
