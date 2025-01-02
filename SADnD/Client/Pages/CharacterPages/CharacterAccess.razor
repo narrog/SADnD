@@ -1,4 +1,5 @@
 ﻿@inject SyncRepository<Character> characterManager
+@using Newtonsoft.Json
 
 <p>Markiere die Mitspieler, mit denen du deine Charakterinformationen teilen willst</p>
 
@@ -56,10 +57,9 @@
         campaignId = context.Character.CampaignId;
         character = context.Character;
 
-        if (campaignId == null) {
+        if (campaignId != null) {
             GetCoPlayers();
         }
-
     }
 
     private void GetCoPlayers() {

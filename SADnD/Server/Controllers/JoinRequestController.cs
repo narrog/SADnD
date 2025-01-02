@@ -112,7 +112,7 @@ namespace SADnD.Server.Controllers
                         Data = null
                     });
                 }
-
+                request.CampaignId = campaign.Id;
                 await _requestManager.Insert(request);
                 var result = await _requestManager.GetByID(request.Id);
                 if (result != null)

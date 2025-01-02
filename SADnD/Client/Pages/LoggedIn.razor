@@ -44,8 +44,14 @@
     private async Task DeleteDatabase()
     {
         var manager = await _dbFactory.GetDbManager(_dbName);
-        await manager.DeleteDbAsync(_dbName);
-        await manager.OpenDb();
+        try
+        {
+            await manager.DeleteDbAsync(_dbName);
+        }
+        finally
+        {
+            await manager.OpenDb();
+        }
     }
 
     private async Task FillDatabase()
