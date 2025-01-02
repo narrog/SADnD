@@ -1,7 +1,7 @@
 ﻿@page "/character-details/{id}"
 @attribute [Authorize]
 @inject SyncRepository<Character> characterManager
-@inject APIRepository<Campaign> campaignManager
+@inject SyncRepository<Campaign> campaignManager
 @inject NoteSyncManager noteManager
 @inject IJSRuntime js
 @inherits NotesCategoryParent

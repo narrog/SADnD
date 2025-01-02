@@ -6,7 +6,7 @@
 @inject IBlazorDbFactory _dbFactory
 @inject NavigationManager navManager
 
-@* @inject SyncRepository<Campaign> campaignManager *@
+@inject SyncRepository<Campaign> campaignManager
 @inject SyncRepository<Character> characterManager
 @inject SyncRepository<Class> classManager
 @inject SyncRepository<Race> raceManager
@@ -50,7 +50,7 @@
 
     private async Task FillDatabase()
     {
-        // await campaignManager.GetAll();
+        await campaignManager.GetAll();
         await characterManager.GetAll();
         await classManager.GetAll();
         await raceManager.GetAll();

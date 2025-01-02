@@ -64,10 +64,6 @@ namespace SADnD.Server.Data
             builder.Entity<NoteHint>().ToTable(nameof(NoteHint));
 
             builder.Entity<Campaign>()
-                .HasIndex(c => c.Id)
-                .IsUnique();
-
-            builder.Entity<Campaign>()
                 .HasMany(c => c.Notes)
                 .WithOne(n => n.Campaign)
                 .HasForeignKey(n => n.CampaignId)

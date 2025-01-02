@@ -77,7 +77,7 @@
 
     protected override async Task OnInitializedAsync() {
         await appState.EnsureCampaigns();
-        campaign = appState.Campaigns.FirstOrDefault(x => x.Id == CampaignId);
+        campaign = appState.Campaigns.FirstOrDefault(x => x.Id == int.Parse(CampaignId));
 
         AddAppointment(); 
     }
@@ -85,7 +85,7 @@
     private void AddAppointment() {
         var newAppointment = new Appointment {
                 Date = DateOnly.FromDateTime(DateTime.Today),
-                CampaignId = CampaignId
+                CampaignId = int.Parse(CampaignId)
             };
 
 

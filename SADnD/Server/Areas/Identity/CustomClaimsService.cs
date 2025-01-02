@@ -31,12 +31,12 @@ namespace SADnD.Server.Areas.Identity
                 foreach (var master in userWithCampaigns.DungeonMasterCampaigns.ToList())
                 {
                     claims.Add(new Claim("CampaignRole", $"{master.Id}:DungeonMaster"));
-                    claims.Add(new Claim("Campaign", master.Id));
+                    claims.Add(new Claim("Campaign", master.Id.ToString()));
                 }
                 foreach (var player in userWithCampaigns.PlayerCampaigns.ToList())
                 {
                     claims.Add(new Claim("CampaignRole", $"{player.Id}:Player"));
-                    claims.Add(new Claim("Campaign", player.Id));
+                    claims.Add(new Claim("Campaign", player.Id.ToString()));
                 }
                 var identity = new ClaimsIdentity(claims);
                 await _userManager.AddClaimsAsync(user, claims);

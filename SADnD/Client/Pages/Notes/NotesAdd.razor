@@ -40,7 +40,7 @@
     [Parameter]
     public int CharacterId { get; set; }
     [Parameter]
-    public string CampaignId { get; set; }
+    public int CampaignId { get; set; }
     [Parameter]
     public EventCallback OnClose { get; set; }
 
@@ -73,7 +73,7 @@
             if(CharacterId != 0){
                 note.CharacterId = CharacterId;
             }
-            else if(!string.IsNullOrEmpty(CampaignId)){
+            else if(CampaignId == null){
                 note.CampaignId = CampaignId;
             }
 

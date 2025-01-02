@@ -1,5 +1,5 @@
 ﻿@inject SyncRepository<Character> characterManager
-@inject APIRepository<Campaign> campaignManager
+@inject SyncRepository<Campaign> campaignManager
 @inject IJSRuntime js
 
 <h4>Kampagne zuweisen</h4>
@@ -46,7 +46,7 @@
 
     private IEnumerable<Campaign>? campaignsFromUser;
     private Campaign selectedCampaign = new();
-    private string selectedCampaignId = "";
+    private int? selectedCampaignId;
 
     private string UIMessage = "";
 
@@ -64,7 +64,7 @@
 
     private async void Post() {
         try {
-            if (string.IsNullOrEmpty(selectedCampaignId)) {
+            if (selectedCampaignId == null) {
                 UIMessage = "Kampagne muss ausgewählt werden";
                 StateHasChanged();
                 return;

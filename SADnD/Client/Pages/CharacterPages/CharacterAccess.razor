@@ -36,7 +36,7 @@
     public EventCallback OnClose { get; set; }
 
     private int? characterId;
-    private string? campaignId;
+    private int? campaignId;
     private Campaign campaign = new Campaign();
     private Character character = new Character();
     private List<User> coPlayers = new List<User>();
@@ -56,7 +56,7 @@
         campaignId = context.Character.CampaignId;
         character = context.Character;
 
-        if (!string.IsNullOrEmpty(campaignId)) {
+        if (campaignId == null) {
             GetCoPlayers();
         }
 

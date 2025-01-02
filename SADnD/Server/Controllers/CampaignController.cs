@@ -63,11 +63,11 @@ namespace SADnD.Server.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<APIEntityResponse<Campaign>>> GetByCampaignId(string id)
+        public async Task<ActionResult<APIEntityResponse<Campaign>>> GetByCampaignId(int id)
         {
             try
             {
-                var result = (await _campaignManager.Get(x => x.Id == id.ToUpper(), null, "EFDungeonMasters,EFPlayers,Characters.Race,Characters.Classes.Class,Appointments")).FirstOrDefault();
+                var result = (await _campaignManager.Get(x => x.Id == id, null, "EFDungeonMasters,EFPlayers,Characters.Race,Characters.Classes.Class,Appointments")).FirstOrDefault();
                 if (result != null)
                 {
                     result.DungeonMasters = new List<User>();
@@ -108,7 +108,7 @@ namespace SADnD.Server.Controllers
         {
             try
             {
-                while ((await _campaignManager.GetByID(campaign.Id)) != null)
+                while ((await _campaignManager.Get(c => c.JoinCode == campaign.JoinCode)) != null)
                 {
                     campaign.RegenerateId();
                 }
@@ -202,7 +202,7 @@ namespace SADnD.Server.Controllers
 
         //[Authorize(Policy="IsDungeonMaster")]
         [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(string id)
+        public async Task<ActionResult> Delete(int id)
         {
             try
             {

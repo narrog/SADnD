@@ -98,7 +98,7 @@ namespace SADnD.Server.Controllers
                     return StatusCode(403);
                 }
 
-                var campaign = (await _campaignManager.Get(c => c.Id == request.CampaignId,null,"EFDungeonMasters,EFPlayers")).FirstOrDefault();
+                var campaign = (await _campaignManager.Get(c => c.JoinCode == request.JoinCode,null,"EFDungeonMasters,EFPlayers")).FirstOrDefault();
                 if (campaign == null)
                 {
                     return StatusCode(404);

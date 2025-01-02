@@ -276,7 +276,7 @@ builder.Services.AddBlazorDB(options =>
 });
 builder.Services.AddScoped<APIRepository<Campaign>>();
 builder.Services.AddScoped<IndexedDBRepository<Campaign>>();
-//builder.Services.AddScoped<SyncRepository<Campaign>>();
+builder.Services.AddScoped<SyncRepository<Campaign>>();
 
 builder.Services.AddScoped<APIRepository<Character>>();
 builder.Services.AddScoped<IndexedDBRepository<Character>>();

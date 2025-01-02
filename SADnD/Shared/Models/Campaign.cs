@@ -6,7 +6,8 @@ namespace SADnD.Shared.Models
 {
     public class Campaign
     {
-        public string Id { get; set; } = GenerateId();
+        public int Id { get; set; }
+        public string JoinCode { get; set; } = GenerateId();
         [Required]
         [StringLength(maximumLength: 50, MinimumLength = 5, ErrorMessage = "Name muss zwischen 5 und 50 Zeichen lang sein")]
         public string Name { get; set; }
@@ -31,7 +32,7 @@ namespace SADnD.Shared.Models
         }
         public void RegenerateId()
         {
-            Id = GenerateId();
+            JoinCode = GenerateId();
         }
     }
 }

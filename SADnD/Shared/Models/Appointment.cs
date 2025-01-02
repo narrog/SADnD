@@ -15,7 +15,7 @@ namespace SADnD.Shared.Models
         public TimeOnly StartTime { get; set; }
         public TimeOnly EndTime { get; set; }
         public bool Accepted { get; set; }
-        public string CampaignId { get; set; }
+        public int CampaignId { get; set; }
         [JsonIgnore]
         public Campaign? Campaign { get; set; }
         public ICollection<AppointmentVote>? AppointmentVotes { get; set; }

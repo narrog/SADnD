@@ -17,7 +17,7 @@ namespace SADnD.Shared.Models
         [Required (ErrorMessage = "Text ist ein Pflichtfeld")]
         public string Content { get; set; }
         public string Type { get; set; }
-        public string? CampaignId { get; set; }
+        public int? CampaignId { get; set; }
         [JsonIgnore]
         public Campaign? Campaign { get; set; }
         public int? CharacterId { get; set; }

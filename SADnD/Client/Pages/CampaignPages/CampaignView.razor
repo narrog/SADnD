@@ -1,4 +1,4 @@
-﻿@inject APIRepository<Campaign> campaignManager
+﻿@inject SyncRepository<Campaign> campaignManager
 @inject SyncRepository<JoinRequest> joinRequestManager
 
 <div class="container-fluid mt-3">
@@ -8,7 +8,7 @@
                 <div class="col-12 col-md-4 p-1 d-flex" style="cursor: pointer;">
                     <div class="p-2 bg-dark text-light w-100" @onclick="() => OpenCampaignDetails(campaign.Id)">
                         <h4>@campaign.Name</h4>
-                        <p>Zugangscode: @campaign.Id</p>
+                        <p>Zugangscode: @campaign.JoinCode</p>
                         <div class="d-none d-md-block">
                             @if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any()) {
                                 <p>
@@ -145,7 +145,7 @@
         StateHasChanged();
     }
 
-    private void OpenCampaignDetails(string id) {
+    private void OpenCampaignDetails(int id) {
         navManager.NavigateTo($"campaign-details/{id}");
     }
 }

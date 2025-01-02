@@ -114,7 +114,7 @@
         await appState.EnsureCampaigns();
         currentUserId = appState.UserId;
 
-        campaign = appState.Campaigns.FirstOrDefault(x => x.Id == CampaignId);
+        campaign = appState.Campaigns.FirstOrDefault(x => x.Id == int.Parse(CampaignId));
         if (campaign != null){
             if (campaign.DungeonMasters != null && campaign.DungeonMasters.Any(dm => dm.Id == currentUserId)){
                 isUserDM = true;
@@ -129,9 +129,9 @@
     private void GetAppointmentsToVote() {
         DateOnly today = DateOnly.FromDateTime(DateTime.Today);
 
-        if (allAppointments != null && allAppointments.Any(x => x.CampaignId == CampaignId) && allAppointments.Any()) {
+        if (allAppointments != null && allAppointments.Any(x => x.CampaignId == int.Parse(CampaignId)) && allAppointments.Any()) {
             campaignAppointments = allAppointments
-                .Where(x => x.Date >= today && !x.Accepted && x.CampaignId == CampaignId)
+                .Where(x => x.Date >= today && !x.Accepted && x.CampaignId == int.Parse(CampaignId))
                 .OrderBy(x => x.Date);
         }
 

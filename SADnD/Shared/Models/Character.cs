@@ -37,7 +37,7 @@ namespace SADnD.Shared.Models
         public ApplicationUser? AppUser { get; set; }
         [NotMapped]
         public User? User { get; set; }
-        public string? CampaignId { get; set; }
+        public int? CampaignId { get; set; }
         [JsonIgnore]
         public Campaign? Campaign { get; set; }
         public ICollection<Inventory>? Inventory { get; set; }

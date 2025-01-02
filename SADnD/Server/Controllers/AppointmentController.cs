@@ -63,7 +63,6 @@ namespace SADnD.Server.Controllers
                 var result = (await _appointmentManager.Get(x => x.Id == id,null,"AppointmentVotes.AppUser")).FirstOrDefault();
                 var userId = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
                 var campaignIds = (await _campaignManager.Get(c => c.EFPlayers.Any(u => u.Id == userId) || c.EFDungeonMasters.Any(u => u.Id == userId))).Select(c => c.Id);
-                //var campaignIds = User.Claims.Where(c => c.Type == "Campaign").Select(c => c.Value);
                 if (!campaignIds.Contains(result.CampaignId))
                     return StatusCode(403);
                 if (result != null)
@@ -102,7 +101,6 @@ namespace SADnD.Server.Controllers
             {
                 var userId = User.Claims.First(u => u.Type == ClaimTypes.NameIdentifier).Value;
                 var dmCampaignIds = (await _campaignManager.Get(c => c.EFDungeonMasters.Any(u => u.Id == userId))).Select(c => c.Id);
-                //var campaignRoles = User.Claims.Where(c => c.Type == "CampaignRole").Select(c => c.Value);
                 if (!dmCampaignIds.Contains(appointment.CampaignId))
                     return StatusCode(403);
                 await _appointmentManager.Insert(appointment);
@@ -145,9 +143,6 @@ namespace SADnD.Server.Controllers
                 var campaigns = await _campaignManager.Get(c => c.EFPlayers.Any(u => u.Id == userId) || c.EFDungeonMasters.Any(u => u.Id == userId));
                 var campaignIds = campaigns.Select(c => c.Id);
                 var dmCampaignIds = (await _campaignManager.Get(c => c.EFDungeonMasters.Any(u => u.Id == userId))).Select(c => c.Id);
-                //var dmCampaignIds = campaigns.Where(c => c.DungeonMasters.Any(u => u.Id == userId)).Select(c => c.Id);
-                //var campaignIds = User.Claims.Where(c => c.Type == "Campaign").Select(c => c.Value);
-                //var campaignRoles = User.Claims.Where(c => c.Type == "CampaignRole").Select(c => c.Value);
                 if (!campaignIds.Contains(appointment.CampaignId) || (appointment.Accepted && !dmCampaignIds.Contains(appointment.CampaignId)))
                     return StatusCode(403);
                 await _appointmentManager.Update(appointment);

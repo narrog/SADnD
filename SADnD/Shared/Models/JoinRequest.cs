@@ -10,7 +10,8 @@ namespace SADnD.Shared.Models
         public DateTime? Accepted { get; set; }
         [Required (ErrorMessage = "Zugangscode ist ein Pflichtfeld")]
         [StringLength(maximumLength: 8, MinimumLength = 8, ErrorMessage = "Länge von Zugangscode falsch")]
-        public string CampaignId { get; set; }
+        public string JoinCode { get; set; }
+        public int CampaignId { get; set; }
         [JsonIgnore]
         public Campaign? Campaign { get; set; }
         [ForeignKey("AppUser")]

@@ -1,6 +1,6 @@
 ﻿@page "/campaign-details/{id}"
 @attribute [Authorize]
-@inject APIRepository<Campaign> campaignManager
+@inject SyncRepository<Campaign> campaignManager
 @inject SyncRepository<Character> characterManager
 @inject SyncRepository<JoinRequest> joinRequestManager
 @inject IJSRuntime js
@@ -30,7 +30,7 @@
                             <p>Kein DungeonMaster gefunden</p>
                         }
                         <p>
-                            <strong>Zugangscode: </strong>@Campaign.Id
+                            <strong>Zugangscode: </strong>@Campaign.JoinCode
                             <span class="oi oi-share-boxed ms-2" @onclick="ShareAccessCode" title="Zugangscode teilen" style="cursor: pointer;" aria-hidden="true"></span>
                         </p>
                     </div>     
@@ -179,14 +179,14 @@
                 <div class="col-2 my-1" id="notes-icons-container">
                     <NotesCategoryIcons @bind-ActiveCategory="ActiveCategory"
                     OnCategoryChanged="HandleCategoryChanged"
-                    CampaignId="@Id"
+                    CampaignId="@int.Parse(Id)"
                     ViewTypeIsDM="true" />
                 </div>
                 <div class="col-10">
                     @if (!ShowAddNotes)
                     {
                         <NotesView NotesCategory="@ActiveCategory"
-                        CampaignId="@Id"
+                        CampaignId="@int.Parse(Id)"
                         OnEditNote="ShowAddNotesAsync"
                         ViewTypeIsDM="true" />
 
@@ -196,7 +196,7 @@
                     {
                         <NotesAdd NotesCategory="@ActiveCategory"
                         SelectedNoteId="@SelectedNoteId"
-                        CampaignId="@Id"
+                        CampaignId="@int.Parse(Id)"
                         OnClose="HideAddNotesAsync" />
                     }
 
@@ -255,7 +255,7 @@
         currentUserId = appState.UserId;
 
         if (appState.Campaigns != null && appState.Campaigns.Any())
-            Campaign = appState.Campaigns.FirstOrDefault(c => c.Id == Id) ?? new Campaign();
+            Campaign = appState.Campaigns.FirstOrDefault(c => c.Id == int.Parse(Id)) ?? new Campaign();
 
 
         if(Campaign != null){
@@ -274,7 +274,7 @@
 
     private async Task GetOpenJoinRequests() {
         joinRequests = await joinRequestManager.GetAll();
-        joinRequests = joinRequests.Where(x => x.CampaignId == Id && x.Accepted == null);
+        joinRequests = joinRequests.Where(x => x.CampaignId == int.Parse(Id) && x.Accepted == null);
     }
     private async void JoinRequestReject(JoinRequest joinRequest) {
         if (joinRequest != null) {
@@ -294,7 +294,7 @@
             await AllocatePlayersNCharacters();
             await GetOpenJoinRequests();
             await appState.GetCampaigns();
-            Campaign = appState.Campaigns.FirstOrDefault(c => c.Id == Id);
+            Campaign = appState.Campaigns.FirstOrDefault(c => c.Id == int.Parse(Id));
         }
         StateHasChanged();
     }
@@ -322,7 +322,7 @@
             if (await js.InvokeAsync<bool>("navigator.canShare", new { text = "Test" })) {
                 await js.InvokeVoidAsync("navigator.share", new {
                     title = "Dungeon Kampagne",
-                    text = $"Trete meiner Kampagne unter sadnd.benpeter.ch/join-campaign bei. Der Zugangscode lautet: {Campaign.Id}"
+                    text = $"Trete meiner Kampagne unter sadnd.benpeter.ch/join-campaign bei. Der Zugangscode lautet: {Campaign.JoinCode}"
                 });
             }
             else {
@@ -374,7 +374,7 @@
             if (Campaign.Players != null) {
                 Campaign.Players.Remove(playerToDelete);
                 Campaign = await campaignManager.Update(Campaign);
-                appState.Campaigns[appState.Campaigns.FindIndex(c => c.Id == Id)] = Campaign;
+                appState.Campaigns[appState.Campaigns.FindIndex(c => c.Id == int.Parse(Id))] = Campaign;
                 UIMessage = uiMessage;
                 if (!isKicked)
                     await js.InvokeVoidAsync("history.back");
