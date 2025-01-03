@@ -33,7 +33,14 @@
         if (storedUserId == null || storedTimestamp == null ||
             storedUserId != currentUserId || (DateTime.UtcNow - DateTime.Parse(storedTimestamp)).TotalDays >= 30)
         {
-            await DeleteDatabase();
+            try
+            {
+                await DeleteDatabase();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
             await FillDatabase();
             await js.InvokeVoidAsync("localStorage.setItem", "UserId", currentUserId);
             await js.InvokeVoidAsync("localStorage.setItem", "LastSynced", DateTime.UtcNow.ToString("o"));
@@ -44,14 +51,8 @@
     private async Task DeleteDatabase()
     {
         var manager = await _dbFactory.GetDbManager(_dbName);
-        try
-        {
-            await manager.DeleteDbAsync(_dbName);
-        }
-        finally
-        {
-            await manager.OpenDb();
-        }
+        await manager.DeleteDbAsync(_dbName);
+        await manager.OpenDb();
     }
 
     private async Task FillDatabase()
