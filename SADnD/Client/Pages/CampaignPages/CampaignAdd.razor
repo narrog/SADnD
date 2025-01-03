@@ -1,4 +1,5 @@
 ﻿@page "/new-campaign"
+@using Newtonsoft.Json
 
 @attribute [Authorize]
 
@@ -30,7 +31,6 @@
     public CascadingAppState appState {get; set; }
     private Campaign campaign = new Campaign();
     string UIMessage = "";
-    string controllerName = "campaign";
     string name = "";
 
 
@@ -41,10 +41,9 @@
     private async void Post() {
 
         try {
-            if (controllerName == "campaign") {
-                campaign = await campaignManager.Insert(campaign);
-                appState.Campaigns.Add(campaign);
-            }
+            Console.WriteLine(JsonConvert.SerializeObject(campaign));
+            campaign = await campaignManager.Insert(campaign);
+            appState.Campaigns.Add(campaign);
             UIMessage = "Kampagne erfolgreich erstellt";
             navManager.NavigateTo("all-campaigns");
         }

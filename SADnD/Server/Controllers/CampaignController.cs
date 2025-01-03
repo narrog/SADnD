@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Newtonsoft.Json;
 using SADnD.Server.Areas.Identity;
 using SADnD.Server.Data;
 using SADnD.Shared;
@@ -108,7 +109,7 @@ namespace SADnD.Server.Controllers
         {
             try
             {
-                while ((await _campaignManager.Get(c => c.JoinCode == campaign.JoinCode)) != null)
+                while (((await _campaignManager.Get(c => c.JoinCode == campaign.JoinCode))).FirstOrDefault() != null)
                 {
                     campaign.RegenerateId();
                 }
