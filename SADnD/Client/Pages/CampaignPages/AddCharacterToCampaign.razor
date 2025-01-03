@@ -31,8 +31,7 @@
                 </ul>
             }
             @if (selectedCharacter.CampaignId != null) {
-                <strong>Kampagne: </strong> @selectedCharacter.CampaignId
-                @selectedCharacter.Campaign?.Name
+                    <strong>Kampagne: </strong> @appState.Campaigns.Where(c => c.Id == selectedCharacter.CampaignId).FirstOrDefault().Name
             }
         </p>
     </div>
