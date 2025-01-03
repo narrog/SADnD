@@ -249,6 +249,7 @@
     private bool isDungeonMaster;
     private bool isCharacterOwner;
     private bool hasCharacterAccess;
+    private bool getUserPermHasFailed;
 
     protected override async Task OnInitializedAsync() {
         await appState.EnsureCampaigns();
@@ -300,21 +301,26 @@
     }
     public async Task AllocatePlayersNCharacters()
     {
-        Campaign = await campaignManager.GetByID(Id);
-        // Campaign = appState.Campaigns.FirstOrDefault(c => c.Id == Id);
-        PlayerCharacters.Clear();
+        try  {
+            Campaign = await campaignManager.GetByID(Id);
+            PlayerCharacters.Clear();
 
-        Character temp = new();
+            Character temp = new();
 
-        if (Campaign.Players != null && Campaign.Players.Any()) {
-            foreach (var player in Campaign.Players) {
-                Character character = Campaign.Characters.FirstOrDefault(c => c.UserId == player.Id);
-                PlayerCharacters.Add((player, character));
-                if(character != null){
-                    temp = await characterManager.GetByID(character.Id);
-                    joindCharacters.Add(temp);
+            if (Campaign.Players != null && Campaign.Players.Any()) {
+                foreach (var player in Campaign.Players) {
+                    Character character = Campaign.Characters.FirstOrDefault(c => c.UserId == player.Id);
+                    PlayerCharacters.Add((player, character));
+                    if (character != null) {
+                        temp = await characterManager.GetByID(character.Id);
+                        joindCharacters.Add(temp);
+                    }
                 }
             }
+        }
+        catch (Exception ex) {
+            UIMessage = "Fehler beim Laden der Mitspieler. Informationen sind möglicherweise nicht vollständig. Gehe Online, um alle Informationen anzuzeigen.";
+            Console.WriteLine(ex.Message);
         }
     }
     private async Task ShareAccessCode() {
@@ -351,7 +357,8 @@
             }
         }
         else {
-            UIMessage = $"Kein Zugriff auf Character {character.Name}";
+            if (!getUserPermHasFailed)
+                UIMessage = $"Kein Zugriff auf Character {character.Name}";
         }
     }
 
@@ -382,7 +389,7 @@
                     await AllocatePlayersNCharacters();
                     StateHasChanged();
                 }
-                    
+
             }
             else {
                 Console.WriteLine($"Spieler '{toDeleteName}' nicht gefunden");
@@ -395,19 +402,26 @@
     }
 
     private async Task GetUserPerm(Character character) {
-        isCharacterOwner = false;
-        hasCharacterAccess = false;
+        try {
+            isCharacterOwner = false;
+            hasCharacterAccess = false;
 
-        Character temp = await characterManager.GetByID(character.Id);
+            Character temp = await characterManager.GetByID(character.Id);
 
-        if (temp.UserId == currentUserId) {
-            isCharacterOwner = true;
-            return;
+            if (temp.UserId == currentUserId) {
+                isCharacterOwner = true;
+                return;
+            }
+            if (temp.UserAccess != null && temp.UserAccess.Any(x => x.Id == currentUserId)) {
+                hasCharacterAccess = true;
+                return;
+            }
         }
-        if (temp.UserAccess != null && temp.UserAccess.Any(x => x.Id == currentUserId)) {
-            hasCharacterAccess = true;
-            return;
+        catch (Exception) {
+            UIMessage = "Funktion nur online verfügbar";
+            getUserPermHasFailed = true;
         }
+        
     }
 
     private void GetNextAppointments(){
