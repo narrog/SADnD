@@ -214,7 +214,7 @@
         </div>
         @if (!string.IsNullOrEmpty(UIMessage)) {
             <div class="row my-4 pt-4">
-                <div>
+                <div class="@uiMessageClass">
                     @UIMessage
                 </div>
             </div>
@@ -236,6 +236,7 @@
     private IEnumerable<JoinRequest>? joinRequests;
     private string requestMessage = "";
     private string UIMessage = "";
+    private string uiMessageClass = "";
     private bool isUserDM;
 
     public new string ActiveCategory = "story";
@@ -320,6 +321,7 @@
         }
         catch (Exception ex) {
             UIMessage = "Fehler beim Laden der Mitspieler. Informationen sind möglicherweise nicht vollständig. Gehe Online, um alle Informationen anzuzeigen.";
+            uiMessageClass = "text-danger";
             Console.WriteLine(ex.Message);
         }
     }
@@ -332,11 +334,14 @@
                 });
             }
             else {
-                Console.WriteLine("Web Share API wird nicht unterstützt");
+                UIMessage = "Web Share API wird nicht unterstützt";
+                uiMessageClass = "text-danger";
             }
 
         }
         catch (Exception ex) {
+            UIMessage = "Fehler beim Teilen";
+            uiMessageClass = "text-danger";
             Console.WriteLine($"Fehler beim Teilen: {ex.Message}");
         }
     }
@@ -357,8 +362,11 @@
             }
         }
         else {
-            if (!getUserPermHasFailed)
+            if (!getUserPermHasFailed) {
                 UIMessage = $"Kein Zugriff auf Character {character.Name}";
+                uiMessageClass = "text-danger";
+            }
+
         }
     }
 
@@ -368,6 +376,7 @@
             string toDeleteName = playerToDelete.UserName;
             string confirmMessage = $"Soll der Spieler '{toDeleteName}' wirklich entfernt werden?";
             string uiMessage = $"Spieler '{toDeleteName}' wurde entfernt";
+            uiMessageClass = "text-success";
 
             if (!isKicked) {
                 confirmMessage = $"Möchtest du diese Kampagne wirklich verlassen?";
@@ -385,17 +394,20 @@
                 UIMessage = uiMessage;
                 if (!isKicked)
                     await js.InvokeVoidAsync("history.back");
-                else{
+                else {
                     await AllocatePlayersNCharacters();
                     StateHasChanged();
                 }
 
             }
             else {
-                Console.WriteLine($"Spieler '{toDeleteName}' nicht gefunden");
+                UIMessage = $"Spieler '{toDeleteName}' nicht gefunden";
+                uiMessageClass = "text-danger";
             }
         }
         catch (Exception ex) {
+            UIMessage = "Fehler beim Entfernen von Spieler";
+            uiMessageClass = "text-danger";
             Console.WriteLine($"Exception RemovePlayer: {ex.Message}");
         }
 
@@ -419,6 +431,7 @@
         }
         catch (Exception) {
             UIMessage = "Funktion nur online verfügbar";
+            uiMessageClass = "text-danger";
             getUserPermHasFailed = true;
         }
         
@@ -448,10 +461,12 @@
         if (success) {
             appState.Campaigns.Remove(appState.Campaigns[appState.Campaigns.FindIndex(c => c.Id == Campaign.Id)]);
             UIMessage = $"Kampagne '{toDeleteName}' erfolgreich gelöscht.";
+            uiMessageClass = "text-success";
             await js.InvokeVoidAsync("history.back");
         }
         else {
             UIMessage = $"Kampagne '{toDeleteName}' konnte nicht gelöscht werden.";
+            uiMessageClass = "text-danger";
         }
     }
 }

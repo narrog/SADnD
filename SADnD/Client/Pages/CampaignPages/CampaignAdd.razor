@@ -1,5 +1,4 @@
 ﻿@page "/new-campaign"
-@using Newtonsoft.Json
 
 @attribute [Authorize]
 
@@ -41,7 +40,6 @@
     private async void Post() {
 
         try {
-            Console.WriteLine(JsonConvert.SerializeObject(campaign));
             campaign = await campaignManager.Insert(campaign);
             appState.Campaigns.Add(campaign);
             UIMessage = "Kampagne erfolgreich erstellt";

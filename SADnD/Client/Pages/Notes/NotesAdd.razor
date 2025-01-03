@@ -77,7 +77,6 @@
                 note.CampaignId = CampaignId;
             }
 
-            // Note result;
             if (SelectedNoteId == 0) {
                 note = await noteManager.Insert(note);
                 appState.Notes.Add(note);
@@ -88,14 +87,7 @@
                 var index = appState.Notes.FindIndex(n => n.Id == SelectedNoteId);
                 appState.Notes[index] = note;
             }
-
-            // if (result != null) {
-            //     Console.WriteLine("Notiz erfolgreich gespeichert.");
-                await Close();
-            // }
-            // else {
-            //     Console.WriteLine("Fehler beim Speichern der Notiz.");
-            // }
+            await Close();
         }
         catch (Exception ex) {
             Console.WriteLine($"{ex.Message}");

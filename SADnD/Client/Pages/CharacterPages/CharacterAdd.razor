@@ -128,9 +128,13 @@
         </EditForm>
     </div>
 }
-<div class="mt-3">
-    @UIMessage
-</div>
+@if (!string.IsNullOrEmpty(UIMessage)) {
+    <div class="row my-4 pt-4">
+        <div class="@uiMessageClass">
+            @UIMessage
+        </div>
+    </div>
+}
 
 @code {
     [CascadingParameter] 
@@ -167,8 +171,8 @@
     };
     private IEnumerable<Class>? allClasses;
     private IEnumerable<Race>? allRaces;
-    string UIMessage = "";
-    string controllerName = "character";
+    private string UIMessage = "";
+    private string uiMessageClass = "";
 
     bool showClassError = false;
     bool showLevelError = false;
@@ -227,6 +231,7 @@
         }
         catch (Exception ex) {
             UIMessage = ex.Message;
+            uiMessageClass = "text-danger";
             Console.WriteLine($"{ex.Message}");
             StateHasChanged();
         }

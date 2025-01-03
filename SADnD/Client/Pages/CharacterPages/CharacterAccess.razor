@@ -1,5 +1,4 @@
 ﻿@inject SyncRepository<Character> characterManager
-@using Newtonsoft.Json
 
 <p>Markiere die Mitspieler, mit denen du deine Charakterinformationen teilen willst</p>
 
@@ -20,11 +19,11 @@
     </div>
 
     @if (!string.IsNullOrEmpty(UIMessage)) {
-        <ul class="mt-3">
-            <li class="validation-message">
+        <div class="row my-4 pt-4">
+            <div class="@uiMessageClass">
                 @UIMessage
-            </li>
-        </ul>
+            </div>
+        </div>
     }
 }
 
@@ -45,6 +44,7 @@
     public List<SetUserAccess> userAccess = new List<SetUserAccess>();
 
     private string UIMessage = "";
+    private string uiMessageClass = "";
 
     public class SetUserAccess
     {
@@ -119,6 +119,8 @@
         }
         catch (Exception ex)
         {
+            UIMessage = "Fehler beim Speichern";
+            uiMessageClass = "text-danger";
             Console.WriteLine(ex.Message);
         }
     }
