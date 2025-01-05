@@ -393,7 +393,10 @@
                 appState.Campaigns[appState.Campaigns.FindIndex(c => c.Id == int.Parse(Id))] = Campaign;
                 UIMessage = uiMessage;
                 if (!isKicked)
+                {
+                    appState.Campaigns.Remove(Campaign);
                     await js.InvokeVoidAsync("history.back");
+                }
                 else {
                     await AllocatePlayersNCharacters();
                     StateHasChanged();
