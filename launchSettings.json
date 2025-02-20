@@ -5,9 +5,7 @@
       "commandVersion": "1.0",
       "serviceActions": {
         "sadnd.server": "StartDebugging",
-        "sadnd.certbot": "DoNotStart",
-        "sadnd.database": "StartWithoutDebugging",
-        "sadnd.nginx": "DoNotStart"
+        "sadnd.database": "StartWithoutDebugging"
       }
     }
   }

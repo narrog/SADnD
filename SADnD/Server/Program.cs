@@ -6,19 +6,20 @@ using SADnD.Shared.Models;
 using Microsoft.AspNetCore.Identity;
 using SADnD.Server.Areas.Identity;
 using SADnD.Server.Migrations;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
-if (!builder.Environment.IsDevelopment())
-{
-    builder.WebHost.ConfigureKestrel(serverOptions =>
-    {
-        serverOptions.ListenAnyIP(443, listenOptions =>
-        {
-            listenOptions.UseHttps("/etc/letsencrypt/live/sadnd.benpeter.ch/cert.pfx", "SADnD");
-        });
-    });
-}
+//if (!builder.Environment.IsDevelopment())
+//{
+//    builder.WebHost.ConfigureKestrel(serverOptions =>
+//    {
+//        serverOptions.ListenAnyIP(443, listenOptions =>
+//        {
+//            listenOptions.UseHttps("/etc/letsencrypt/live/sadnd.benpeter.ch/cert.pfx", "SADnD");
+//        });
+//    });
+//}
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -101,15 +102,30 @@ else
 {
     app.UseExceptionHandler("/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    //app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+if (app.Environment.IsProduction())
+{
+    app.UseForwardedHeaders(new ForwardedHeadersOptions
+    {
+        ForwardedHeaders = ForwardedHeaders.XForwardedProto
+    });
+}
+else
+{
+    app.UseCookiePolicy(new CookiePolicyOptions
+    {
+        MinimumSameSitePolicy = SameSiteMode.Lax
+    });
+}
 
 app.UseIdentityServer();
 app.UseAuthorization();
